@@ -13,7 +13,7 @@ class FinampIcon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final icon = SvgPicture.asset("images/finamp_cropped.svg", width: width, height: height);
+    final icon = SvgPicture.asset("images/jellyamp_icon.svg", width: width, height: height);
     final useMonochromeIcon = ref.watch(finampSettingsProvider.useMonochromeIcon);
     if (!useMonochromeIcon && overrideColor == null) return icon;
 

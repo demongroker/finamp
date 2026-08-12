@@ -210,6 +210,7 @@ flutter:
     - images/album_white.png
     - images/finamp_cropped.png
     - images/finamp_cropped.svg
+    - images/jellyamp_icon.svg
     - images/jellyfin-icon-transparent.png
     - assets/icon/icon_square_bg-black.png # preview image for Discord RPC Fallback Icon Setting
     - assets/icon/icon_combined.png # preview image for Discord RPC Fallback Icon Setting
@@ -252,7 +253,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/icon_combined.png"
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
-  adaptive_icon_background: "#000B25"
+  adaptive_icon_background: "#0B1220"
   remove_alpha_ios: true
   macos:
     generate: true
@@ -263,7 +264,7 @@ msix_config:
   publisher_display_name: demongroker
   identity_name: com.demongroker.jellyamp
   msix_version: 0.9.25.0
-  logo_path: ./images/finamp_cropped.png
+  logo_path: ./assets/icon/icon_combined.png
   trim_logo: false # don't force logo to be square, it will be stretched
   # backgroundMediaPlayback prevents apps from getting muted or killed when being in the background (won't build if included at the moment)
   # internetClient is used to allow access to remote Jellyfin servers through the internet

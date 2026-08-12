@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="g" x1="40" y1="40" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00A4DC" offset="0"/>
+      <stop stop-color="#AA5CC3" offset="1"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="108" fill="url(#g)" opacity="0.95"/>
+  <!-- note head -->
+  <ellipse cx="108" cy="158" rx="32" ry="24" fill="#fff"/>
+  <!-- stem -->
+  <rect x="132" y="72" width="14" height="90" rx="6" fill="#fff"/>
+  <!-- flag -->
+  <path d="M146 72 C190 88 196 110 186 128 C168 112 156 100 146 96 Z" fill="#fff"/>
+  <!-- J badge -->
+  <circle cx="176" cy="168" r="28" fill="#AA5CC3"/>
+  <text x="176" y="180" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif"
+        font-size="36" font-weight="700" fill="#fff">J</text>
+</svg>

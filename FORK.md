@@ -9,14 +9,17 @@
 
 Fork of Finamp (open-source Jellyfin music player) with a light rebrand and small QoL features.
 
-## Rebrand (small)
+## Rebrand
 
 | Item | Value |
 |------|--------|
 | Launcher name | Jellyamp |
 | `applicationId` | `com.demongroker.jellyamp` (installs next to official Finamp) |
 | Kotlin namespace | unchanged (`com.unicornsonlsd.finamp`) — less churn |
-| Icon / colors | still Finamp assets (medium rebrand later) |
+| Icon / splash | custom Jellyamp note+J badge (blue→purple), navy adaptive bg `#0B1220` |
+| Default accent | Jellyfin purple `#AA5CC3` |
+| UI strings (en) | Jellyamp; credits demongroker + Finamp origin |
+| Jellyfin Client | `Jellyamp` |
 
 ## Features added
 

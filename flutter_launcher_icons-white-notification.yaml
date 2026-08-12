@@ -1,4 +1,6 @@
-flutter_icons:
-  android: true
+flutter_launcher_icons:
+  android: "white"
   ios: false
   image_path: "assets/icon/icon_white_noborder.png"
+  adaptive_icon_background: "#0B1220"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"

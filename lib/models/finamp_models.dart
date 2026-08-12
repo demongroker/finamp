@@ -111,7 +111,8 @@ class DefaultSettings {
   static const themeMode = ThemeMode.system;
   static const amoledTheme = false;
   static const Locale? locale = null;
-  static const Color? accentColor = null;
+  /// Jellyamp default: Jellyfin purple (distinct from stock Finamp blue).
+  static const Color? accentColor = Color(0xFFAA5CC3);
   static const shouldTranscode = false;
   static const transcodeBitrate = 320000;
   static const androidStopForegroundOnPause = true;

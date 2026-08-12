@@ -437,9 +437,9 @@ Future<void> _setupPlaybackServices() async {
     builder: () => MusicPlayerBackgroundTask(),
     config: AudioServiceConfig(
       androidStopForegroundOnPause: FinampSettingsHelper.finampSettings.androidStopForegroundOnPause,
-      androidNotificationChannelName: "Finamp",
+      androidNotificationChannelName: "Jellyamp",
       androidNotificationIcon: "mipmap/white",
-      androidNotificationChannelId: "com.unicornsonlsd.finamp.audio",
+      androidNotificationChannelId: "com.demongroker.jellyamp.audio",
       // notificationColor: TODO use the theme color for older versions of Android,
       // We will handle preloading artwork ourselves
       preloadArtwork: false,
@@ -953,7 +953,7 @@ class FinampApp extends ConsumerWidget {
           )
         : null;
     return MaterialApp(
-      title: "Finamp",
+      title: "Jellyamp",
       routes: {
         SplashScreen.routeName: (context) => const SplashScreen(),
         LoginScreen.routeName: (context) => const LoginScreen(),
@@ -1068,7 +1068,7 @@ class FinampErrorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Finamp",
+      title: "Jellyamp",
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
