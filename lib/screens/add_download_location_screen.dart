@@ -30,9 +30,9 @@ class _AddDownloadLocationScreenState extends State<AddDownloadLocationScreen> w
   @override
   void initState() {
     super.initState();
-    // Since we can't initialise tabs before initState we need to awkwardly
-    // provide the length directly
-    _tabController = TabController(vsync: this, length: Platform.isAndroid ? 2 : 1);
+    // Jellyamp privacy: no custom/external storage pickers (no storage permission).
+    // Android uses app-private directory only. Desktop keeps custom path form.
+    _tabController = TabController(vsync: this, length: 1);
   }
 
   @override
@@ -43,12 +43,16 @@ class _AddDownloadLocationScreenState extends State<AddDownloadLocationScreen> w
 
   @override
   Widget build(BuildContext context) {
-    final tabs = Platform.isAndroid
-        ? [
-            Tab(text: AppLocalizations.of(context)!.customLocation.toUpperCase()),
-            Tab(text: AppLocalizations.of(context)!.appDirectory.toUpperCase()),
-          ]
-        : [Tab(text: AppLocalizations.of(context)!.customLocation.toUpperCase())];
+    // Privacy build: Android = app-private dir only (no SAF/storage permission).
+    // Desktop/Linux = custom path form (local filesystem, no Android runtime perms).
+    final useAppPrivateOnly = Platform.isAndroid || Platform.isIOS;
+    final tabs = [
+      Tab(
+        text: useAppPrivateOnly
+            ? AppLocalizations.of(context)!.appDirectory.toUpperCase()
+            : AppLocalizations.of(context)!.customLocation.toUpperCase(),
+      ),
+    ];
     return Provider<NewDownloadLocation>(
       create: (_) => NewDownloadLocation(name: null, baseDirectory: DownloadLocationType.none),
       builder: (context, _) {
@@ -63,22 +67,16 @@ class _AddDownloadLocationScreenState extends State<AddDownloadLocationScreen> w
             onPressed: () async {
               bool isValidated = false;
 
-              // If _tabController.index is 0, we are on the custom location tab.
-              // If not, we are on the app directory tab.
-              if (_tabController.index == 0) {
-                if (customLocationFormKey.currentState?.validate() ?? false) {
-                  customLocationFormKey.currentState!.save();
-                  // If we're saving to a custom location, we want to use human readable names.
-                  // With app dir locations, we don't use human readable names.
-                  context.read<NewDownloadLocation>().baseDirectory = DownloadLocationType.custom;
-                  isValidated = true;
-                }
-              } else {
+              if (useAppPrivateOnly) {
                 if (appDirectoryFormKey.currentState?.validate() ?? false) {
                   appDirectoryFormKey.currentState!.save();
                   context.read<NewDownloadLocation>().baseDirectory = DownloadLocationType.external;
                   isValidated = true;
                 }
+              } else if (customLocationFormKey.currentState?.validate() ?? false) {
+                customLocationFormKey.currentState!.save();
+                context.read<NewDownloadLocation>().baseDirectory = DownloadLocationType.custom;
+                isValidated = true;
               }
 
               // We set a variable called isValidated so that we don't have to copy this logic into each validate()
@@ -147,16 +145,11 @@ class _AddDownloadLocationScreenState extends State<AddDownloadLocationScreen> w
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: CustomDownloadLocationForm(formKey: customLocationFormKey),
+                  child: useAppPrivateOnly
+                      ? AppDirectoryLocationForm(formKey: appDirectoryFormKey)
+                      : CustomDownloadLocationForm(formKey: customLocationFormKey),
                 ),
               ),
-              if (Platform.isAndroid)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: AppDirectoryLocationForm(formKey: appDirectoryFormKey),
-                  ),
-                ),
             ],
           ),
         );

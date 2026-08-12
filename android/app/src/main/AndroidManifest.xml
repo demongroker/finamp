@@ -1,11 +1,37 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+  <!--
+    Jellyamp privacy profile:
+    - No storage / photos / camera / mic / location / contacts runtime prompts.
+    - Downloads stay in app-private storage (no READ/WRITE_EXTERNAL_STORAGE).
+    - Only network + media playback service remain (required for Jellyfin streaming).
+  -->
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.VIBRATE"/>
+
+  <!-- Strip permissions that plugins or legacy Finamp may merge in -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+  <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" tools:node="remove"/>
+  <uses-permission android:name="android.permission.CAMERA" tools:node="remove"/>
+  <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove"/>
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.VIBRATE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" tools:node="remove"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:node="remove"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" tools:node="remove"/>
+  <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" tools:node="remove"/>
+
   <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -18,11 +44,10 @@
     android:localeConfig="@xml/locales_config"
     android:appCategory="audio"
     android:usesCleartextTraffic="true"
-    android:requestLegacyExternalStorage="true"
     android:supportsRtl="true"
-    android:allowBackup="true"
-    android:fullBackupContent="@xml/backup_rules_legacy"
-    android:dataExtractionRules="@xml/backup_rules"
+    android:allowBackup="false"
+    android:fullBackupContent="false"
+    android:dataExtractionRules="@xml/backup_rules_no_backup"
     android:networkSecurityConfig="@xml/network_security_config"
     android:enableOnBackInvokedCallback="true"
   >

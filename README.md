@@ -120,6 +120,13 @@ Fork-specific notes: [FORK.md](./FORK.md).
 
 ---
 
+## Privacy
+
+- **No analytics, no ads, no telemetry.**
+- Talks only to **your** Jellyfin server (plus optional features you turn on).
+- Android: **no storage/photos/camera/location** permission prompts; downloads stay app-private.
+- Details: [PRIVACY.md](./PRIVACY.md)
+
 ## Credits & license
 
 - **Jellyamp** changes © demongroker (this fork).  

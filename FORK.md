@@ -16,6 +16,17 @@
 | Icon bg | `#0B1220` |
 | Jellyfin `Client` header | `Jellyamp` |
 
+## Privacy / permissions
+
+| Item | Value |
+|------|--------|
+| Analytics | None |
+| Cloud backup | Disabled (`allowBackup=false`) |
+| Storage permission | Removed; app-private downloads only |
+| Runtime permission dialogs | Avoided (no storage/media/camera/location) |
+| Required install-time | `INTERNET`, wake lock, media playback FGS |
+| Docs | [PRIVACY.md](./PRIVACY.md) |
+
 ## Feature map
 
 | Feature | Code |

@@ -81,13 +81,13 @@
 			<true/>
 		</dict>
 		<key>NSAppleMusicUsageDescription</key>
-		<string>Finamp can use your media library to store downloaded songs. If you don't want this, Finamp can also download songs to the app's internal directory, which doesn't use any permissions.</string>
+		<string>Jellyamp stores downloads in app-private storage by default and does not need media library access.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>I don't know why this permission is being requested, you should probably deny it. If you can, create a GitHub issue with a screenshot of this message.</string>
+		<string>Jellyamp does not need camera or photo library access. Deny this if prompted.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>I don't know why this permission is being requested, you should probably deny it. If you can, create a GitHub issue with a screenshot of this message.</string>
+		<string>Jellyamp does not need camera or photo library access. Deny this if prompted.</string>
 		<key>NSSiriUsageDescription</key>
-		<string>Finamp uses Siri to play music via voice commands like "Play [track/artist] on Finamp".</string>
+		<string>Jellyamp uses Siri to play music via voice commands like "Play [track/artist] on Jellyamp".</string>
 		<key>INIntentsSupported</key>
 		<array>
 			<string>INPlayMediaIntent</string>

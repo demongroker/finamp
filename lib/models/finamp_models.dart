@@ -175,7 +175,8 @@ class DefaultSettings {
   static const shouldRedownloadTranscodes = false;
   static const resyncOnStartup = true;
   static const splitScreenPlayerWidth = 400.0;
-  static const enableVibration = true;
+  /// Jellyamp privacy: no vibration permission / no haptics by default.
+  static const enableVibration = false;
   static const prioritizeCoverFactor = 8.0;
   static const suppressPlayerPadding = false;
   static const hidePlayerBottomActions = false;
