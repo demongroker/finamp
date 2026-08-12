@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:finamp/components/SettingsScreen/logout_list_tile.dart';
 import 'package:finamp/components/finamp_app_bar_back_button.dart';
 import 'package:finamp/components/finamp_icon.dart';
@@ -17,6 +19,7 @@ import 'package:finamp/screens/playback_reporting_settings_screen.dart';
 import 'package:finamp/screens/transcoding_settings_screen.dart';
 import 'package:finamp/screens/view_selector.dart';
 import 'package:finamp/screens/volume_normalization_settings_screen.dart';
+import 'package:finamp/services/app_share_helper.dart';
 import 'package:finamp/services/client_certificate_installer.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:flutter/gestures.dart';
@@ -203,6 +206,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onTap: () => Navigator.of(context).pushNamed(LanguageSelectionScreen.routeName),
           ),
           Divider(),
+          if (Platform.isAndroid) ...[
+            ListTile(
+              leading: const Icon(TablerIcons.share_2),
+              title: Text(AppLocalizations.of(context)!.shareApkTitle),
+              subtitle: Text(AppLocalizations.of(context)!.shareApkSubtitle),
+              onTap: () => AppShareHelper.shareApkFile(),
+            ),
+            ListTile(
+              leading: Icon(
+                AppShareHelper.isServerRunning ? TablerIcons.wifi : TablerIcons.wifi_off,
+              ),
+              title: Text(
+                AppShareHelper.isServerRunning
+                    ? AppLocalizations.of(context)!.shareApkServerStopTitle
+                    : AppLocalizations.of(context)!.shareApkServerStartTitle,
+              ),
+              subtitle: Text(AppLocalizations.of(context)!.shareApkServerSubtitle),
+              onTap: () async {
+                if (AppShareHelper.isServerRunning) {
+                  await AppShareHelper.stopLocalApkServer();
+                  if (context.mounted) setState(() {});
+                  return;
+                }
+                final urls = await AppShareHelper.startLocalApkServer();
+                if (context.mounted) setState(() {});
+                if (urls != null && context.mounted) {
+                  await showDialog<void>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(AppLocalizations.of(ctx)!.shareApkServerDialogTitle),
+                      content: SingleChildScrollView(
+                        child: SelectableText(
+                          '${AppLocalizations.of(ctx)!.shareApkServerDialogBody}\n\n$urls',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () async {
+                            await AppShareHelper.copyLocalApkUrls();
+                          },
+                          child: Text(AppLocalizations.of(ctx)!.shareApkCopyUrls),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: Text(AppLocalizations.of(ctx)!.close),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
           ListTile(
             leading: Icon(TablerIcons.access_point),
             title: Text(AppLocalizations.of(context)!.serverSharingMenuButtonTitle),

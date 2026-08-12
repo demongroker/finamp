@@ -28,9 +28,16 @@ Available on **track, album, artist, playlist, and genre** context menus:
 
 | Action | What it does |
 |--------|----------------|
+| **Share audio file** | (tracks) Download original FLAC/etc. and open system share sheet |
 | **Share** | System share sheet with `Artist — Title` + Jellyfin web deep link |
 | **Copy link** | Copies `{server}/web/#/details?id={itemId}` to the clipboard |
 | **Copy title** | Copies a human-readable line (e.g. `Daft Punk — Get Lucky`) |
+
+### Share Jellyamp APK (Android Settings)
+| Action | What it does |
+|--------|----------------|
+| **Share Jellyamp APK** | Share this phone’s install file via Nearby/Bluetooth/Drive/etc. |
+| **Share over Wi‑Fi** | Host the APK on LAN port 8765 for nearby phones |
 
 Deep links use the logged-in server base URL (`public` or `local`, same as Finamp networking prefs). Hidden while offline.
 

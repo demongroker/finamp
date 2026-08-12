@@ -42,6 +42,9 @@ class MainActivity : AudioServiceActivity() {
 
         private const val SET_NATIVE_THEME_CHANNEL = "com.unicornsonlsd.finamp/set_native_theme"
         private const val SET_NATIVE_THEME_CHANNEL_LOG_TAG = "setNativeThemeChannel"
+
+        private const val APP_SHARE_CHANNEL = "com.unicornsonlsd.finamp/app_share"
+        private const val APP_SHARE_CHANNEL_LOG_TAG = "AppShareChannel"
     }
 
     private lateinit var mediaRouter: MediaRouter
@@ -249,6 +252,27 @@ class MainActivity : AudioServiceActivity() {
                 }
                 else -> {
                     Log.e(OUTPUT_SWITCHER_CHANNEL_LOG_TAG, "Method not found: '${call.method}'")
+                    result.notImplemented()
+                }
+            }
+        }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            APP_SHARE_CHANNEL,
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getInstalledApkPath" -> {
+                    try {
+                        val path = applicationInfo.sourceDir
+                        Log.d(APP_SHARE_CHANNEL_LOG_TAG, "Installed APK path: $path")
+                        result.success(path)
+                    } catch (e: Exception) {
+                        Log.e(APP_SHARE_CHANNEL_LOG_TAG, "Failed to get APK path", e)
+                        result.error("APK_PATH_ERROR", e.message, null)
+                    }
+                }
+                else -> {
+                    Log.e(APP_SHARE_CHANNEL_LOG_TAG, "Method not found: '${call.method}'")
                     result.notImplemented()
                 }
             }

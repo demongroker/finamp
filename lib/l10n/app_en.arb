@@ -3736,5 +3736,35 @@
     "copyItemInfoTooltip": "Copy artist and title to clipboard",
     "copyItemInfoCopied": "Copied to clipboard",
     "seekForwardLongPressHint": "Long-press: seek forward 30 seconds",
-    "seekBackwardLongPressHint": "Long-press: seek backward 10 seconds"
+    "seekBackwardLongPressHint": "Long-press: seek backward 10 seconds",
+
+    "shareAudioFile": "Share audio file",
+    "@shareAudioFile": {
+        "description": "Menu entry to download/share the original track file (e.g. FLAC)."
+    },
+    "shareAudioFileTooltip": "Download the original file (FLAC/etc.) and open the system share sheet",
+    "shareAudioFileTooltipOffline": "Share a locally downloaded copy of this track",
+    "shareAudioFilePreparing": "Preparing audio file…",
+    "shareAudioFileFailed": "Could not prepare the audio file to share",
+    "shareApkTitle": "Share Jellyamp APK",
+    "shareApkSubtitle": "Send this app install file to another device",
+    "shareApkPreparing": "Preparing Jellyamp APK…",
+    "shareApkUnavailable": "Could not find the Jellyamp install file on this device",
+    "shareApkServerStartTitle": "Share Jellyamp over Wi‑Fi",
+    "shareApkServerStopTitle": "Stop Wi‑Fi APK share",
+    "shareApkServerSubtitle": "Serve the APK on your local network for phones nearby",
+    "shareApkServerStarted": "APK server listening on port {port}",
+    "@shareApkServerStarted": {
+        "placeholders": {
+            "port": {
+                "type": "String",
+                "example": "8765"
+            }
+        }
+    },
+    "shareApkServerStopped": "APK Wi‑Fi share stopped",
+    "shareApkServerDialogTitle": "Download Jellyamp nearby",
+    "shareApkServerDialogBody": "On another phone (same Wi‑Fi / Tailscale), open one of these links:",
+    "shareApkCopyUrls": "Copy links",
+    "shareApkUrlsCopied": "Download links copied"
 }
