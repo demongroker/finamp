@@ -64,7 +64,7 @@ Localizations: new strings are in `lib/l10n/app_en.arb`. Generated `lib/l10n/*.d
 gh repo fork finamp-app/finamp --clone=false
 cd /home/adnan/finamp
 git remote rename origin upstream
-git remote add origin git@github.com:ccosmgasm/finamp.git
+git remote add origin git@github.com:demongroker/finamp.git
 git push -u origin features/share-seek-qol
 ```
 
@@ -72,7 +72,7 @@ Or use the GitHub website **Fork** button, then:
 
 ```bash
 git remote rename origin upstream
-git remote add origin https://github.com/ccosmgasm/finamp.git
+git remote add origin https://github.com/demongroker/finamp.git
 git push -u origin features/share-seek-qol
 ```
 
