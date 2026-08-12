@@ -1,11 +1,11 @@
-dnl Desktop file entry for Finamp on Linux. Use m4 to generate the final file.
+dnl Desktop file entry for Jellyamp (demongroker Finamp fork). Use m4 to generate the final file.
 [Desktop Entry]
 Type=Application
-Name=Finamp
+Name=Jellyamp
 GenericName=Music Player
 Icon=finamp
 Exec=__INSTALL_PATH__/finamp
 Terminal=false
 Categories=AudioVideo;Audio;Player;Music;
-Comment=An open source Jellyfin music player
+Comment=Jellyfin music player (Finamp fork)
 MimeType=x-scheme-handler/finamp;

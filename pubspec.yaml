@@ -259,9 +259,9 @@ flutter_launcher_icons:
     image_path: "assets/icon/icon_combined_macos.png"
 
 msix_config:
-  display_name: Finamp
-  publisher_display_name: jmshrv
-  identity_name: com.unicornsonlsd.finamp
+  display_name: Jellyamp
+  publisher_display_name: demongroker
+  identity_name: com.demongroker.jellyamp
   msix_version: 0.9.25.0
   logo_path: ./images/finamp_cropped.png
   trim_logo: false # don't force logo to be square, it will be stretched

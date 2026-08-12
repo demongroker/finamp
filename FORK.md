@@ -1,10 +1,22 @@
-# Finamp fork — local enhancements
+# Jellyamp — demongroker Finamp fork
 
+**Brand name:** **Jellyamp**  
+**Android package:** `com.demongroker.jellyamp`  
 **Upstream:** [finamp-app/finamp](https://github.com/finamp-app/finamp) (`redesign` branch)  
+**GitHub:** [demongroker/finamp](https://github.com/demongroker/finamp)  
 **Local path:** `/home/adnan/finamp`  
 **Feature branch:** `features/share-seek-qol`
 
-This is a local development fork of Finamp (open-source Jellyfin music player) with small, practical UX features that fit existing menu and player patterns.
+Fork of Finamp (open-source Jellyfin music player) with a light rebrand and small QoL features.
+
+## Rebrand (small)
+
+| Item | Value |
+|------|--------|
+| Launcher name | Jellyamp |
+| `applicationId` | `com.demongroker.jellyamp` (installs next to official Finamp) |
+| Kotlin namespace | unchanged (`com.unicornsonlsd.finamp`) — less churn |
+| Icon / colors | still Finamp assets (medium rebrand later) |
 
 ## Features added
 

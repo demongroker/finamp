@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
-  <id>com.unicornsonlsd.finamp</id>
-  <name>Finamp</name>
-  <summary>Open source Jellyfin music player</summary>
+  <id>com.demongroker.jellyamp</id>
+  <name>Jellyamp</name>
+  <summary>Jellyfin music player (Finamp fork by demongroker)</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MPL-2.0</project_license>
   <supports>
@@ -14,21 +14,21 @@
     <display_length side="shortest" compare="ge">250</display_length>
     <display_length side="longest" compare="ge">400</display_length>
   </requires>
-  <developer id="com.unicornsonlsd">
+  <developer id="com.demongroker">
     <name>
-      jmshrv
+      demongroker
     </name>
   </developer>
-  <url type="homepage">https://github.com/jmshrv/finamp</url>
-  <url type="vcs-browser">https://github.com/jmshrv/finamp/tree/redesign</url>
+  <url type="homepage">https://github.com/demongroker/finamp</url>
+  <url type="vcs-browser">https://github.com/demongroker/finamp/tree/features/share-seek-qol</url>
   <url type="translate">https://hosted.weblate.org/engage/finamp/</url>
-  <url type="bugtracker">https://github.com/jmshrv/finamp/issues</url>
+  <url type="bugtracker">https://github.com/demongroker/finamp/issues</url>
   <url
     type="contribute"
-  >https://github.com/jmshrv/finamp/blob/redesign/CONTRIBUTING.md</url>
+  >https://github.com/finamp-app/finamp/blob/redesign/CONTRIBUTING.md</url>
   <description>
     <p
-    >Finamp is an open source, cross-platform Jellyfin music player that supports streaming playback and offline downloads, playlists, favorites and shuffle. Linux support is currently in Beta.</p>
+    >Jellyamp is a demongroker fork of Finamp — an open source, cross-platform Jellyfin music player with streaming, offline downloads, playlists, favorites, and shuffle. Based on Finamp redesign.</p>
   </description>
   <screenshots>
     <screenshot type="default">
