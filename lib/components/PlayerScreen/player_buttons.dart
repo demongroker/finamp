@@ -8,6 +8,7 @@ import 'package:finamp/components/audio_fade_progress_visualizer_container.dart'
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/screens/player_screen.dart';
 import 'package:finamp/services/feedback_helper.dart';
+import 'package:finamp/services/playback_seek_helper.dart';
 import 'package:finamp/utils/locale_helper.dart';
 import 'package:finamp/utils/platform_helper.dart';
 import 'package:flutter/material.dart';
@@ -45,16 +46,22 @@ class PlayerButtons extends ConsumerWidget {
           ),
           container: true,
           excludeSemantics: true,
-          child: IconButton(
-            tooltip: getStringComponentsInLocaleOrder(context, [
-              AppLocalizations.of(context)!.skipToPreviousTrackButtonTooltip,
-              if (isDesktop) "(${GlobalShortcuts.getDisplay(SkipToPreviousIntent)})",
-            ], separator: "\n"),
-            icon: const Icon(TablerIcons.player_skip_back),
-            onPressed: () async {
-              FeedbackHelper.feedback(FeedbackType.light);
-              await audioHandler.skipToPrevious();
+          child: GestureDetector(
+            onLongPress: () {
+              unawaited(PlaybackSeekHelper.seekBackward());
             },
+            child: IconButton(
+              tooltip: getStringComponentsInLocaleOrder(context, [
+                AppLocalizations.of(context)!.skipToPreviousTrackButtonTooltip,
+                AppLocalizations.of(context)!.seekBackwardLongPressHint,
+                if (isDesktop) "(${GlobalShortcuts.getDisplay(SkipToPreviousIntent)})",
+              ], separator: "\n"),
+              icon: const Icon(TablerIcons.player_skip_back),
+              onPressed: () async {
+                FeedbackHelper.feedback(FeedbackType.light);
+                await audioHandler.skipToPrevious();
+              },
+            ),
           ),
         ),
         Semantics.fromProperties(
@@ -94,16 +101,22 @@ class PlayerButtons extends ConsumerWidget {
           ),
           container: true,
           excludeSemantics: true,
-          child: IconButton(
-            tooltip: getStringComponentsInLocaleOrder(context, [
-              AppLocalizations.of(context)!.skipToNextTrackButtonTooltip,
-              if (isDesktop) "(${GlobalShortcuts.getDisplay(SkipToNextIntent)})",
-            ], separator: "\n"),
-            icon: const Icon(TablerIcons.player_skip_forward),
-            onPressed: () async {
-              FeedbackHelper.feedback(FeedbackType.light);
-              await audioHandler.skipToNext();
+          child: GestureDetector(
+            onLongPress: () {
+              unawaited(PlaybackSeekHelper.seekForward());
             },
+            child: IconButton(
+              tooltip: getStringComponentsInLocaleOrder(context, [
+                AppLocalizations.of(context)!.skipToNextTrackButtonTooltip,
+                AppLocalizations.of(context)!.seekForwardLongPressHint,
+                if (isDesktop) "(${GlobalShortcuts.getDisplay(SkipToNextIntent)})",
+              ], separator: "\n"),
+              icon: const Icon(TablerIcons.player_skip_forward),
+              onPressed: () async {
+                FeedbackHelper.feedback(FeedbackType.light);
+                await audioHandler.skipToNext();
+              },
+            ),
           ),
         ),
         if (controller.shouldShow(PlayerHideable.loopShuffleButtons)) PlayerButtonsLoopMode(),

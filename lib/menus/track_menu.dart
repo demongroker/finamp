@@ -7,6 +7,7 @@ import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/menus/components/menuEntries/adaptive_download_lock_delete_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/add_to_playlist_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/clear_queue_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/copy_item_info_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/create_playlist_from_current_queue.dart';
 import 'package:finamp/menus/components/menuEntries/delete_from_server_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/instant_mix_menu_entry.dart';
@@ -14,6 +15,7 @@ import 'package:finamp/menus/components/menuEntries/menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/remove_from_current_playlist_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/remove_from_queue_menbu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/restore_queue_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/share_item_link_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/start_radio_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/toggle_favorite_menu_entry.dart';
 import 'package:finamp/menus/components/menu_item_info_header.dart';
@@ -251,6 +253,9 @@ class _TrackMenuState extends ConsumerState<TrackMenu> with TickerProviderStateM
       StartRadioMenuEntry(baseItem: widget.item),
       AdaptiveDownloadLockDeleteMenuEntry(baseItem: widget.item),
       ToggleFavoriteMenuEntry(baseItem: widget.item),
+      ShareItemLinkMenuEntry(baseItem: widget.item),
+      CopyItemLinkMenuEntry(baseItem: widget.item),
+      CopyItemInfoMenuEntry(baseItem: widget.item),
       if (widget.showQueueActions) CreatePlaylistFromCurrentQueueMenuEntry(),
       if (widget.showQueueActions) ClearQueueMenuEntry(baseItem: widget.item),
       DeleteFromServerMenuEntry(baseItem: widget.item),

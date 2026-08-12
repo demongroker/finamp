@@ -6,6 +6,7 @@ import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/services/feedback_helper.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_player_background_task.dart';
+import 'package:finamp/services/playback_seek_helper.dart';
 import 'package:finamp/services/queue_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,11 +18,19 @@ import '../../services/current_album_image_provider.dart';
 import '../../services/favorite_provider.dart';
 import '../album_image.dart';
 
-class PlayerScreenAlbumImage extends ConsumerWidget {
+class PlayerScreenAlbumImage extends ConsumerStatefulWidget {
   const PlayerScreenAlbumImage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PlayerScreenAlbumImage> createState() => _PlayerScreenAlbumImageState();
+}
+
+class _PlayerScreenAlbumImageState extends ConsumerState<PlayerScreenAlbumImage> {
+  /// Last double-tap X position (local coords) for left/center/right zone seeking.
+  double? _doubleTapLocalX;
+
+  @override
+  Widget build(BuildContext context) {
     final queueService = GetIt.instance<QueueService>();
     final audioService = GetIt.instance<MusicPlayerBackgroundTask>();
     return StreamBuilder<FinampQueueInfo?>(
@@ -59,12 +68,6 @@ class PlayerScreenAlbumImage extends ConsumerWidget {
                 unawaited(audioService.togglePlayback());
                 FeedbackHelper.feedback(FeedbackType.selection);
               },
-              onDoubleTap: () {
-                final currentTrack = queueService.getCurrentTrack();
-                if (currentTrack?.baseItem != null && !FinampSettingsHelper.finampSettings.isOffline) {
-                  ref.read(isFavoriteProvider(currentTrack!.baseItem).notifier).toggleFavorite();
-                }
-              },
               onHorizontalSwipe: (direction) {
                 if (direction == SwipeDirection.left) {
                   if (!FinampSettingsHelper.finampSettings.disableGesture) {
@@ -85,17 +88,40 @@ class PlayerScreenAlbumImage extends ConsumerWidget {
                   final minPadding = ref.watch(finampSettingsProvider.playerScreenCoverMinimumPadding);
                   final horizontalPadding = constraints.maxWidth * (minPadding / 100.0);
                   final verticalPadding = constraints.maxHeight * (minPadding / 100.0);
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-                    child: AlbumImage(
-                      imageListenable: currentAlbumImageProvider,
-                      borderRadius: BorderRadius.circular(8.0),
-                      // Load player cover at max size to allow more seamless scaling
-                      autoScale: false,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(blurRadius: 24, offset: const Offset(0, 4), color: Colors.black.withOpacity(0.3)),
-                        ],
+                  return GestureDetector(
+                    // Double-tap zones:
+                    // left third  → seek −10s
+                    // right third → seek +30s
+                    // center      → toggle favorite (original behaviour)
+                    onDoubleTapDown: (details) {
+                      _doubleTapLocalX = details.localPosition.dx;
+                    },
+                    onDoubleTap: () {
+                      final width = constraints.maxWidth;
+                      final x = _doubleTapLocalX ?? (width / 2);
+                      if (x < width * (1 / 3)) {
+                        unawaited(PlaybackSeekHelper.seekBackward());
+                      } else if (x > width * (2 / 3)) {
+                        unawaited(PlaybackSeekHelper.seekForward());
+                      } else {
+                        final track = queueService.getCurrentTrack();
+                        if (track?.baseItem != null && !FinampSettingsHelper.finampSettings.isOffline) {
+                          ref.read(isFavoriteProvider(track!.baseItem).notifier).toggleFavorite();
+                        }
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+                      child: AlbumImage(
+                        imageListenable: currentAlbumImageProvider,
+                        borderRadius: BorderRadius.circular(8.0),
+                        // Load player cover at max size to allow more seamless scaling
+                        autoScale: false,
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(blurRadius: 24, offset: const Offset(0, 4), color: Colors.black.withOpacity(0.3)),
+                          ],
+                        ),
                       ),
                     ),
                   );

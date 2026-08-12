@@ -3716,5 +3716,25 @@
                 "example": "Never Gonna Give You Up"
             }
         }
-    }
+    },
+    "shareItemLink": "Share",
+    "@shareItemLink": {
+        "description": "Menu entry that opens the system share sheet for a library item (name + Jellyfin web link)."
+    },
+    "shareItemLinkTooltip": "Share this item via the system share sheet",
+    "copyItemLink": "Copy link",
+    "@copyItemLink": {
+        "description": "Menu entry that copies a Jellyfin web details URL to the clipboard."
+    },
+    "copyItemLinkTooltip": "Copy Jellyfin web link to clipboard",
+    "shareItemLinkCopied": "Link copied",
+    "shareItemNoServer": "Not connected to a server",
+    "copyItemInfo": "Copy title",
+    "@copyItemInfo": {
+        "description": "Menu entry that copies a human-readable title line (e.g. Artist — Track) to the clipboard."
+    },
+    "copyItemInfoTooltip": "Copy artist and title to clipboard",
+    "copyItemInfoCopied": "Copied to clipboard",
+    "seekForwardLongPressHint": "Long-press: seek forward 30 seconds",
+    "seekBackwardLongPressHint": "Long-press: seek backward 10 seconds"
 }

@@ -5,6 +5,7 @@ import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/services/music_player_background_task.dart';
+import 'package:finamp/services/playback_seek_helper.dart';
 import 'package:finamp/services/queue_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -81,15 +82,13 @@ Map<Type, Action<Intent>> getMusicControlActions() {
     ),
     SeekForwardIntent: _MusicControlTextFieldSafeAction<SeekForwardIntent>(
       onInvoke: (_) {
-        audioHandler.seek(audioHandler.playbackPosition + const Duration(seconds: 30));
+        unawaited(PlaybackSeekHelper.seekForward());
         return null;
       },
     ),
     SeekBackwardIntent: _MusicControlTextFieldSafeAction<SeekBackwardIntent>(
       onInvoke: (_) {
-        final current = audioHandler.playbackPosition;
-        final target = current < const Duration(seconds: 5) ? Duration.zero : current - const Duration(seconds: 5);
-        audioHandler.seek(target);
+        unawaited(PlaybackSeekHelper.seekBackward());
         return null;
       },
     ),
