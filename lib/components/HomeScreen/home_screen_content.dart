@@ -2,21 +2,16 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:balanced_text/balanced_text.dart';
-import 'package:finamp/components/AlbumScreen/download_button.dart';
 import 'package:finamp/components/Buttons/cta_small.dart';
-import 'package:finamp/components/Buttons/simple_button.dart';
 import 'package:finamp/components/HomeScreen/home_screen_quick_action_button.dart';
 import 'package:finamp/components/HomeScreen/quick_action_editor.dart';
-import 'package:finamp/components/HomeScreen/show_all_button.dart';
 import 'package:finamp/components/MusicScreen/item_card.dart';
 import 'package:finamp/components/MusicScreen/item_wrapper.dart';
 import 'package:finamp/components/MusicScreen/music_screen_tab_view.dart';
 import 'package:finamp/components/finamp_section_header.dart';
-import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/menus/components/icon_button_with_semantics.dart';
 import 'package:finamp/menus/home_section_menu.dart';
 import 'package:finamp/models/finamp_models.dart';
-import 'package:finamp/models/jellyfin_models.dart';
 import 'package:finamp/models/music_models.dart';
 import 'package:finamp/screens/home_screen_settings_screen.dart';
 import 'package:finamp/screens/music_screen.dart';
@@ -65,12 +60,12 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
   Widget build(BuildContext context) {
     super.build(context);
     widget.refresh?.callback = _refresh;
+    final hasActions = ref.watch(finampSettingsProvider.homeScreenConfiguration).actions.isNotEmpty;
     return RefreshIndicator(
       onRefresh: () async => _refresh(),
       child: CustomScrollView(
         slivers: [
-          if (ref.watch(finampSettingsProvider.homeScreenConfiguration).actions.isNotEmpty)
-            SliverPadding(padding: const EdgeInsets.only(top: 10.0)),
+          if (hasActions) const SliverPadding(padding: EdgeInsets.only(top: 6.0)),
           SliverLayoutBuilder(
             builder: (context, constraints) {
               final double maxWidth = isDesktop ? 800.0 : 600.0;
@@ -80,6 +75,7 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
               // Mandatory padding should be enough to clear scrollbar
               final horizontalPadding = max(0, (usableWidth - maxWidth) / 2) + 14.0;
               final configuredQuickActions = ref.watch(finampSettingsProvider.homeScreenConfiguration).actions;
+              final actionGap = isDesktop ? 8.0 : 6.0;
               return SliverPadding(
                 padding: EdgeInsets.only(
                   left: horizontalPadding + viewPadding.left,
@@ -87,8 +83,8 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
                 ),
                 sliver: SliverToBoxAdapter(
                   child: Wrap(
-                    spacing: isDesktop ? 4.0 : 0,
-                    runSpacing: 8,
+                    spacing: actionGap,
+                    runSpacing: actionGap,
                     direction: Axis.horizontal,
                     alignment: WrapAlignment.spaceBetween,
                     runAlignment: WrapAlignment.center,
@@ -101,20 +97,19 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
                         usableWidth - horizontalPadding - horizontalPadding,
                         maxWidth,
                       );
-                      double verticalButtonWidth = (quickActionsWidth / 3) - 2 * (5.0);
-                      double horizontalButtonWidth = (quickActionsWidth / 2) - 1 * (8.0);
+                      final n = configuredQuickActions.length;
+                      double verticalButtonWidth = (quickActionsWidth - 2 * actionGap) / 3;
+                      double horizontalButtonWidth = (quickActionsWidth - actionGap) / 2;
                       double singleButtonWidth = quickActionsWidth;
                       double buttonWidth;
                       // always fill each row completely
-                      if (configuredQuickActions.length == 1) {
+                      if (n == 1) {
                         buttonWidth = singleButtonWidth;
-                      } else if (configuredQuickActions.length % 3 == 0) {
+                      } else if (n % 3 == 0) {
                         buttonWidth = verticalButtonWidth;
-                      } else if (configuredQuickActions.length == 4) {
+                      } else if (n == 4) {
                         buttonWidth = horizontalButtonWidth;
-                      } else if ((configuredQuickActions.length % 3 == 1 &&
-                              configuredQuickActions.length - index <= 4) ||
-                          (configuredQuickActions.length % 3 == 2 && configuredQuickActions.length - index < 3)) {
+                      } else if ((n % 3 == 1 && n - index <= 4) || (n % 3 == 2 && n - index < 3)) {
                         buttonWidth = horizontalButtonWidth;
                       } else {
                         buttonWidth = verticalButtonWidth;
@@ -135,7 +130,7 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
               );
             },
           ),
-          const SliverPadding(padding: EdgeInsets.only(top: 4.0)),
+          SliverPadding(padding: EdgeInsets.only(top: hasActions ? 10.0 : 2.0)),
           SliverMainAxisGroup(
             slivers: ref
                 .watch(finampSettingsProvider.homeScreenConfiguration)
@@ -143,52 +138,32 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
                 .map((sectionInfo) => HomeScreenSection(sectionInfo: sectionInfo))
                 .toList(),
           ),
-          const SliverPadding(padding: EdgeInsets.only(top: 30)),
-          ...[
-            SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 200),
-                  child: BalancedText(
-                    context.l10n.lookingForSomethingElse,
-                    textAlign: TextAlign.center,
-                    style: TextTheme.of(context).bodySmall,
+          const SliverPadding(padding: EdgeInsets.only(top: 16)),
+          SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 240),
+                child: BalancedText(
+                  context.l10n.lookingForSomethingElse,
+                  textAlign: TextAlign.center,
+                  style: TextTheme.of(context).bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
                   ),
                 ),
               ),
             ),
-            const SliverPadding(padding: EdgeInsets.only(top: 12)),
-            SliverToBoxAdapter(
-              child: Center(
-                child: CTASmall(
-                  text: context.l10n.customizeHomeScreen,
-                  icon: TablerIcons.settings,
-                  onPressed: () => Navigator.pushNamed(context, HomeScreenSettingsScreen.routeName),
-                ),
+          ),
+          const SliverPadding(padding: EdgeInsets.only(top: 10)),
+          SliverToBoxAdapter(
+            child: Center(
+              child: CTASmall(
+                text: context.l10n.customizeHomeScreen,
+                icon: TablerIcons.layout,
+                onPressed: () => Navigator.pushNamed(context, HomeScreenSettingsScreen.routeName),
               ),
             ),
-          ],
-          /*const SliverPadding(padding: EdgeInsets.only(top: 60)),
-          ...[
-            // monochrome icon
-            SliverToBoxAdapter(
-              child: FinampIcon(56, 56, overrideColor: TextTheme.of(context).bodySmall?.color?.withOpacity(0.4)),
-            ),
-            const SliverPadding(padding: EdgeInsets.only(top: 16)),
-            SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 200),
-                  child: BalancedText(
-                    context.l10n.builtWithByTheFinampContributors,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: TextTheme.of(context).bodySmall?.color?.withOpacity(0.6)),
-                  ),
-                ),
-              ),
-            ),
-          ],*/
-          SliverSafeArea(top: false, sliver: SliverPadding(padding: const EdgeInsets.only(bottom: 40.0))),
+          ),
+          const SliverSafeArea(top: false, sliver: SliverPadding(padding: EdgeInsets.only(bottom: 32.0))),
         ],
       ),
     );
@@ -206,48 +181,28 @@ class HomeScreenSection extends ConsumerWidget {
 
     final viewPadding = MediaQuery.paddingOf(context);
     return SliverPadding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 12.0),
       sliver: FinampSectionHeader(
         sticky: false,
         key: Key(sectionInfo.toString()),
         title: sectionInfo.getTitle(context.l10n),
         label: context.l10n.showAll,
         titleTrailingIcon: TablerIcons.chevron_right,
-        headerPadding: EdgeInsets.only(left: viewPadding.left + 14.0, right: viewPadding.right + 20.0),
+        headerPadding: EdgeInsets.only(left: viewPadding.left + 14.0, right: viewPadding.right + 12.0),
         contentPadding: EdgeInsets.zero,
+        // Jellyamp polish: one shuffle action only — play/download via long-press section menu.
         actions: [
-          if (sectionDisplayable is FinampPlayable) ...[
+          if (sectionDisplayable is FinampPlayable)
             IconButtonWithSemantics(
               onPressed: () async {
                 final queueService = GetIt.instance<QueueService>();
                 final playable = sectionDisplayable as FinampPlayable;
-                await queueService.startSlicePlayback(
-                  await ref.read(getPlayableSliceProvider(item: playable, startingOffset: 0).future),
-                );
-              },
-              label: AppLocalizations.of(context)!.playButtonLabel,
-              icon: TablerIcons.player_play,
-            ),
-            IconButtonWithSemantics(
-              onPressed: () async {
-                final queueService = GetIt.instance<QueueService>();
-                final playable = sectionDisplayable as FinampPlayable;
-                // TODO better shuffling?  need to think about shuffle all versus shuffle first
                 await queueService.startSlicePlayback(
                   (await ref.read(getPlayableSliceProvider(item: playable, startingOffset: 0).future)).shuffle(),
                 );
               },
               label: context.l10n.shuffleButtonLabel,
               icon: TablerIcons.arrows_shuffle,
-            ),
-          ],
-          // bind function result to downloadInfo and proceed if not null
-          if (getHomeDownloadInfo(ref, context.l10n, sectionInfo, sectionDisplayable?.maybeItem) case var downloadInfo?)
-            DownloadButton(
-              item: downloadInfo.stub,
-              allowServerDelete: false,
-              warningMessage: downloadInfo.warning,
-              downloadOnly: true,
             ),
         ],
         onTap: () {
@@ -258,28 +213,6 @@ class HomeScreenSection extends ConsumerWidget {
         onSecondaryTap: () => showModalHomeSectionMenu(context: context, section: sectionInfo),
         onDismiss: null,
         sectionContentSliver: SliverToBoxAdapter(
-          /* child: ShaderMask(
-            shaderCallback: (bounds) {
-              final leftFade = 9.0 / bounds.width;
-              final rightFade = 20.0 / bounds.width;
-              final leftOffset = 5.0 / bounds.width;
-              final rightOffset = 20.0 / bounds.width;
-              return LinearGradient(
-                colors: [
-                  Color.fromARGB(0, 255, 255, 255),
-                  Color.fromARGB(0, 255, 255, 255),
-                  Color.fromARGB(255, 255, 255, 255),
-                  Color.fromARGB(255, 255, 255, 255),
-                  Color.fromARGB(0, 255, 255, 255),
-                  Color.fromARGB(0, 255, 255, 255),
-                ],
-                stops: [0.0, leftOffset, leftOffset + leftFade, 1.0 - rightOffset - rightFade, 1.0 - rightOffset, 1.0],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ).createShader(bounds);
-            },
-            child: HomeScreenSectionContent(sectionInfo: sectionInfo),
-          ) */
           child: HomeScreenSectionContent(sectionInfo: sectionInfo),
         ),
       ),

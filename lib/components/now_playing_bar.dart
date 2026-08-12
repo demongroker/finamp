@@ -187,7 +187,7 @@ class NowPlayingBar extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(left: 12.0, bottom: 12.0, right: 12.0),
+      padding: const EdgeInsets.only(left: 10.0, bottom: 10.0, right: 10.0),
       child: Semantics.fromProperties(
         properties: SemanticsProperties(label: AppLocalizations.of(context)!.nowPlayingBarTooltip, button: true),
         child: SimpleGestureDetector(
@@ -229,13 +229,16 @@ class NowPlayingBar extends ConsumerWidget {
                 child: Material(
                   shadowColor: ColorScheme.of(
                     context,
-                  ).primary.withOpacity(Theme.brightnessOf(context) == Brightness.light ? 0.75 : 0.3),
-                  borderRadius: BorderRadius.circular(12.0),
+                  ).primary.withOpacity(Theme.brightnessOf(context) == Brightness.light ? 0.55 : 0.28),
+                  borderRadius: BorderRadius.circular(14.0),
                   clipBehavior: Clip.antiAlias,
                   color: Theme.brightnessOf(context) == Brightness.dark
-                      ? IconTheme.of(context).color!.withOpacity(0.1)
+                      ? Color.alphaBlend(
+                          ColorScheme.of(context).primary.withOpacity(0.12),
+                          ColorScheme.of(context).surface,
+                        )
                       : Theme.of(context).cardColor,
-                  elevation: 8.0,
+                  elevation: 6.0,
                   // If we have a media item and the player hasn't finished, show
                   // the now playing bar.
                   child: //TODO move into separate component and share with queue list
@@ -246,7 +249,7 @@ class NowPlayingBar extends ConsumerWidget {
                     clipBehavior: Clip.antiAlias,
                     decoration: ShapeDecoration(
                       color: remainingPartBackgroundColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.0)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

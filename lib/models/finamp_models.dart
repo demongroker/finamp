@@ -153,6 +153,7 @@ class DefaultSettings {
     ContentType.tracks,
     ContentType.genres,
   ];
+  /// Jellyamp: fewer default tabs — Genres still available in Tabs settings.
   static const showTabs = {
     ContentType.home: true,
     ContentType.albums: true,
@@ -161,7 +162,7 @@ class DefaultSettings {
     ContentType.performingArtists: false,
     ContentType.playlists: true,
     ContentType.tracks: true,
-    ContentType.genres: true,
+    ContentType.genres: false,
   };
   static const itemSwipeActionLeftToRight = ItemSwipeActions.nothing;
   static const itemSwipeActionRightToLeft = ItemSwipeActions.addToNextUp;
@@ -201,16 +202,12 @@ class DefaultSettings {
   static const keepScreenOnWhilePluggedIn = false;
   static const hasDownloadedPlaylistInfo = false;
   static const transcodingStreamingFormat = FinampTranscodingStreamingFormat.aacFragmentedMp4;
+  /// Slim player chips — essentials only (codec + explicit). Rest still available in settings.
   static const featureChipsConfiguration = FinampFeatureChipsConfiguration(
     enabled: true,
     features: [
       FinampFeatureChipType.explicit,
-      FinampFeatureChipType.additionalPeople,
-      FinampFeatureChipType.playCount,
-      FinampFeatureChipType.playbackMode,
       FinampFeatureChipType.codec,
-      FinampFeatureChipType.bitRate,
-      FinampFeatureChipType.normalizationGain,
     ],
     migrated: true,
   );
@@ -277,7 +274,24 @@ class DefaultSettings {
   static const forceAudioOffloadingOnAndroid = false;
   static const verboseLogging = false;
   static const previousTracksPersistenceMode = PreviousTracksPersistenceMode.persistent;
+  /// Jellyamp clean home: 3 quick actions (full row) + 4 focused sections.
+  /// Less scroll, less chrome — customize anytime in Home settings.
   static final homeScreenConfiguration = FinampHomeScreenConfiguration(
+    actions: [
+      QuickActionConfig(action: FinampQuickActions.shuffleTracks),
+      QuickActionConfig(action: FinampQuickActions.playPreviousQueue),
+      QuickActionConfig(action: FinampQuickActions.surpriseMe),
+    ],
+    sections: [
+      HomeScreenSectionConfiguration.fromPreset(HomeScreenSectionPresetType.recentlyPlayedTracks),
+      HomeScreenSectionConfiguration.fromPreset(HomeScreenSectionPresetType.recentlyAddedAlbums),
+      HomeScreenSectionConfiguration.fromPreset(HomeScreenSectionPresetType.favoriteAlbums),
+      HomeScreenSectionConfiguration.fromPreset(HomeScreenSectionPresetType.recentQueues),
+    ],
+  );
+
+  /// Previous Jellyamp/stock cluttered home (used for one-shot migrate → clean layout).
+  static final homeScreenConfigurationLegacyCluttered = FinampHomeScreenConfiguration(
     actions: [
       QuickActionConfig(action: FinampQuickActions.shuffleTracks),
       QuickActionConfig(

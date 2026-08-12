@@ -5,85 +5,87 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 const jellyfinBlueColor = Color(0xFF00A4DC);
 const jellyfinPurpleColor = Color(0xFFAA5CC3);
 
+/// Jellyamp light fallback: purple primary for brand cohesion.
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,
-  // Primary
-  primary: Color(0xFF00668A),
+  // Primary — Jellyfin purple
+  primary: Color(0xFF8B3BA8),
   onPrimary: Color(0xFFFFFFFF),
-  primaryContainer: Color(0xFFC4E8FF),
-  onPrimaryContainer: Color(0xFF001E2C),
+  primaryContainer: Color(0xFFFAD7FF),
+  onPrimaryContainer: Color(0xFF330044),
   // Secondary
-  secondary: Color(0xFF406374),
+  secondary: Color(0xFF675A66),
   onSecondary: Color(0xFFFFFFFF),
-  secondaryContainer: Color(0xFFCCE8F8),
-  onSecondaryContainer: Color(0xFF1B333F),
-  // Tertiary
-  tertiary: Color(0xFF893DA2),
+  secondaryContainer: Color(0xFFEFDBE8),
+  onSecondaryContainer: Color(0xFF221920),
+  // Tertiary — Jellyfin blue as pair
+  tertiary: Color(0xFF00668A),
   onTertiary: Color(0xFFFFFFFF),
-  tertiaryContainer: Color(0xFFFAD7FF),
-  onTertiaryContainer: Color(0xFF330044),
+  tertiaryContainer: Color(0xFFC4E8FF),
+  onTertiaryContainer: Color(0xFF001E2C),
   // Error
   error: Color(0xFFBA1A1A),
   errorContainer: Color(0xFFFFDAD6),
   onError: Color(0xFFFFFFFF),
   onErrorContainer: Color(0xFF410002),
   // Background & Surface
-  background: Color(0xFFFCFDFE),
-  onBackground: Color(0xFF191C1E),
-  surface: Color(0xFFFCFDFE),
-  surfaceContainerHighest: Color(0xFFFCFCFE),
-  onSurface: Color(0xFF191C1E),
-  surfaceVariant: Color(0xFFDDE4E8),
-  onSurfaceVariant: Color(0xFF41484D),
+  background: Color(0xFFFFF7FC),
+  onBackground: Color(0xFF1E1A1E),
+  surface: Color(0xFFFFF7FC),
+  surfaceContainerHighest: Color(0xFFF6EEF4),
+  onSurface: Color(0xFF1E1A1E),
+  surfaceVariant: Color(0xFFEBDFE8),
+  onSurfaceVariant: Color(0xFF4D444C),
   // Other colors
-  outline: Color(0xFF727A7F),
-  onInverseSurface: Color(0xFFF0F1F3),
-  inverseSurface: Color(0xFF2E3133),
-  inversePrimary: Color(0xFF7BD0FF),
+  outline: Color(0xFF7E747C),
+  onInverseSurface: Color(0xFFF7EFF3),
+  inverseSurface: Color(0xFF332F33),
+  inversePrimary: Color(0xFFEFB0FF),
   shadow: Color(0xFF000000),
-  surfaceTint: Color(0xFF00668A),
-  outlineVariant: Color(0xFFC0C7CD),
+  surfaceTint: jellyfinPurpleColor,
+  outlineVariant: Color(0xFFCFC3CC),
   scrim: Color(0xFF000000),
 );
 
+/// Jellyamp dark fallback: Jellyfin purple primary (not stock Finamp blue).
 const darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
-  // Primary
-  primary: jellyfinBlueColor,
-  onPrimary: Color(0xFF001E2C),
-  primaryContainer: Color(0xFF004C68),
-  onPrimaryContainer: Color(0xFFC3E7FF),
-  // Secondary
-  secondary: Color(0xFF60B4DD),
-  onSecondary: Color(0xFF112732),
-  secondaryContainer: Color(0xFF206B8C),
-  onSecondaryContainer: Color(0xFFCEEEFF),
-  // Tertiary
-  tertiary: Color(0xFFC979E2),
-  onTertiary: Color(0xFF3D0050),
-  tertiaryContainer: Color(0xFF762A90),
-  onTertiaryContainer: Color(0xFFFAD7FF),
+  // Primary — Jellyfin purple
+  primary: jellyfinPurpleColor,
+  onPrimary: Color(0xFF3D0050),
+  primaryContainer: Color(0xFF762A90),
+  onPrimaryContainer: Color(0xFFFAD7FF),
+  // Secondary — cool slate for contrast
+  secondary: Color(0xFFB0C8D4),
+  onSecondary: Color(0xFF1B333F),
+  secondaryContainer: Color(0xFF334A55),
+  onSecondaryContainer: Color(0xFFCCE8F8),
+  // Tertiary — Jellyfin blue as accent pair
+  tertiary: Color(0xFF7BD0FF),
+  onTertiary: Color(0xFF001E2C),
+  tertiaryContainer: Color(0xFF004C68),
+  onTertiaryContainer: Color(0xFFC3E7FF),
   // Error
   error: Color(0xFFFFB4AB),
   errorContainer: Color(0xFF93000A),
   onError: Color(0xFF690005),
   onErrorContainer: Color(0xFFFFDAD6),
-  // Background & Surface
-  background: Color(0xFF101315),
-  onBackground: Color(0xFFE1E2E5),
-  surface: Color(0xFF101315),
-  surfaceContainerHighest: Color(0xFF111A1B),
-  onSurface: Color(0xFFE1E2E5),
-  surfaceVariant: Color(0xFF333A3E),
-  onSurfaceVariant: Color(0xFFC0C7CD),
+  // Background & Surface — slightly lifted, less muddy
+  background: Color(0xFF0E0F12),
+  onBackground: Color(0xFFE6E2E8),
+  surface: Color(0xFF0E0F12),
+  surfaceContainerHighest: Color(0xFF1A1620),
+  onSurface: Color(0xFFE6E2E8),
+  surfaceVariant: Color(0xFF3A3440),
+  onSurfaceVariant: Color(0xFFCBC3D0),
   // Other colors
-  outline: Color(0xFF80878C),
-  onInverseSurface: Color(0xFF191C1E),
-  inverseSurface: Color(0xFFE1E2E5),
-  inversePrimary: Color(0xFF00668A),
+  outline: Color(0xFF958E99),
+  onInverseSurface: Color(0xFF1C1B1F),
+  inverseSurface: Color(0xFFE6E2E8),
+  inversePrimary: Color(0xFF8B3BA8),
   shadow: Color(0xFF000000),
-  surfaceTint: Color(0xFF7BD0FF),
-  outlineVariant: Color(0xFF41484D),
+  surfaceTint: jellyfinPurpleColor,
+  outlineVariant: Color(0xFF4A4450),
   scrim: Color(0xFF000000),
 );
 

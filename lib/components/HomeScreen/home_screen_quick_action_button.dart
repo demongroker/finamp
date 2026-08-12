@@ -26,34 +26,43 @@ class HomeScreenQuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = disabled ? ColorScheme.of(context).primary.withOpacity(0.5) : ColorScheme.of(context).primary;
+    final scheme = ColorScheme.of(context);
+    final accentColor = disabled ? scheme.primary.withOpacity(0.5) : scheme.primary;
+    final isDark = Theme.brightnessOf(context) == Brightness.dark;
 
     final buttonChildren = [
-      Icon(icon, size: 16, color: accentColor, weight: 1.0, applyTextScaling: true),
+      Icon(icon, size: vertical ? 20 : 18, color: accentColor, weight: 1.0, applyTextScaling: true),
       Text(
         text,
         style: TextStyle(
           color:
-              (Theme.brightnessOf(context) == Brightness.light
-                      ? Color.alphaBlend(accentColor.withOpacity(0.33), Colors.black)
-                      : Colors.white)
+              (isDark
+                      ? scheme.onSurface
+                      : Color.alphaBlend(accentColor.withOpacity(0.28), scheme.onSurface))
                   .withOpacity(disabled ? 0.5 : 1.0),
           fontSize: 13,
-          height: 0.9,
-          fontWeight: FontWeight.w500,
+          height: 1.05,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
         ),
         textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
     ];
 
     final buttonContent = vertical
-        ? Column(mainAxisAlignment: MainAxisAlignment.center, spacing: isDesktop ? 4.0 : 6.0, children: buttonChildren)
+        ? Column(mainAxisAlignment: MainAxisAlignment.center, spacing: isDesktop ? 6.0 : 5.0, children: buttonChildren)
         : Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
             alignment: WrapAlignment.center,
-            spacing: 6.0,
+            spacing: 8.0,
             children: buttonChildren,
           );
+
+    final bg = isDark
+        ? Color.alphaBlend(accentColor.withOpacity(disabled ? 0.06 : 0.14), scheme.surfaceContainerHighest)
+        : Color.alphaBlend(accentColor.withOpacity(disabled ? 0.08 : 0.16), scheme.surface);
 
     return Semantics(
       label: text,
@@ -85,19 +94,22 @@ class HomeScreenQuickActionButton extends StatelessWidget {
                     FeedbackHelper.feedback(FeedbackType.selection);
                     onPressed();
                   },
-
             style: ButtonStyle(
+              elevation: WidgetStateProperty.all(0),
               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(isDesktop ? 8 : 12)),
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(isDesktop ? 10 : 14),
+                  side: BorderSide(
+                    color: accentColor.withOpacity(isDark ? 0.22 : 0.18),
+                    width: 0.8,
+                  ),
+                ),
               ),
               padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                EdgeInsets.symmetric(horizontal: 8, vertical: isDesktop ? 16 : 8),
+                EdgeInsets.symmetric(horizontal: 10, vertical: isDesktop ? 14 : (vertical ? 12 : 10)),
               ),
-              backgroundColor: WidgetStateProperty.all<Color>(
-                Theme.brightnessOf(context) == Brightness.dark
-                    ? accentColor.withOpacity(disabled ? 0.05 : 0.15)
-                    : Color.alphaBlend(accentColor.withOpacity(0.2), Colors.white).withOpacity(disabled ? 0.5 : 1.0),
-              ),
+              backgroundColor: WidgetStateProperty.all<Color>(bg),
+              overlayColor: WidgetStateProperty.all<Color>(accentColor.withOpacity(0.12)),
             ),
             child: buttonContent,
           ),

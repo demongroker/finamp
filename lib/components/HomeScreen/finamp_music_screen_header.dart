@@ -123,28 +123,29 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
                   SizedBox(width: _upperToolbarHeight + 6, height: _upperToolbarHeight, child: FinampAppBarBackButton())
                 else
                   Material(
-                    elevation: 3.0,
+                    elevation: Theme.brightnessOf(context) == Brightness.dark ? 0.0 : 2.0,
                     surfaceTintColor: Colors.transparent,
                     shadowColor: Theme.brightnessOf(context) == Brightness.dark
                         ? Colors.transparent
-                        : Theme.of(context).colorScheme.shadow.withOpacity(0.4),
+                        : Theme.of(context).colorScheme.shadow.withOpacity(0.28),
+                    // Jellyamp: always tint icon chip with primary (purple by default), not stock Finamp blue.
                     color: Theme.brightnessOf(context) == Brightness.dark
                         ? Color.alphaBlend(
-                            // only use primary accent if Finamp icon is guaranteed to look nice on it
-                            // otherwise use a static dark blue background
-                            ref.watch(finampSettingsProvider.useMonochromeIcon) ||
-                                    (!ref.watch(finampSettingsProvider.useSystemAccentColor) &&
-                                        ref.watch(finampSettingsProvider.accentColor) == null)
-                                ? ColorScheme.of(context).primary.withOpacity(0.1)
-                                : Color(0xff000e2e),
+                            ColorScheme.of(context).primary.withOpacity(0.16),
                             ColorScheme.of(context).surface,
                           )
-                        : Colors.white,
+                        : Color.alphaBlend(
+                            ColorScheme.of(context).primary.withOpacity(0.08),
+                            Colors.white,
+                          ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadiusGeometry.circular(12.0),
-                      side: Theme.brightnessOf(context) == Brightness.dark
-                          ? BorderSide(color: ColorScheme.of(context).outline.withOpacity(0.3), width: 0.5)
-                          : BorderSide.none,
+                      side: BorderSide(
+                        color: ColorScheme.of(context).primary.withOpacity(
+                          Theme.brightnessOf(context) == Brightness.dark ? 0.28 : 0.16,
+                        ),
+                        width: 0.7,
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 5.0, right: 3.0, top: 5.0, bottom: 3.0),

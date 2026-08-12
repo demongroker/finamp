@@ -15,7 +15,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.9.25+126
+version: 0.9.26+127
 
 environment:
   sdk: ^3.9.0
@@ -263,7 +263,7 @@ msix_config:
   display_name: Jellyamp
   publisher_display_name: demongroker
   identity_name: com.demongroker.jellyamp
-  msix_version: 0.9.25.0
+  msix_version: 0.9.26.0
   logo_path: ./assets/icon/icon_combined.png
   trim_logo: false # don't force logo to be square, it will be stretched
   # backgroundMediaPlayback prevents apps from getting muted or killed when being in the background (won't build if included at the moment)

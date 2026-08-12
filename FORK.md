@@ -36,6 +36,21 @@
 | Long-press / double-tap seek | `playback_seek_helper.dart`, `player_buttons.dart`, `player_screen_album_image.dart` |
 | Share APK + Wi‑Fi serve | `lib/services/app_share_helper.dart`, Settings tiles |
 | Brand assets | `assets/icon/`, `images/jellyamp_icon.svg`, `docs/brand/`, `GitHub_Banner.png` |
+| Clean home + UI polish | `DefaultSettings.homeScreenConfiguration`, `_migrateHomescreen()`, HomeScreen components, `color_schemes.g.dart` |
+
+## Home layout (Jellyamp clean)
+
+Default home is intentionally sparse (reset via **Settings → Home → reset**):
+
+| Area | Default |
+|------|---------|
+| Quick actions | Shuffle · Previous queue · Surprise me |
+| Sections | Recently played · Newly added albums · Favorite albums · Recent queues |
+| Tabs | Home, Albums, Artists, Playlists, Tracks (Genres off by default) |
+| Player chips | Explicit + codec only |
+| Theme | Jellyfin purple `#AA5CC3` |
+
+Users still on the old 4-action / 7-section stock layout are **auto-migrated once** on launch if they never customized. Customized homes are left alone.
 
 ## Releases
 

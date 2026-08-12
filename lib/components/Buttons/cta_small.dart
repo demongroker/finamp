@@ -30,14 +30,18 @@ class CTASmall extends StatelessWidget {
               onPressed();
             },
       style: ButtonStyle(
+        elevation: WidgetStateProperty.all(0),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: accentColor.withOpacity(0.22), width: 0.8),
+          ),
         ),
         padding: WidgetStateProperty.all<EdgeInsetsGeometry>(const EdgeInsets.symmetric(horizontal: 16, vertical: 10)),
         backgroundColor: WidgetStateProperty.all<Color>(
           Theme.brightnessOf(context) == Brightness.dark
-              ? accentColor.withOpacity(disabled ? 0.05 : 0.15)
-              : Color.alphaBlend(accentColor.withOpacity(0.2), Colors.white).withOpacity(disabled ? 0.5 : 1.0),
+              ? Color.alphaBlend(accentColor.withOpacity(disabled ? 0.06 : 0.14), Theme.of(context).colorScheme.surface)
+              : Color.alphaBlend(accentColor.withOpacity(0.14), Colors.white).withOpacity(disabled ? 0.5 : 1.0),
         ),
       ),
       child: Wrap(

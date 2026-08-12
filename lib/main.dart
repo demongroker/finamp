@@ -496,11 +496,33 @@ void _migrateDownloadLocations() {
   }
 }
 
+/// True when home layout matches the previous cluttered Jellyamp/stock default
+/// (4 actions + 7 sections). Used for one-shot upgrade to the clean layout.
+bool _isLegacyClutteredHomeLayout(FinampHomeScreenConfiguration config) {
+  final legacy = DefaultSettings.homeScreenConfigurationLegacyCluttered;
+  if (config.sections.length != legacy.sections.length) return false;
+  if (config.actions.length != legacy.actions.length) return false;
+  for (var i = 0; i < legacy.sections.length; i++) {
+    if (config.sections[i].presetType != legacy.sections[i].presetType) return false;
+  }
+  for (var i = 0; i < legacy.actions.length; i++) {
+    if (config.actions[i].action != legacy.actions[i].action) return false;
+  }
+  return true;
+}
+
 /// Migrates defaults for the home screen (e.g. add home screen tab)
 void _migrateHomescreen() {
   final finampSettings = FinampSettingsHelper.finampSettings;
 
   var changed = false;
+
+  // Jellyamp UI polish: auto-upgrade cluttered stock home → clean 3-action / 4-section layout.
+  // Only when the user still has the exact legacy default (customized homes are left alone).
+  if (_isLegacyClutteredHomeLayout(finampSettings.homeScreenConfiguration)) {
+    finampSettings.homeScreenConfiguration = DefaultSettings.homeScreenConfiguration;
+    changed = true;
+  }
 
   if (!finampSettings.tabOrder.contains(ContentType.home)) {
     finampSettings.tabOrder = [ContentType.home, ...finampSettings.tabOrder.whereNot((e) => e == ContentType.home)];

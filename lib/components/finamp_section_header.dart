@@ -109,14 +109,22 @@ class FinampSectionHeader extends ConsumerWidget {
                                 child: Text(
                                   title,
                                   semanticsLabel: label,
-                                  style: TextTheme.of(context).titleMedium,
+                                  style: TextTheme.of(context).titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: -0.2,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               SizedBox(width: 2.0),
                               if (titleTrailingIcon != null)
-                                Icon(titleTrailingIcon, size: 20.0, applyTextScaling: true),
+                                Icon(
+                                  titleTrailingIcon,
+                                  size: 18.0,
+                                  applyTextScaling: true,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+                                ),
                             ],
                           ),
                         ),
