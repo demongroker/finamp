@@ -12,8 +12,10 @@
 | App name | Jellyamp |
 | Android `applicationId` | `com.demongroker.jellyamp` |
 | Kotlin namespace | `com.unicornsonlsd.finamp` (unchanged) |
-| Default accent | `#AA5CC3` |
-| Icon bg | `#0B1220` |
+| Default accent | `#7DD3FC` (ice cyan) |
+| Icon bg | `#0B0F14` (charcoal) |
+| Theme | Ice liquid glass |
+| APK ABI | arm64-v8a only (~40MB) |
 | Jellyfin `Client` header | `Jellyamp` |
 
 ## Privacy / permissions
@@ -37,6 +39,7 @@
 | Share APK + Wi‑Fi serve | `lib/services/app_share_helper.dart`, Settings tiles |
 | Brand assets | `assets/icon/`, `images/jellyamp_icon.svg`, `docs/brand/`, `GitHub_Banner.png` |
 | Clean home + UI polish | `DefaultSettings.homeScreenConfiguration`, `_migrateHomescreen()`, HomeScreen components, `color_schemes.g.dart` |
+| Ice glass theme + logo | `lib/components/glass/`, ice color schemes, `assets/icon/*`, adaptive launcher |
 
 ## Home layout (Jellyamp clean)
 

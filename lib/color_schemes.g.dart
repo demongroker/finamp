@@ -5,87 +5,81 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 const jellyfinBlueColor = Color(0xFF00A4DC);
 const jellyfinPurpleColor = Color(0xFFAA5CC3);
 
-/// Jellyamp light fallback: purple primary for brand cohesion.
+/// Jellyamp ice-glass brand accents.
+const icePrimaryColor = Color(0xFF7DD3FC);
+const iceBgColor = Color(0xFF0B0F14);
+const iceSurfaceColor = Color(0xFF121820);
+const iceHighlightColor = Color(0xFFE0F2FE);
+
+/// Jellyamp light: frosted ice / platinum glass.
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,
-  // Primary — Jellyfin purple
-  primary: Color(0xFF8B3BA8),
+  primary: Color(0xFF0284C7),
   onPrimary: Color(0xFFFFFFFF),
-  primaryContainer: Color(0xFFFAD7FF),
-  onPrimaryContainer: Color(0xFF330044),
-  // Secondary
-  secondary: Color(0xFF675A66),
+  primaryContainer: Color(0xFFCFFAFE),
+  onPrimaryContainer: Color(0xFF0C4A6E),
+  secondary: Color(0xFF5B6B7A),
   onSecondary: Color(0xFFFFFFFF),
-  secondaryContainer: Color(0xFFEFDBE8),
-  onSecondaryContainer: Color(0xFF221920),
-  // Tertiary — Jellyfin blue as pair
-  tertiary: Color(0xFF00668A),
+  secondaryContainer: Color(0xFFE2E8F0),
+  onSecondaryContainer: Color(0xFF1E293B),
+  tertiary: Color(0xFF0EA5E9),
   onTertiary: Color(0xFFFFFFFF),
-  tertiaryContainer: Color(0xFFC4E8FF),
-  onTertiaryContainer: Color(0xFF001E2C),
-  // Error
+  tertiaryContainer: Color(0xFFE0F2FE),
+  onTertiaryContainer: Color(0xFF0C4A6E),
   error: Color(0xFFBA1A1A),
   errorContainer: Color(0xFFFFDAD6),
   onError: Color(0xFFFFFFFF),
   onErrorContainer: Color(0xFF410002),
-  // Background & Surface
-  background: Color(0xFFFFF7FC),
-  onBackground: Color(0xFF1E1A1E),
-  surface: Color(0xFFFFF7FC),
-  surfaceContainerHighest: Color(0xFFF6EEF4),
-  onSurface: Color(0xFF1E1A1E),
-  surfaceVariant: Color(0xFFEBDFE8),
-  onSurfaceVariant: Color(0xFF4D444C),
-  // Other colors
-  outline: Color(0xFF7E747C),
-  onInverseSurface: Color(0xFFF7EFF3),
-  inverseSurface: Color(0xFF332F33),
-  inversePrimary: Color(0xFFEFB0FF),
+  background: Color(0xFFF4F7FA),
+  onBackground: Color(0xFF0F172A),
+  surface: Color(0xFFF4F7FA),
+  surfaceContainerHighest: Color(0xFFE8EEF4),
+  onSurface: Color(0xFF0F172A),
+  surfaceVariant: Color(0xFFD9E2EC),
+  onSurfaceVariant: Color(0xFF475569),
+  outline: Color(0xFF94A3B8),
+  onInverseSurface: Color(0xFFF1F5F9),
+  inverseSurface: Color(0xFF1E293B),
+  inversePrimary: Color(0xFF7DD3FC),
   shadow: Color(0xFF000000),
-  surfaceTint: jellyfinPurpleColor,
-  outlineVariant: Color(0xFFCFC3CC),
+  surfaceTint: icePrimaryColor,
+  outlineVariant: Color(0xFFCBD5E1),
   scrim: Color(0xFF000000),
 );
 
-/// Jellyamp dark fallback: Jellyfin purple primary (not stock Finamp blue).
+/// Jellyamp dark: liquid ice glass on charcoal.
 const darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
-  // Primary — Jellyfin purple
-  primary: jellyfinPurpleColor,
-  onPrimary: Color(0xFF3D0050),
-  primaryContainer: Color(0xFF762A90),
-  onPrimaryContainer: Color(0xFFFAD7FF),
-  // Secondary — cool slate for contrast
-  secondary: Color(0xFFB0C8D4),
-  onSecondary: Color(0xFF1B333F),
-  secondaryContainer: Color(0xFF334A55),
-  onSecondaryContainer: Color(0xFFCCE8F8),
-  // Tertiary — Jellyfin blue as accent pair
-  tertiary: Color(0xFF7BD0FF),
-  onTertiary: Color(0xFF001E2C),
-  tertiaryContainer: Color(0xFF004C68),
-  onTertiaryContainer: Color(0xFFC3E7FF),
-  // Error
+  primary: icePrimaryColor,
+  onPrimary: Color(0xFF0C4A6E),
+  primaryContainer: Color(0xFF0369A1),
+  onPrimaryContainer: Color(0xFFE0F2FE),
+  secondary: Color(0xFFA5B4C8),
+  onSecondary: Color(0xFF1E293B),
+  secondaryContainer: Color(0xFF334155),
+  onSecondaryContainer: Color(0xFFE2E8F0),
+  tertiary: Color(0xFFBAE6FD),
+  onTertiary: Color(0xFF0C4A6E),
+  tertiaryContainer: Color(0xFF0E7490),
+  onTertiaryContainer: Color(0xFFECFEFF),
   error: Color(0xFFFFB4AB),
   errorContainer: Color(0xFF93000A),
   onError: Color(0xFF690005),
   onErrorContainer: Color(0xFFFFDAD6),
-  // Background & Surface — slightly lifted, less muddy
-  background: Color(0xFF0E0F12),
-  onBackground: Color(0xFFE6E2E8),
-  surface: Color(0xFF0E0F12),
-  surfaceContainerHighest: Color(0xFF1A1620),
-  onSurface: Color(0xFFE6E2E8),
-  surfaceVariant: Color(0xFF3A3440),
-  onSurfaceVariant: Color(0xFFCBC3D0),
-  // Other colors
-  outline: Color(0xFF958E99),
-  onInverseSurface: Color(0xFF1C1B1F),
-  inverseSurface: Color(0xFFE6E2E8),
-  inversePrimary: Color(0xFF8B3BA8),
+  background: iceBgColor,
+  onBackground: Color(0xFFF0F6FA),
+  surface: iceBgColor,
+  surfaceContainerHighest: iceSurfaceColor,
+  onSurface: Color(0xFFF0F6FA),
+  surfaceVariant: Color(0xFF1E293B),
+  onSurfaceVariant: Color(0xFFA5B4C8),
+  outline: Color(0xFF64748B),
+  onInverseSurface: Color(0xFF0B0F14),
+  inverseSurface: Color(0xFFE2E8F0),
+  inversePrimary: Color(0xFF0284C7),
   shadow: Color(0xFF000000),
-  surfaceTint: jellyfinPurpleColor,
-  outlineVariant: Color(0xFF4A4450),
+  surfaceTint: icePrimaryColor,
+  outlineVariant: Color(0xFF334155),
   scrim: Color(0xFF000000),
 );
 

@@ -41,6 +41,10 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
+        // Modern phones only (Poco/arm64) — cuts APK ~110MB → ~40MB
+        ndk {
+            abiFilters "arm64-v8a"
+        }
     }
     signingConfigs {
         release {

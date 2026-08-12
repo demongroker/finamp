@@ -42,14 +42,14 @@ class NowPlayingBar extends ConsumerWidget {
   static const showPlayButtonAtEnd = false;
 
   BoxDecoration? getShadow(BuildContext context) => BoxDecoration(
-    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+    borderRadius: const BorderRadius.all(Radius.circular(16.0)),
     boxShadow: [
       BoxShadow(
-        blurRadius: 12.0,
-        spreadRadius: 8.0,
+        blurRadius: 20.0,
+        spreadRadius: 2.0,
         color: Theme.brightnessOf(context) == Brightness.light
-            ? darkColorScheme.surface.withOpacity(0.15)
-            : darkColorScheme.surface.withOpacity(0.7),
+            ? darkColorScheme.surface.withOpacity(0.12)
+            : Colors.black.withOpacity(0.45),
       ),
     ],
   );
@@ -186,6 +186,7 @@ class NowPlayingBar extends ConsumerWidget {
       mediaStateProvider.select((x) => x.playbackState.playing && x.fadeDirection != FadeDirection.fadeOut),
     );
 
+    final isDark = Theme.brightnessOf(context) == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(left: 10.0, bottom: 10.0, right: 10.0),
       child: Semantics.fromProperties(
@@ -227,18 +228,20 @@ class NowPlayingBar extends ConsumerWidget {
                   return false;
                 },
                 child: Material(
-                  shadowColor: ColorScheme.of(
-                    context,
-                  ).primary.withOpacity(Theme.brightnessOf(context) == Brightness.light ? 0.55 : 0.28),
-                  borderRadius: BorderRadius.circular(14.0),
+                  shadowColor: ColorScheme.of(context).primary.withOpacity(isDark ? 0.22 : 0.40),
+                  borderRadius: BorderRadius.circular(16.0),
                   clipBehavior: Clip.antiAlias,
-                  color: Theme.brightnessOf(context) == Brightness.dark
+                  // Ice glass tint over progress colors
+                  color: isDark
                       ? Color.alphaBlend(
-                          ColorScheme.of(context).primary.withOpacity(0.12),
-                          ColorScheme.of(context).surface,
+                          ColorScheme.of(context).primary.withOpacity(0.14),
+                          const Color(0xFF121820).withOpacity(0.92),
                         )
-                      : Theme.of(context).cardColor,
-                  elevation: 6.0,
+                      : Color.alphaBlend(
+                          ColorScheme.of(context).primary.withOpacity(0.08),
+                          Colors.white.withOpacity(0.92),
+                        ),
+                  elevation: 4.0,
                   // If we have a media item and the player hasn't finished, show
                   // the now playing bar.
                   child: //TODO move into separate component and share with queue list
@@ -249,7 +252,7 @@ class NowPlayingBar extends ConsumerWidget {
                     clipBehavior: Clip.antiAlias,
                     decoration: ShapeDecoration(
                       color: remainingPartBackgroundColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.0)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

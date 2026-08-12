@@ -122,73 +122,82 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
                 if (backButtonInsteadOfTabs)
                   SizedBox(width: _upperToolbarHeight + 6, height: _upperToolbarHeight, child: FinampAppBarBackButton())
                 else
+                  // Ice glass logo chip
                   Material(
-                    elevation: Theme.brightnessOf(context) == Brightness.dark ? 0.0 : 2.0,
-                    surfaceTintColor: Colors.transparent,
-                    shadowColor: Theme.brightnessOf(context) == Brightness.dark
-                        ? Colors.transparent
-                        : Theme.of(context).colorScheme.shadow.withOpacity(0.28),
-                    // Jellyamp: always tint icon chip with primary (purple by default), not stock Finamp blue.
-                    color: Theme.brightnessOf(context) == Brightness.dark
-                        ? Color.alphaBlend(
-                            ColorScheme.of(context).primary.withOpacity(0.16),
-                            ColorScheme.of(context).surface,
-                          )
-                        : Color.alphaBlend(
-                            ColorScheme.of(context).primary.withOpacity(0.08),
-                            Colors.white,
+                    elevation: 0,
+                    color: Colors.transparent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14.0),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(
+                            Theme.brightnessOf(context) == Brightness.dark ? 0.16 : 0.40,
                           ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(12.0),
-                      side: BorderSide(
-                        color: ColorScheme.of(context).primary.withOpacity(
-                          Theme.brightnessOf(context) == Brightness.dark ? 0.28 : 0.16,
+                          width: 0.9,
                         ),
-                        width: 0.7,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 5.0, right: 3.0, top: 5.0, bottom: 3.0),
-                      child: GestureDetector(
-                        onTap: openMenu,
-                        onSecondaryTap: ref.watch(isDownloadingOrSyncingPollingProvider)
-                            ? () {
-                                if (ref.read(isDownloadingOrSyncingPollingProvider)) {
-                                  Navigator.of(context).pushNamed(DownloadsScreen.routeName);
-                                }
-                              }
-                            : null,
-                        onLongPress: ref.watch(isDownloadingOrSyncingPollingProvider)
-                            ? () {
-                                if (ref.read(isDownloadingOrSyncingPollingProvider)) {
-                                  Navigator.of(context).pushNamed(DownloadsScreen.routeName);
-                                }
-                              }
-                            : null,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            FinampIcon(
-                              35,
-                              35,
-                              overrideColor: ref.watch(finampSettingsProvider.isOffline)
-                                  ? TextTheme.of(context).bodyMedium?.color?.withOpacity(0.6)
-                                  : null,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.alphaBlend(
+                              ColorScheme.of(context).primary.withOpacity(0.22),
+                              Theme.brightnessOf(context) == Brightness.dark
+                                  ? const Color(0xFF121820).withOpacity(0.75)
+                                  : Colors.white.withOpacity(0.72),
                             ),
-                            Positioned(bottom: -4, right: -2, child: Icon(statusIcon, size: 16)),
-                            if (ref.watch(isDownloadingOrSyncingPollingProvider))
-                              Positioned(
-                                bottom: statusIcon != null ? -6 : 1,
-                                right: statusIcon != null ? -4 : 3,
-                                child: SizedBox.square(
-                                  dimension: statusIcon != null ? 20.0 : 10.0,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onSurface),
+                            Color.alphaBlend(
+                              ColorScheme.of(context).primary.withOpacity(0.08),
+                              Theme.brightnessOf(context) == Brightness.dark
+                                  ? const Color(0xFF0B0F14).withOpacity(0.55)
+                                  : Colors.white.withOpacity(0.45),
+                            ),
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 5.0, right: 3.0, top: 5.0, bottom: 3.0),
+                        child: GestureDetector(
+                          onTap: openMenu,
+                          onSecondaryTap: ref.watch(isDownloadingOrSyncingPollingProvider)
+                              ? () {
+                                  if (ref.read(isDownloadingOrSyncingPollingProvider)) {
+                                    Navigator.of(context).pushNamed(DownloadsScreen.routeName);
+                                  }
+                                }
+                              : null,
+                          onLongPress: ref.watch(isDownloadingOrSyncingPollingProvider)
+                              ? () {
+                                  if (ref.read(isDownloadingOrSyncingPollingProvider)) {
+                                    Navigator.of(context).pushNamed(DownloadsScreen.routeName);
+                                  }
+                                }
+                              : null,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              FinampIcon(
+                                35,
+                                35,
+                                overrideColor: ref.watch(finampSettingsProvider.isOffline)
+                                    ? TextTheme.of(context).bodyMedium?.color?.withOpacity(0.6)
+                                    : null,
+                              ),
+                              Positioned(bottom: -4, right: -2, child: Icon(statusIcon, size: 16)),
+                              if (ref.watch(isDownloadingOrSyncingPollingProvider))
+                                Positioned(
+                                  bottom: statusIcon != null ? -6 : 1,
+                                  right: statusIcon != null ? -4 : 3,
+                                  child: SizedBox.square(
+                                    dimension: statusIcon != null ? 20.0 : 10.0,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onSurface),
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

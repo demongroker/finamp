@@ -1,8 +1,10 @@
+import 'dart:ui';
+
 import 'package:finamp/services/feedback_helper.dart';
 import 'package:finamp/utils/platform_helper.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreenQuickActionButton extends StatelessWidget {
+class HomeScreenQuickActionButton extends StatefulWidget {
   final String text;
   final String? label;
   final IconData icon;
@@ -25,21 +27,27 @@ class HomeScreenQuickActionButton extends StatelessWidget {
   });
 
   @override
+  State<HomeScreenQuickActionButton> createState() => _HomeScreenQuickActionButtonState();
+}
+
+class _HomeScreenQuickActionButtonState extends State<HomeScreenQuickActionButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final scheme = ColorScheme.of(context);
-    final accentColor = disabled ? scheme.primary.withOpacity(0.5) : scheme.primary;
+    final accentColor = widget.disabled ? scheme.primary.withOpacity(0.5) : scheme.primary;
     final isDark = Theme.brightnessOf(context) == Brightness.dark;
+    final radius = isDesktop ? 12.0 : 16.0;
 
     final buttonChildren = [
-      Icon(icon, size: vertical ? 20 : 18, color: accentColor, weight: 1.0, applyTextScaling: true),
+      Icon(widget.icon, size: widget.vertical ? 20 : 18, color: accentColor, weight: 1.0, applyTextScaling: true),
       Text(
-        text,
+        widget.text,
         style: TextStyle(
           color:
-              (isDark
-                      ? scheme.onSurface
-                      : Color.alphaBlend(accentColor.withOpacity(0.28), scheme.onSurface))
-                  .withOpacity(disabled ? 0.5 : 1.0),
+              (isDark ? scheme.onSurface : Color.alphaBlend(accentColor.withOpacity(0.22), scheme.onSurface))
+                  .withOpacity(widget.disabled ? 0.5 : 1.0),
           fontSize: 13,
           height: 1.05,
           fontWeight: FontWeight.w600,
@@ -51,7 +59,7 @@ class HomeScreenQuickActionButton extends StatelessWidget {
       ),
     ];
 
-    final buttonContent = vertical
+    final buttonContent = widget.vertical
         ? Column(mainAxisAlignment: MainAxisAlignment.center, spacing: isDesktop ? 6.0 : 5.0, children: buttonChildren)
         : Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
@@ -60,58 +68,77 @@ class HomeScreenQuickActionButton extends StatelessWidget {
             children: buttonChildren,
           );
 
-    final bg = isDark
-        ? Color.alphaBlend(accentColor.withOpacity(disabled ? 0.06 : 0.14), scheme.surfaceContainerHighest)
-        : Color.alphaBlend(accentColor.withOpacity(disabled ? 0.08 : 0.16), scheme.surface);
+    final fill = isDark
+        ? Color.alphaBlend(accentColor.withOpacity(widget.disabled ? 0.05 : 0.12), const Color(0xFF121820).withOpacity(0.55))
+        : Color.alphaBlend(accentColor.withOpacity(widget.disabled ? 0.06 : 0.10), Colors.white.withOpacity(0.62));
 
     return Semantics(
-      label: text,
-      tooltip: label,
+      label: widget.text,
+      tooltip: widget.label,
       button: true,
       focusable: true,
-      onLongPressHint: label,
-      excludeSemantics: true, // replace child semantics with custom semantics
+      onLongPressHint: widget.label,
+      excludeSemantics: true,
       container: true,
       child: SizedBox(
-        width: width,
+        width: widget.width,
         child: GestureDetector(
-          onLongPress: disabled || onSecondaryPressed == null
+          onLongPress: widget.disabled || widget.onSecondaryPressed == null
               ? null
               : () {
                   FeedbackHelper.feedback(FeedbackType.selection);
-                  onSecondaryPressed!();
+                  widget.onSecondaryPressed!();
                 },
-          onSecondaryTap: disabled || onSecondaryPressed == null
+          onSecondaryTap: widget.disabled || widget.onSecondaryPressed == null
               ? null
               : () {
                   FeedbackHelper.feedback(FeedbackType.selection);
-                  onSecondaryPressed!();
+                  widget.onSecondaryPressed!();
                 },
-          child: FilledButton(
-            onPressed: disabled
-                ? null
-                : () {
-                    FeedbackHelper.feedback(FeedbackType.selection);
-                    onPressed();
-                  },
-            style: ButtonStyle(
-              elevation: WidgetStateProperty.all(0),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(isDesktop ? 10 : 14),
-                  side: BorderSide(
-                    color: accentColor.withOpacity(isDark ? 0.22 : 0.18),
-                    width: 0.8,
+          onTapDown: widget.disabled ? null : (_) => setState(() => _pressed = true),
+          onTapUp: widget.disabled
+              ? null
+              : (_) {
+                  setState(() => _pressed = false);
+                  FeedbackHelper.feedback(FeedbackType.selection);
+                  widget.onPressed();
+                },
+          onTapCancel: () => setState(() => _pressed = false),
+          child: AnimatedScale(
+            scale: _pressed ? 0.97 : 1.0,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOutCubic,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: fill,
+                    borderRadius: BorderRadius.circular(radius),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(isDark ? 0.14 : 0.35),
+                      width: 0.9,
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(isDark ? 0.12 : 0.40),
+                        Colors.white.withOpacity(0.0),
+                      ],
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: isDesktop ? 14 : (widget.vertical ? 12 : 10),
+                    ),
+                    child: buttonContent,
                   ),
                 ),
               ),
-              padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                EdgeInsets.symmetric(horizontal: 10, vertical: isDesktop ? 14 : (vertical ? 12 : 10)),
-              ),
-              backgroundColor: WidgetStateProperty.all<Color>(bg),
-              overlayColor: WidgetStateProperty.all<Color>(accentColor.withOpacity(0.12)),
             ),
-            child: buttonContent,
           ),
         ),
       ),
