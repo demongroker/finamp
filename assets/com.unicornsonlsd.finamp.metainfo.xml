@@ -19,10 +19,10 @@
       demongroker
     </name>
   </developer>
-  <url type="homepage">https://github.com/demongroker/finamp</url>
-  <url type="vcs-browser">https://github.com/demongroker/finamp/tree/features/share-seek-qol</url>
+  <url type="homepage">https://github.com/demongroker/jellyamp</url>
+  <url type="vcs-browser">https://github.com/demongroker/jellyamp/tree/features/share-seek-qol</url>
   <url type="translate">https://hosted.weblate.org/engage/finamp/</url>
-  <url type="bugtracker">https://github.com/demongroker/finamp/issues</url>
+  <url type="bugtracker">https://github.com/demongroker/jellyamp/issues</url>
   <url
     type="contribute"
   >https://github.com/finamp-app/finamp/blob/redesign/CONTRIBUTING.md</url>

@@ -3,7 +3,7 @@
 **Brand name:** **Jellyamp**  
 **Android package:** `com.demongroker.jellyamp`  
 **Upstream:** [finamp-app/finamp](https://github.com/finamp-app/finamp) (`redesign` branch)  
-**GitHub:** [demongroker/finamp](https://github.com/demongroker/finamp)  
+**GitHub:** [demongroker/jellyamp](https://github.com/demongroker/jellyamp)  
 **Local path:** `/home/adnan/finamp`  
 **Feature branch:** `features/share-seek-qol`
 
@@ -86,7 +86,7 @@ Localizations: new strings are in `lib/l10n/app_en.arb`. Generated `lib/l10n/*.d
 gh repo fork finamp-app/finamp --clone=false
 cd /home/adnan/finamp
 git remote rename origin upstream
-git remote add origin git@github.com:demongroker/finamp.git
+git remote add origin git@github.com:demongroker/jellyamp.git
 git push -u origin features/share-seek-qol
 ```
 
@@ -94,7 +94,7 @@ Or use the GitHub website **Fork** button, then:
 
 ```bash
 git remote rename origin upstream
-git remote add origin https://github.com/demongroker/finamp.git
+git remote add origin https://github.com/demongroker/jellyamp.git
 git push -u origin features/share-seek-qol
 ```
 
