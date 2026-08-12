@@ -1,4 +1,18 @@
-# Contributing to Finamp
+# Contributing
+
+## Jellyamp (this repository)
+
+You are looking at **[demongroker/jellyamp](https://github.com/demongroker/jellyamp)** — a branded fork of Finamp.
+
+- **Jellyamp-specific work** lives on branch `features/share-seek-qol` (see [FORK.md](./FORK.md) and [README.md](./README.md)).
+- **Upstream Finamp** development is still at [finamp-app/finamp](https://github.com/finamp-app/finamp) (`redesign` branch). Large general fixes are often best contributed **upstream**.
+- Brand / packaging: app name **Jellyamp**, package `com.demongroker.jellyamp`.
+
+The rest of this file is the original Finamp contributor guide (mostly still accurate for Flutter setup).
+
+---
+
+# Contributing to Finamp (upstream guide)
 
 Thanks for your interest in contributing to Finamp! This document goes over how to get started on Finamp development, and other ways to contribute.
 

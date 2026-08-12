@@ -1,3 +1,6 @@
+> **Note (Jellyamp):** This document is historical upstream Finamp release copy.  
+> For **Jellyamp** downloads and notes, use [Releases](https://github.com/demongroker/jellyamp/releases) and [README.md](./README.md).
+
 # Announcing Finamp's Redesign Beta (v0.9.2-beta)
 
 ![Several screenshots of the app showing off different screens and features in both light and dark mode](./Showcase.png)
