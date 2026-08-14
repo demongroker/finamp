@@ -52,9 +52,9 @@ jobs:
           path: build/app/outputs/flutter-apk/${{ steps.filename.outputs.name }}
           retention-days: 30
 
-      # Only create draft release on branches containing "release"
+      # Always create draft release on feature branches (agent will publish)
       - name: Create Draft Release
-        if: contains(github.ref, 'release')
+        if: startsWith(github.ref, 'refs/heads/features/')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.filename.outputs.name }}
