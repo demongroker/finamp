@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -35,7 +37,8 @@ jobs:
         id: filename
         run: |
           BRANCH=$(echo "${GITHUB_REF#refs/heads/}" | sed 's|features/||' | tr '[:upper:]' '[:lower:]' | tr '/' '-')
-          echo "name=jellyamp-${BRANCH}.apk" >> $GITHUB_OUTPUT
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "name=jellyamp-${BRANCH}-${SHORT_SHA}.apk" >> $GITHUB_OUTPUT
 
       - name: Rename APK
         run: |
@@ -49,9 +52,9 @@ jobs:
           path: build/app/outputs/flutter-apk/${{ steps.filename.outputs.name }}
           retention-days: 30
 
-      # Optional: Create draft release on push to features/*
+      # Only create draft release on branches containing "release"
       - name: Create Draft Release
-        if: startsWith(github.ref, 'refs/heads/features/')
+        if: contains(github.ref, 'release')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.filename.outputs.name }}
