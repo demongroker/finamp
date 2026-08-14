@@ -18,6 +18,32 @@ import 'package:share_plus/share_plus.dart';
 
 final _shareLog = Logger("MediaShareHelper");
 
+/// Maximum age (in hours) for temporary share files before cleanup.
+const int _shareTempMaxAgeHours = 48;
+
+/// Deletes old temporary share files from previous sessions.
+static Future<void> cleanupOldShareFiles() async {
+  try {
+    final tempDir = await getTemporaryDirectory();
+    final shareDir = Directory(path_helper.join(tempDir.path, 'jellyamp_share'));
+    if (!await shareDir.exists()) return;
+
+    final now = DateTime.now();
+    await for (final entity in shareDir.list(recursive: false)) {
+      if (entity is File) {
+        final stat = await entity.stat();
+        final age = now.difference(stat.modified);
+        if (age.inHours > _shareTempMaxAgeHours) {
+          await entity.delete();
+          _shareLog.fine('Deleted stale share file: ${entity.path}');
+        }
+      }
+    }
+  } catch (e) {
+    _shareLog.warning('cleanupOldShareFiles failed', e);
+  }
+}
+
 /// Helpers for sharing Jellyfin library items (links, metadata, original audio files).
 class MediaShareHelper {
   MediaShareHelper._();
@@ -46,7 +72,7 @@ class MediaShareHelper {
     if (item.albumArtist != null && item.albumArtist!.trim().isNotEmpty) {
       return item.albumArtist!.trim();
     }
-    return item.id.raw;
+    return 'Unknown item';
   }
 
   /// Share sheet with name + optional Jellyfin web link.
@@ -95,6 +121,7 @@ class MediaShareHelper {
   /// `/Items/{id}/File` from the Jellyfin server into a temp file, then shares it.
   static Future<void> shareOriginalAudioFile(BaseItemDto item) async {
     try {
+      await cleanupOldShareFiles(); // clean stale temp files first
       GlobalSnackbar.message((ctx) => AppLocalizations.of(ctx)!.shareAudioFilePreparing);
 
       final localFile = await _resolveLocalOrDownloadOriginal(item);
@@ -153,7 +180,7 @@ class MediaShareHelper {
 
     final client = http.Client();
     try {
-      final response = await client.send(request);
+      final response = await client.send(request).timeout(const Duration(seconds: 180));
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw HttpException(
           'Jellyfin file download failed (${response.statusCode}) for ${item.id.raw}',
@@ -218,7 +245,7 @@ class MediaShareHelper {
 
   static String _safeFilename(BaseItemDto item, String ext) {
     final line = itemDisplayLine(item);
-    var base = line.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_').replaceAll(RegExp(r'\s+'), ' ').trim();
+    var base = line.replaceAll(RegExp(r'[\/:*?"<>|]'), '_').replaceAll(RegExp(r'\s+'), ' ').trim();
     if (base.isEmpty) base = item.id.raw;
     if (base.length > 120) base = base.substring(0, 120);
     return '$base.$ext';

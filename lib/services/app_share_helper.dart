@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:clipboard/clipboard.dart';
 import 'package:finamp/components/global_snackbar.dart';
@@ -18,10 +19,13 @@ class AppShareHelper {
 
   static const _channel = MethodChannel('com.unicornsonlsd.finamp/app_share');
   static const defaultPort = 8765;
+  static const _autoStopMinutes = 15;
 
   static HttpServer? _server;
   static String? _servingPath;
   static int? _servingPort;
+  static String? _currentToken;
+  static Timer? _autoStopTimer;
 
   static bool get isServerRunning => _server != null;
   static int? get serverPort => _servingPort;
@@ -77,6 +81,13 @@ class AppShareHelper {
     }
   }
 
+  /// Generate a short random token for the current server session.
+  static String _generateToken() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rnd = Random.secure();
+    return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
+  }
+
   /// Start (or restart) a tiny HTTP server serving the APK on [port].
   ///
   /// Returns a multi-line string of download URLs (one per local IPv4), or null on failure.
@@ -89,11 +100,15 @@ class AppShareHelper {
       return null;
     }
 
+    _currentToken = _generateToken();
+
     try {
       final server = await HttpServer.bind(InternetAddress.anyIPv4, port);
       _server = server;
       _servingPath = file.path;
       _servingPort = port;
+
+      _startAutoStopTimer();
 
       unawaited(
         server.forEach((request) async {
@@ -105,6 +120,15 @@ class AppShareHelper {
             }
 
             final path = request.uri.path;
+            final token = request.uri.queryParameters['token'];
+
+            if (token != _currentToken) {
+              request.response.statusCode = HttpStatus.forbidden;
+              request.response.write('Forbidden');
+              await request.response.close();
+              return;
+            }
+
             if (path == '/' || path == '/Jellyamp.apk' || path.endsWith('.apk')) {
               final apk = File(_servingPath!);
               final length = await apk.length();
@@ -127,7 +151,7 @@ class AppShareHelper {
                 '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width">'
                 '<title>Jellyamp</title></head><body style="font-family:sans-serif;padding:2rem">'
                 '<h1>Jellyamp</h1>'
-                '<p><a href="/Jellyamp.apk">Download Jellyamp.apk</a></p>'
+                '<p><a href="/Jellyamp.apk?token=$_currentToken">Download Jellyamp.apk</a></p>'
                 '</body></html>',
               );
             }
@@ -152,11 +176,26 @@ class AppShareHelper {
     }
   }
 
+  static void _startAutoStopTimer() {
+    _autoStopTimer?.cancel();
+    _autoStopTimer = Timer(Duration(minutes: _autoStopMinutes), () {
+      if (isServerRunning) {
+        _log.info('Auto-stopping APK server after $_autoStopMinutes minutes');
+        stopLocalApkServer();
+      }
+    });
+  }
+
   static Future<void> stopLocalApkServer() async {
+    _autoStopTimer?.cancel();
+    _autoStopTimer = null;
+
     final s = _server;
     _server = null;
     _servingPath = null;
     _servingPort = null;
+    _currentToken = null;
+
     if (s != null) {
       await s.close(force: true);
       GlobalSnackbar.message((ctx) => AppLocalizations.of(ctx)!.shareApkServerStopped);
@@ -185,12 +224,7 @@ class AppShareHelper {
       )) {
         for (final addr in iface.addresses) {
           if (addr.isLoopback) continue;
-          // Skip common docker/bridge ranges for cleaner UX
-          final ip = addr.address;
-          if (ip.startsWith('172.') && !ip.startsWith('172.16.') && !ip.startsWith('172.17.')) {
-            // keep private 172.16/12 is complex — just list all non-loopback
-          }
-          ips.add(ip);
+          ips.add(addr.address);
         }
       }
     } catch (e) {
@@ -201,6 +235,6 @@ class AppShareHelper {
       ips.add('127.0.0.1');
     }
 
-    return ips.map((ip) => 'http://$ip:$port/Jellyamp.apk').toList();
+    return ips.map((ip) => 'http://$ip:$port/Jellyamp.apk?token=$_currentToken').toList();
   }
 }
