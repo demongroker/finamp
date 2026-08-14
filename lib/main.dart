@@ -54,6 +54,7 @@ import 'package:finamp/services/playback_history_service.dart';
 import 'package:finamp/services/playon_service.dart';
 import 'package:finamp/services/queue_service.dart';
 import 'package:finamp/services/theme_provider.dart';
+import 'package:finamp/services/update_checker_provider.dart';
 import 'package:finamp/services/ui_overlay_setter_observer.dart';
 import 'package:finamp/services/widget_bindings_observer_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -965,6 +966,8 @@ class FinampApp extends ConsumerWidget {
     final themeMode = ref.watch(finampSettingsProvider.themeMode);
     final amoledTheme = ref.watch(finampSettingsProvider.amoledTheme);
     final locale = ref.watch(finampSettingsProvider.locale);
+    // Trigger update check on app startup
+    ref.watch(updateCheckerProvider);
     final transitionBuilder = MediaQuery.disableAnimationsOf(context)
         ? PageTransitionsTheme(
             // Disable page transitions on all platforms if [disableAnimations] is true, otherwise use default transitions

@@ -22,6 +22,9 @@ import 'package:finamp/screens/volume_normalization_settings_screen.dart';
 import 'package:finamp/services/app_share_helper.dart';
 import 'package:finamp/services/client_certificate_installer.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
+import 'package:finamp/services/update_checker.dart';
+import 'package:finamp/services/update_checker_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -286,3 +289,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
+
+  // Simple update checker integration (B)
+  // Update checker (runs on app startup via provider)
+  Widget _buildUpdateTile() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final updateAsync = ref.watch(updateCheckerProvider);
+
+        return updateAsync.when(
+          data: (update) {
+            if (update == null) return const SizedBox.shrink();
+
+            return ListTile(
+              leading: const Icon(Icons.system_update, color: Colors.green),
+              title: Text('Update available: v${update.latestVersion}'),
+              subtitle: const Text('Tap to view release'),
+              onTap: () => launchUrl(Uri.parse(update.htmlUrl)),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }

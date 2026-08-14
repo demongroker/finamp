@@ -19,6 +19,7 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_screen_provider.dart';
 import 'package:finamp/services/queue_service.dart';
 import 'package:finamp/services/quick_actions_service.dart';
+import 'package:finamp/components/update_banner.dart';
 import 'package:finamp/utils/platform_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
