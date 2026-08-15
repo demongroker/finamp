@@ -51,7 +51,10 @@ class UpdateChecker {
       }
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final latestTag = (data['tag_name'] as String?)?.replaceAll('v', '') ?? '';
+      // Tag is "v0.9.29" or "0.9.29" — strip a leading "v" only (not all "v"s),
+      // and ignore any "+build" suffix that may appear.
+      final rawTag = (data['tag_name'] as String?) ?? '';
+      final latestTag = rawTag.replaceFirst(RegExp(r'^v'), '').split('+').first;
       final htmlUrl = data['html_url'] as String? ?? 'https://github.com/$_repo/releases';
 
       if (latestTag.isEmpty) return null;
@@ -77,9 +80,12 @@ class UpdateChecker {
   }
 
   static bool _isNewerVersion(String latest, String current) {
+    // Normalise: strip leading "v", drop any "+build" suffix, and keep only
+    // numeric dotted components so "0.9.29" vs "0.9.28+129" compares correctly.
+    String clean(String s) => s.replaceFirst(RegExp(r'^v'), '').split('+').first;
     try {
-      final latestParts = latest.split('.').map(int.parse).toList();
-      final currentParts = current.split('.').map(int.parse).toList();
+      final latestParts = clean(latest).split('.').map(int.parse).toList();
+      final currentParts = clean(current).split('.').map(int.parse).toList();
 
       for (int i = 0; i < latestParts.length && i < currentParts.length; i++) {
         if (latestParts[i] > currentParts[i]) return true;
@@ -87,7 +93,7 @@ class UpdateChecker {
       }
       return latestParts.length > currentParts.length;
     } catch (_) {
-      return latest.compareTo(current) > 0;
+      return clean(latest).compareTo(clean(current)) > 0;
     }
   }
 }

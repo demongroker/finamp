@@ -40,6 +40,12 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           echo "name=jellyamp-${BRANCH}-${SHORT_SHA}.apk" >> $GITHUB_OUTPUT
 
+      - name: Determine version tag
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Rename APK
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk \
@@ -57,8 +63,8 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/features/')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.filename.outputs.name }}
-          name: Jellyamp ${{ steps.filename.outputs.name }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Jellyamp ${{ steps.version.outputs.tag }}
           draft: true
           files: build/app/outputs/flutter-apk/${{ steps.filename.outputs.name }}
         env:
