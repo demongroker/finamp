@@ -1202,6 +1202,24 @@ class QueueService {
     _buildQueueFromNativePlayerQueue(); // update internal queues
   }
 
+  /// Removes all upcoming tracks (Next Up + regular queue), keeping the
+  /// current track and everything before it.
+  Future<void> clearAfterCurrent() async {
+    int adjustedQueueIndex = getActualIndexByLinearIndex(_currentQueueIndex);
+    final totalUpcoming = _queueNextUp.length + _queue.length;
+
+    if (totalUpcoming > 0) {
+      await _audioHandler.removeFinampQueueItemRange(
+        adjustedQueueIndex + 1,
+        adjustedQueueIndex + 1 + totalUpcoming,
+      );
+      _queueNextUp.clear();
+      _queue.clear();
+    }
+
+    _buildQueueFromNativePlayerQueue(); // update internal queues
+  }
+
   FinampQueueInfo getQueue() {
     return FinampQueueInfo(
       id: _order.id,

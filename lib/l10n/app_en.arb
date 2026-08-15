@@ -727,6 +727,7 @@
     "removedFromPlaylist": "Removed from playlist.",
     "removedFromQueue": "Removed from queue.",
     "undo": "Undo",
+    "clearAfterCurrent": "Clear after current",
     "startingInstantMix": "Starting instant mix.",
     "anErrorHasOccured": "An error has occured.",
     "responseError": "{error} Status code {statusCode}.",

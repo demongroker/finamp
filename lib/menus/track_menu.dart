@@ -7,6 +7,7 @@ import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/menus/components/menuEntries/adaptive_download_lock_delete_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/add_to_playlist_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/clear_queue_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/clear_after_current_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/copy_item_info_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/create_playlist_from_current_queue.dart';
 import 'package:finamp/menus/components/menuEntries/delete_from_server_menu_entry.dart';
@@ -259,6 +260,7 @@ class _TrackMenuState extends ConsumerState<TrackMenu> with TickerProviderStateM
       CopyItemLinkMenuEntry(baseItem: widget.item),
       CopyItemInfoMenuEntry(baseItem: widget.item),
       if (widget.showQueueActions) CreatePlaylistFromCurrentQueueMenuEntry(),
+      if (widget.showQueueActions) ClearAfterCurrentMenuEntry(),
       if (widget.showQueueActions) ClearQueueMenuEntry(baseItem: widget.item),
       DeleteFromServerMenuEntry(baseItem: widget.item),
       RemoveFromQueueMenuEntry(queueItem: widget.queueItem),
