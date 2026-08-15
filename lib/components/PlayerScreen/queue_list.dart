@@ -475,7 +475,21 @@ class _PreviousTracksListState extends State<PreviousTracksList> with TickerProv
                     scrollToKey(key: widget.previousTracksHeaderKey, duration: const Duration(milliseconds: 500));
                   },
                   onRemoveFromList: () {
+                    setState(() => _previousTracks!.removeAt(index));
                     unawaited(_queueService.removeAtOffset(indexOffset));
+                    GlobalSnackbar.message(
+                      (scaffold) => AppLocalizations.of(scaffold)!.removedFromQueue,
+                      isConfirmation: true,
+                      action: (scaffold) => SnackBarAction(
+                        label: AppLocalizations.of(scaffold)!.undo,
+                        onPressed: () {
+                          if (mounted) {
+                            setState(() => _previousTracks!.insert(index, item));
+                          }
+                          unawaited(_queueService.insertAtOffset(indexOffset, item));
+                        },
+                      ),
+                    );
                   },
                 );
               },
@@ -556,7 +570,21 @@ class _NextUpTracksListState extends State<NextUpTracksList> {
                     queueItem: item,
                     allowReorder: true,
                     onRemoveFromList: () {
+                      setState(() => _nextUp!.removeAt(index));
                       unawaited(_queueService.removeAtOffset(indexOffset));
+                      GlobalSnackbar.message(
+                        (scaffold) => AppLocalizations.of(scaffold)!.removedFromQueue,
+                        isConfirmation: true,
+                        action: (scaffold) => SnackBarAction(
+                          label: AppLocalizations.of(scaffold)!.undo,
+                          onPressed: () {
+                            if (mounted) {
+                              setState(() => _nextUp!.insert(index, item));
+                            }
+                            unawaited(_queueService.insertAtOffset(indexOffset, item));
+                          },
+                        ),
+                      );
                     },
                     onTap: (bool playable) async {
                       FeedbackHelper.feedback(FeedbackType.selection);
@@ -646,7 +674,21 @@ class _QueueTracksListState extends ConsumerState<QueueTracksList> {
                   queueItem: item,
                   allowReorder: true,
                   onRemoveFromList: () {
+                    setState(() => _queue!.removeAt(index));
                     unawaited(_queueService.removeAtOffset(indexOffset));
+                    GlobalSnackbar.message(
+                      (scaffold) => AppLocalizations.of(scaffold)!.removedFromQueue,
+                      isConfirmation: true,
+                      action: (scaffold) => SnackBarAction(
+                        label: AppLocalizations.of(scaffold)!.undo,
+                        onPressed: () {
+                          if (mounted) {
+                            setState(() => _queue!.insert(index, item));
+                          }
+                          unawaited(_queueService.insertAtOffset(indexOffset, item));
+                        },
+                      ),
+                    );
                   },
                   onTap: (bool playable) async {
                     FeedbackHelper.feedback(FeedbackType.selection);

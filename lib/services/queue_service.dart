@@ -1103,6 +1103,16 @@ class QueueService {
     _buildQueueFromNativePlayerQueue();
   }
 
+  /// Re-inserts [item] at a linear [offset] relative to the current track.
+  /// Mirror of [removeAtOffset], used by the queue "Undo" action to restore a
+  /// removed item to its exact original position.
+  Future<void> insertAtOffset(int offset, FinampQueueItem item) async {
+    int adjustedQueueIndex = getActualIndexByLinearIndex(_currentQueueIndex + offset);
+
+    await _audioHandler.insertFinampQueueItemAt(adjustedQueueIndex, item);
+    _buildQueueFromNativePlayerQueue();
+  }
+
   /// This function removes all upcoming radio tracks.
   /// Callers should set up correct radio state synchronously before calling this,
   /// so that we will be ready for the radio to restart as soon as this function releases its lock.

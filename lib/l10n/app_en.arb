@@ -725,6 +725,8 @@
         "description": "Snackbar message that shows when the user successfully adds items to a playlist."
     },
     "removedFromPlaylist": "Removed from playlist.",
+    "removedFromQueue": "Removed from queue.",
+    "undo": "Undo",
     "startingInstantMix": "Starting instant mix.",
     "anErrorHasOccured": "An error has occured.",
     "responseError": "{error} Status code {statusCode}.",
