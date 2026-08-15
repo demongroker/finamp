@@ -667,6 +667,30 @@
     "@playbackModeDirectPlaying": {
         "description": "Feature chip that is shown when tracks are being played directly from the server, without transcoding"
     },
+    "playbackModeDirectStreaming": "Direct Streaming",
+    "@playbackModeDirectStreaming": {
+        "description": "Feature chip that is shown when tracks are direct-streamed (container remux, no transcode) from the server"
+    },
+    "channels": "Channels",
+    "@channels": {
+        "description": "Label for the number of audio channels in the track info sheet"
+    },
+    "container": "Container",
+    "@container": {
+        "description": "Label for the media container format in the track info sheet"
+    },
+    "fileSize": "File Size",
+    "@fileSize": {
+        "description": "Label for the file size in the track info sheet"
+    },
+    "path": "Path",
+    "@path": {
+        "description": "Label for the media file path in the track info sheet"
+    },
+    "server": "Server",
+    "@server": {
+        "description": "Label for the Jellyfin server name in the track info sheet"
+    },
     "playbackModeTranscoding": "Transcoding",
     "@playbackModeTranscoding": {
         "description": "Feature chip that is shown when tracks are being transcoded by the server"

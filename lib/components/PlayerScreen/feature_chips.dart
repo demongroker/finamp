@@ -11,6 +11,7 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/metadata_provider.dart';
 import 'package:finamp/services/music_player_background_task.dart';
 import 'package:finamp/services/queue_service.dart';
+import 'package:finamp/components/PlayerScreen/track_info_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -134,12 +135,20 @@ class FeatureState {
           if (isTranscodingAndStreaming) {
             features.add(FeatureProperties(type: feature, text: AppLocalizations.of(context)!.playbackModeTranscoding));
           } else {
+            // Differentiate direct streaming from direct playing: the server
+            // reports whether the media source can be direct-played. If not,
+            // a container remux (direct stream) is used instead of a transcode.
+            final supportsDirectPlay = metadata?.mediaSourceInfo.supportsDirectPlay ?? true;
+            final supportsDirectStream = metadata?.mediaSourceInfo.supportsDirectStream ?? false;
             features.add(
-              //TODO differentiate between direct streaming and direct playing
-              // const FeatureProperties(
-              //   text: "Direct Streaming",
-              // ),
-              FeatureProperties(type: feature, text: AppLocalizations.of(context)!.playbackModeDirectPlaying),
+              FeatureProperties(
+                type: feature,
+                text: supportsDirectPlay
+                    ? AppLocalizations.of(context)!.playbackModeDirectPlaying
+                    : supportsDirectStream
+                        ? AppLocalizations.of(context)!.playbackModeDirectStreaming
+                        : AppLocalizations.of(context)!.playbackModeDirectPlaying,
+              ),
             );
           }
         }
@@ -270,6 +279,18 @@ class Features extends StatelessWidget {
         runSpacing: 4.0,
         children: List.generate(featureList.length, (index) {
           final feature = featureList[index];
+
+          // Tap on the playback-mode chip opens the technical track info sheet.
+          if (feature.type == FinampFeatureChipType.playbackMode) {
+            return GestureDetector(
+              onTap: () => showTrackInfoSheet(context, features),
+              child: _FeatureContent(
+                backgroundColor: IconTheme.of(context).color?.withOpacity(0.1) ?? _defaultBackgroundColour,
+                feature: feature,
+                color: color,
+              ),
+            );
+          }
 
           return _FeatureContent(
             backgroundColor: IconTheme.of(context).color?.withOpacity(0.1) ?? _defaultBackgroundColour,

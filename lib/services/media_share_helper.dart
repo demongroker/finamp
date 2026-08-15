@@ -22,7 +22,7 @@ final _shareLog = Logger("MediaShareHelper");
 const int _shareTempMaxAgeHours = 48;
 
 /// Deletes old temporary share files from previous sessions.
-static Future<void> cleanupOldShareFiles() async {
+Future<void> cleanupOldShareFiles() async {
   try {
     final tempDir = await getTemporaryDirectory();
     final shareDir = Directory(path_helper.join(tempDir.path, 'jellyamp_share'));
