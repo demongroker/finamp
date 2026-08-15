@@ -43,9 +43,22 @@ class _UpdateBannerState extends ConsumerState<UpdateBanner> {
                   const Icon(Icons.system_update_alt, size: 18),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      'Jellyamp ${update.latestVersion} is available',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Jellyamp ${update.latestVersion} is available',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        if (update.note != null)
+                          Text(
+                            update.note!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                   _buildAction(update),

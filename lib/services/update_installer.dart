@@ -60,4 +60,17 @@ class UpdateInstaller {
   static Future<void> openInstallPermissionSettings() async {
     await _channel.invokeMethod<void>('openInstallPermissionSettings');
   }
+
+  /// Posts a system notification that an update is available.
+  static Future<void> showUpdateNotification(
+    String version,
+    String? note,
+    String? url,
+  ) async {
+    await _channel.invokeMethod<void>('showUpdateNotification', {
+      'version': version,
+      'note': note,
+      'url': url,
+    });
+  }
 }

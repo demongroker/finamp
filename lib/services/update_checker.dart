@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:finamp/services/update_installer.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,6 +25,28 @@ class UpdateInfo {
     this.body,
     this.downloadUrl,
   });
+
+  /// Short one-line release note derived from the GitHub release body
+  /// (first meaningful markdown line, headers/bullets/backticks stripped).
+  String? get note {
+    final b = body;
+    if (b == null || b.isEmpty) return null;
+
+    final lines = b
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .map((l) => l.replaceFirst(RegExp(r'^#{1,6}\s*'), '').replaceFirst(RegExp(r'^\s*[-*]\s*'), '').trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+
+    if (lines.isEmpty) return null;
+
+    final note = lines.first.replaceAll(RegExp(r'[`*_#]'), '').trim();
+    if (note.isEmpty) return null;
+
+    return note.length > 80 ? '${note.substring(0, 77)}…' : note;
+  }
 }
 
 /// Checks for newer Jellyamp releases on GitHub.
@@ -85,6 +110,7 @@ class UpdateChecker {
 
         _cachedResult = info;
         _lastCheck = DateTime.now();
+        unawaited(_maybeNotify(info));
         return info;
       }
 
@@ -93,6 +119,25 @@ class UpdateChecker {
     } catch (e, st) {
       _log.warning('Update check failed', e, st);
       return null;
+    }
+  }
+
+  /// Posts a one-time system notification for a newly detected update,
+  /// de-duplicated so it only fires once per version.
+  static Future<void> _maybeNotify(UpdateInfo info) async {
+    try {
+      final box = Hive.box<String>('UpdateState');
+      final lastNotified = box.get('lastNotifiedVersion');
+      if (lastNotified == info.latestVersion) return;
+
+      await UpdateInstaller.showUpdateNotification(
+        info.latestVersion,
+        info.note,
+        info.htmlUrl,
+      );
+      await box.put('lastNotifiedVersion', info.latestVersion);
+    } catch (e, st) {
+      _log.warning('Update notification failed', e, st);
     }
   }
 

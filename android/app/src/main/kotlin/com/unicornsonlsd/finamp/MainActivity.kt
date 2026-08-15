@@ -1,6 +1,10 @@
 package com.unicornsonlsd.finamp
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.UiModeManager
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.CATEGORY_APP_MUSIC
 import android.net.Uri
@@ -12,6 +16,7 @@ import android.system.ErrnoException
 import android.system.Os
 import android.util.Log
 import androidx.annotation.WorkerThread
+import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +55,7 @@ class MainActivity : AudioServiceActivity() {
 
         private const val UPDATE_INSTALLER_CHANNEL = "com.unicornsonlsd.finamp/update_installer"
         private const val UPDATE_INSTALLER_CHANNEL_LOG_TAG = "UpdateInstallerChannel"
+        private const val UPDATE_NOTIFICATION_ID = 1001
     }
 
     private lateinit var mediaRouter: MediaRouter
@@ -302,6 +308,12 @@ class MainActivity : AudioServiceActivity() {
                     openInstallPermissionSettings()
                     result.success(null)
                 }
+                "showUpdateNotification" -> {
+                    val version = call.argument<String>("version") ?: ""
+                    val note = call.argument<String>("note")
+                    val url = call.argument<String>("url")
+                    showUpdateNotification(version, note, url, result)
+                }
                 else -> {
                     Log.e(UPDATE_INSTALLER_CHANNEL_LOG_TAG, "Method not found: '${call.method}'")
                     result.notImplemented()
@@ -349,6 +361,39 @@ class MainActivity : AudioServiceActivity() {
             val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
                 .setData(Uri.parse("package:${applicationContext.packageName}"))
             startActivity(intent)
+        }
+    }
+
+    private fun showUpdateNotification(version: String, note: String?, url: String?, result: MethodChannel.Result) {
+        try {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channelId = "updates"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(channelId, "Updates", NotificationManager.IMPORTANCE_DEFAULT)
+                notificationManager.createNotificationChannel(channel)
+            }
+
+            val contentIntent = if (url != null) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            } else {
+                val intent = Intent(this, MainActivity::class.java)
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+
+            val notification = NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                .setContentTitle("JellyAmp $version is available")
+                .setContentText(if (note.isNullOrEmpty()) "Tap to update" else note)
+                .setContentIntent(contentIntent)
+                .setAutoCancel(true)
+                .build()
+
+            notificationManager.notify(UPDATE_NOTIFICATION_ID, notification)
+            result.success(null)
+        } catch (e: Exception) {
+            Log.e(UPDATE_INSTALLER_CHANNEL_LOG_TAG, "Failed to show update notification", e)
+            result.error("NOTIFICATION_ERROR", e.message, null)
         }
     }
 
