@@ -3,6 +3,7 @@ package com.unicornsonlsd.finamp
 import android.app.UiModeManager
 import android.content.Intent
 import android.content.Intent.CATEGORY_APP_MUSIC
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore.INTENT_ACTION_MUSIC_PLAYER
@@ -11,6 +12,7 @@ import android.system.ErrnoException
 import android.system.Os
 import android.util.Log
 import androidx.annotation.WorkerThread
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.mediarouter.app.SystemOutputSwitcherDialogController
@@ -45,6 +47,9 @@ class MainActivity : AudioServiceActivity() {
 
         private const val APP_SHARE_CHANNEL = "com.unicornsonlsd.finamp/app_share"
         private const val APP_SHARE_CHANNEL_LOG_TAG = "AppShareChannel"
+
+        private const val UPDATE_INSTALLER_CHANNEL = "com.unicornsonlsd.finamp/update_installer"
+        private const val UPDATE_INSTALLER_CHANNEL_LOG_TAG = "UpdateInstallerChannel"
     }
 
     private lateinit var mediaRouter: MediaRouter
@@ -276,6 +281,74 @@ class MainActivity : AudioServiceActivity() {
                     result.notImplemented()
                 }
             }
+        }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            UPDATE_INSTALLER_CHANNEL,
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "installApk" -> {
+                    val path = call.argument<String>("path")
+                    if (path == null) {
+                        result.error("INVALID_ARGS", "path is required", null)
+                        return@setMethodCallHandler
+                    }
+                    installApk(path, result)
+                }
+                "canInstallPackages" -> {
+                    result.success(canInstallPackages())
+                }
+                "openInstallPermissionSettings" -> {
+                    openInstallPermissionSettings()
+                    result.success(null)
+                }
+                else -> {
+                    Log.e(UPDATE_INSTALLER_CHANNEL_LOG_TAG, "Method not found: '${call.method}'")
+                    result.notImplemented()
+                }
+            }
+        }
+    }
+
+    private fun installApk(path: String, result: MethodChannel.Result) {
+        try {
+            val file = File(path)
+            if (!file.exists()) {
+                result.error("FILE_NOT_FOUND", "APK not found at $path", null)
+                return
+            }
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.fileprovider",
+                file,
+            )
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+            Log.i(UPDATE_INSTALLER_CHANNEL_LOG_TAG, "Install intent fired for $path")
+            result.success(null)
+        } catch (e: Exception) {
+            Log.e(UPDATE_INSTALLER_CHANNEL_LOG_TAG, "Failed to launch install", e)
+            result.error("INSTALL_ERROR", e.message, null)
+        }
+    }
+
+    private fun canInstallPackages(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    private fun openInstallPermissionSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                .setData(Uri.parse("package:${applicationContext.packageName}"))
+            startActivity(intent)
         }
     }
 

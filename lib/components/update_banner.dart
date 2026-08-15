@@ -1,11 +1,11 @@
 import 'package:finamp/services/update_checker.dart';
 import 'package:finamp/services/update_checker_provider.dart';
+import 'package:finamp/services/update_installer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Subtle, non-intrusive update banner.
-/// Shows once per session and can be dismissed easily.
+/// Subtle, non-intrusive update banner with in-app download + install.
 class UpdateBanner extends ConsumerStatefulWidget {
   const UpdateBanner({super.key});
 
@@ -13,8 +13,13 @@ class UpdateBanner extends ConsumerStatefulWidget {
   ConsumerState<UpdateBanner> createState() => _UpdateBannerState();
 }
 
+enum _UpdateStatus { idle, downloading, installing }
+
 class _UpdateBannerState extends ConsumerState<UpdateBanner> {
   bool _dismissed = false;
+  _UpdateStatus _status = _UpdateStatus.idle;
+  double _progress = 0;
+  String? _message;
 
   @override
   Widget build(BuildContext context) {
@@ -29,26 +34,48 @@ class _UpdateBannerState extends ConsumerState<UpdateBanner> {
         return Container(
           color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.system_update_alt, size: 18),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Jellyamp ${update.latestVersion} is available',
-                  style: Theme.of(context).textTheme.bodyMedium,
+              Row(
+                children: [
+                  const Icon(Icons.system_update_alt, size: 18),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Jellyamp ${update.latestVersion} is available',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  _buildAction(update),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: () => setState(() => _dismissed = true),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              if (_status == _UpdateStatus.downloading) ...[
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(value: _progress),
                 ),
-              ),
-              TextButton(
-                onPressed: () => launchUrl(Uri.parse(update.htmlUrl)),
-                child: const Text('View'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 18),
-                onPressed: () => setState(() => _dismissed = true),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Downloading… ${(_progress * 100).toStringAsFixed(0)}%',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              if (_message != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _message!,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ],
           ),
         );
@@ -56,5 +83,100 @@ class _UpdateBannerState extends ConsumerState<UpdateBanner> {
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
     );
+  }
+
+  Widget _buildAction(UpdateInfo update) {
+    switch (_status) {
+      case _UpdateStatus.downloading:
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
+      case _UpdateStatus.installing:
+        return const TextButton(onPressed: null, child: Text('Installing…'));
+      case _UpdateStatus.idle:
+        return TextButton(
+          onPressed: () => _downloadAndInstall(update),
+          child: const Text('Update'),
+        );
+    }
+  }
+
+  Future<void> _downloadAndInstall(UpdateInfo update) async {
+    final downloadUrl = update.downloadUrl;
+    if (downloadUrl == null) {
+      // No APK asset exposed — fall back to the release page in the browser.
+      await launchUrl(Uri.parse(update.htmlUrl));
+      return;
+    }
+
+    try {
+      final canInstall = await UpdateInstaller.canInstallPackages();
+      if (!mounted) return;
+      if (!canInstall) {
+        final open = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Allow installs'),
+            content: const Text(
+              'To update Jellyamp in-app, allow installing apps from this source, then tap Update again.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Open settings'),
+              ),
+            ],
+          ),
+        );
+        if (open ?? false) {
+          await UpdateInstaller.openInstallPermissionSettings();
+          if (mounted) {
+            setState(() => _message = 'Allow installs, then tap Update again.');
+          }
+        }
+        return;
+      }
+
+      setState(() {
+        _status = _UpdateStatus.downloading;
+        _progress = 0;
+        _message = null;
+      });
+
+      final file = await UpdateInstaller.downloadApk(
+        downloadUrl,
+        onProgress: (p) {
+          if (mounted) setState(() => _progress = p);
+        },
+      );
+
+      if (!mounted) return;
+      setState(() => _status = _UpdateStatus.installing);
+
+      await UpdateInstaller.installApk(file.path);
+
+      if (mounted) {
+        setState(() {
+          _status = _UpdateStatus.idle;
+          _message = 'Install prompt shown — finish it to update.';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _status = _UpdateStatus.idle;
+          _message = 'Update failed: $e';
+        });
+      }
+    }
   }
 }

@@ -12,10 +12,15 @@ class UpdateInfo {
   final String htmlUrl;
   final String? body;
 
+  /// Direct download URL for the APK asset, when the release exposes one.
+  /// Used for in-app update; null means "open the release page instead".
+  final String? downloadUrl;
+
   const UpdateInfo({
     required this.latestVersion,
     required this.htmlUrl,
     this.body,
+    this.downloadUrl,
   });
 }
 
@@ -57,6 +62,17 @@ class UpdateChecker {
       final latestTag = rawTag.replaceFirst(RegExp(r'^v'), '').split('+').first;
       final htmlUrl = data['html_url'] as String? ?? 'https://github.com/$_repo/releases';
 
+      // Find the APK asset download URL for in-app updates.
+      String? downloadUrl;
+      final assets = (data['assets'] as List?) ?? const [];
+      for (final asset in assets) {
+        if (asset is Map &&
+            ((asset['name'] as String?)?.toLowerCase().endsWith('.apk') ?? false)) {
+          downloadUrl = asset['browser_download_url'] as String?;
+          if (downloadUrl != null) break;
+        }
+      }
+
       if (latestTag.isEmpty) return null;
 
       if (_isNewerVersion(latestTag, currentVersion)) {
@@ -64,6 +80,7 @@ class UpdateChecker {
           latestVersion: latestTag,
           htmlUrl: htmlUrl,
           body: data['body'] as String?,
+          downloadUrl: downloadUrl,
         );
 
         _cachedResult = info;
