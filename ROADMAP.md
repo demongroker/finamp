@@ -30,30 +30,38 @@ visibility, (6) fast self-hosted workflows, (7) privacy.
 
 ---
 
+## Current phase — CORE HARDENING (audit #3, 2026-08-16)
+
+Unified grouped search + query syntax **shipped** (v0.9.36). The next phase hardens
+the core before adding anything else: security, search correctness, performance,
+download reliability. *Don't add features faster than the core is hardened.*
+
 ## P0 — do next (this cycle)
 
-1. **Powerful unified search** — one box searches artists / albums / tracks /
-   playlists / genres, results grouped by type, plus optional query syntax
-   (`artist:metallica`, `album:master of puppets`, `year:1986` or `year:1983-1991`,
-   `genre:metal`, `codec:flac`, `favorite:true`, `downloaded:true`).
-2. **Advanced filtering** — Downloaded / Favorite / Played / Never Played /
-   Genre / Year / Album Artist / Codec / Bitrate / Lossless / Hi-Res.
-   *Filtering is more important than more sort options.*
-3. **Download manager reliability + polish** — a trustworthy subsystem:
-   storage used, track/album counts, Active / Downloaded / Failed sections,
-   Pause All / Resume All / Retry Failed, per-item progress + quality + size +
-   error reason. Explicit **Downloaded vs Cached** distinction.
-4. **Transcoding explanation** — when the player says *Transcoding*, show **why**
-   (mobile bitrate limit / unsupported codec / user-selected quality) and the
-   source → output chain (e.g. `FLAC 24/96 → AAC 256 kbps`).
-5. **Queue / listening sessions** — evolve the existing *Recent Queues* into
-   restore-able sessions (restore / save as playlist / shuffle / delete).
-   Save queue as playlist.
-6. **Performance on huge libraries** — deliberately test 10k / 50k / 100k tracks:
-   cold launch, list load, search latency, scroll FPS, artwork load, 1k-track
-   queue, offline startup.
-7. **Stabilize releases + regression testing** — slow the cadence; add regression
-   checks before each release.
+1. **Secure APK update verification** — publish a SHA-256 checksum with each
+   release; the updater downloads → verifies checksum → confirms it's a Jellyamp
+   release APK → only then installs. On failure: "Delete / Open Release Page",
+   never install.
+2. **Exact APK asset selection** — no "first `*.apk`" matching; select by an
+   explicit release contract (exact filename, or ABI-matched signed release APK).
+   Human-readable update errors (Retry / Release Page; details behind a fold).
+3. **Finish `downloaded:` search filter** — implement `downloaded:true/false`
+   (needs the Isar download store), or return "not supported yet" instead of
+   silently accepting a no-op filter.
+4. **Search correctness** — debounce (~250–400 ms) + stale-request cancellation
+   (a slow old query must never overwrite a newer one); limit grouped results
+   with "View all N →"; define album quality semantics (an album matches
+   `bit:24` / `codec:flac` only when **ALL** its tracks match).
+5. **Advanced filtering** — Codec / Bitrate / Lossless / Hi-Res / Year /
+   Downloaded / Favorite / Played (filtering > more sort options).
+6. **Download manager reliability + polish** — trustworthy subsystem: storage/
+   counts, Active / Downloaded / Failed, Pause/Resume All, Retry Failed; explicit
+   **Downloaded vs Cached** distinction.
+7. **Queue / listening sessions** — saved queues (name → restore / shuffle /
+   rename / delete / save-as-Jellyfin-playlist) + session history.
+8. **Transcoding explanation** — "why" + source→output chain (FLAC 24/96 → AAC 256).
+9. **Performance on huge libraries** — 10k–100k tracks: cold launch, list load,
+   search latency, scroll FPS, offline startup.
 
 ## P1
 
@@ -63,8 +71,9 @@ visibility, (6) fast self-hosted workflows, (7) privacy.
 11. Offline-first search (search downloaded content while offline)
 12. Smart Downloads (keep latest N albums, sync favorites, auto-download, expiry)
 13. Settings search
-14. Update integrity verification (SHA-256 checksum before install)
-15. Repo structure: rename active branch → `main`, track `upstream/redesign`; issues + labels
+14. Repo structure: rename active branch → `main`, track `upstream/redesign`; issues + labels
+15. Refactor `main.dart` (55 KB → a boring `bootstrap()` + `runApp` entry point)
+16. Audit git dependency forks — expand `DEPENDENCIES.md` (reason, pinned commit, upstream issue, exit condition)
 
 ## P2
 
