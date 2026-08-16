@@ -63,6 +63,12 @@ Future<List<BaseItemDto>> globalSearch(Ref ref, String searchTerm, {required boo
   return out;
 }
 
+/// Fields requested for search results — `MediaSources` and `ProductionYear`
+/// are required for the codec/bit/year filters (they are NOT in the default
+/// fields set, so omitting them silently breaks those filters).
+const _searchFields =
+    'MediaSources,ProductionYear,Genres,ParentId,DateCreated,SortName';
+
 /// Unified, grouped search across the whole library.
 ///
 /// Unlike [globalSearch] (which returns a flat list for Android Auto), this
@@ -88,6 +94,7 @@ final groupedSearchProvider = FutureProvider.autoDispose.family<SearchResults, S
       recursive: recursive,
       searchTerm: searchTerm,
       filters: filters,
+      fields: _searchFields,
       limit: 30,
       parentItem: parentItem,
     );
@@ -138,14 +145,39 @@ final groupedSearchProvider = FutureProvider.autoDispose.family<SearchResults, S
     return filtered;
   }
 
+  var albums = apply(results[1]);
+  if (query.codec != null || query.bitDepth != null) {
+    albums = await _filterAlbumsByQuality(jellyfinApiHelper, query, albums);
+  }
+
   return SearchResults(
     artists: apply(results[0]),
-    albums: apply(results[1]),
+    albums: albums,
     tracks: apply(results[2]),
     playlists: apply(results[3]),
     genres: apply(results[4]),
   );
 });
+
+/// Album quality semantics: an album matches `codec:` / `bit:` only when ALL
+/// of its tracks do (an empty album never matches).
+Future<List<BaseItemDto>> _filterAlbumsByQuality(
+  JellyfinApiHelper api,
+  SearchQuery query,
+  List<BaseItemDto> albums,
+) async {
+  if (albums.isEmpty) return albums;
+  final results = await Future.wait(albums.map((album) async {
+    final tracks = await api.getItems(
+      parentItem: album,
+      includeItemTypes: BaseItemDtoType.track.jellyfinName!,
+      recursive: true,
+      fields: _searchFields,
+    );
+    return query.matchesAllTracks(tracks ?? const []) ? album : null;
+  }));
+  return results.whereType<BaseItemDto>().toList();
+}
 
 @Riverpod(keepAlive: true)
 Future<FinampDisplayable<FinampPlayable>> resolveSection(Ref ref, HomeScreenSectionConfiguration section) async {

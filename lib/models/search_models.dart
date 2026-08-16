@@ -160,11 +160,23 @@ class SearchQuery {
       return false;
     }
     final type = BaseItemDtoType.fromItem(item);
-    if (type == BaseItemDtoType.track || type == BaseItemDtoType.album) {
+    if (type == BaseItemDtoType.track) {
       if (codec != null && _audioCodec(item) != codec) return false;
       if (bitDepth != null && _audioBitDepth(item) != bitDepth) return false;
     }
     return true;
+  }
+
+  /// Whether every one of [tracks] matches the codec / bit-depth filter.
+  /// An album matches `codec:flac` only when ALL its tracks are FLAC; an empty
+  /// track list is treated as non-matching (an empty album is not a "FLAC album").
+  bool matchesAllTracks(List<BaseItemDto> tracks) {
+    if (tracks.isEmpty) return false;
+    return tracks.every((t) {
+      if (codec != null && _audioCodec(t) != codec) return false;
+      if (bitDepth != null && _audioBitDepth(t) != bitDepth) return false;
+      return true;
+    });
   }
 
   static String? _audioCodec(BaseItemDto item) {
