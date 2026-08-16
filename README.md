@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <strong>Jellyamp</strong> — a Jellyfin music player for the music you already own.<br/>
-  Open source · Android · based on <a href="https://github.com/finamp-app/finamp">Finamp</a> redesign
+  <strong>Jellyamp</strong> — the <em>power-user</em> Jellyfin music client.<br/>
+  Open source · Android · forked from <a href="https://github.com/finamp-app/finamp">Finamp</a>
 </p>
 
 <p align="center">
@@ -13,6 +13,8 @@
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MPL--2.0-blue" alt="license"/></a>
 </p>
 
+> **Your music. Your server. No tracking.**
+
 ---
 
 ## Download
@@ -20,45 +22,74 @@
 | | |
 |--|--|
 | **Latest APK** | [Releases](https://github.com/demongroker/jellyamp/releases/latest) |
-| **Share files build** | [v0.9.25-jellyamp-share](https://github.com/demongroker/jellyamp/releases/tag/v0.9.25-jellyamp-share) |
 
-**Package ID:** `com.demongroker.jellyamp`  
-Installs **next to** official Finamp (different package + signing).
-
-> You need your own [Jellyfin](https://jellyfin.org/) server. Jellyamp does not ship any music.
+**Package ID:** `com.demongroker.jellyamp` · installs **next to** official Finamp (different package + signing). You need your own [Jellyfin](https://jellyfin.org/) server — Jellyamp ships no music.
 
 ---
 
-## What is Jellyamp?
+## Why Jellyamp?
 
-**Jellyamp** is [demongroker](https://github.com/demongroker)’s fork of **[Finamp](https://github.com/finamp-app/finamp)** — the open-source Jellyfin music client — with a distinct brand and practical QoL for homeserver use.
+Jellyamp is a Finamp fork rebuilt for **power users**: people who own their music, run their own Jellyfin server, keep large libraries, care about lossless quality and Direct Play, and want real control — with zero telemetry.
 
-### Brand
+| You want… | Jellyamp gives you |
+|-----------|--------------------|
+| Find anything, fast | **Unified search** across Artists / Albums / Tracks / Playlists / Genres, with query syntax |
+| See exactly what's playing | **Direct Play / Direct Streaming / Transcoding**, codec, bit depth, sample rate, bitrate, server, file |
+| Trust your audio quality | Lossless / Hi-Res / 24-bit visibility and filters |
+| Control the queue | Reorder, swipe-remove, undo, Play Next, Clear After Current |
+| Play offline with certainty | Reliable downloads, app-private storage |
+| Update safely | In-app updates with **SHA-256 verification** before install |
+| Stay private | No analytics, no ads, no telemetry, no cloud |
 
-| | |
-|--|--|
-| Name | **Jellyamp** |
-| Icon | Note + **J** badge, Jellyfin blue → purple |
-| Accent | Jellyfin purple `#AA5CC3` |
-| Jellyfin client name | `Jellyamp` |
+---
 
-### From Finamp (upstream redesign)
+## Power search
 
-- Modern player UI, offline downloads, gapless playback  
-- Lyrics & volume normalization (Jellyfin 10.9+)  
-- Transcoded streaming / downloads, playback reporting  
-- Dynamic colors, playlists, favorites, radio / instant mix  
+One box searches your **entire library**, grouped by type — and accepts a real query language:
 
-### Jellyamp extras
+```
+metallica
+artist:metallica year:1983-1991
+codec:flac bit:24 favorite:true
+downloaded:true
+album:"master of puppets"
+```
+
+Keys: `artist:` · `album:` · `track:` · `playlist:` · `genre:` · `year:` (single or range) · `codec:` · `bit:` / `bitdepth:` · `favorite:` · `downloaded:`
+
+Album semantics are strict: an album matches `codec:flac` only when **all** its tracks are FLAC.
+
+---
+
+## Playback transparency
+
+Tap the playback-mode chip on the Now Playing screen for a full technical sheet — and when something is transcoding, Jellyamp tells you **why**, with the source → output chain:
+
+```
+Source   FLAC · 24-bit · 96 kHz · 2841 kbps
+Output   AAC · 256 kbps
+Why      Streaming quality setting
+```
+
+---
+
+## From Finamp (upstream)
+
+Modern player UI, offline downloads, gapless playback, lyrics, volume normalization, transcoded streaming/downloads, playback reporting, dynamic colors, playlists, favorites, radio / instant mix.
+
+## What Jellyamp adds
 
 | Feature | How |
 |---------|-----|
-| **Share audio file** | Track menu → download **original** file (FLAC when the library is FLAC) → system share |
-| **Share / copy link** | Track, album, artist, playlist, genre menus |
-| **Copy title** | `Artist — Title` to clipboard |
-| **Long-press seek** | Hold Previous / Next → −10s / +30s |
-| **Double-tap cover** | Left third −10s · center favorite · right +30s |
-| **Share app APK** | Settings → share install file, or **Wi‑Fi serve** on port `8765` |
+| Unified search + query syntax | Search box → grouped results across the whole library |
+| Playback transparency | Playback mode, codec, bit depth, sample rate, bitrate, container, size, path, server |
+| Transcoding explanation | Source → output → reason |
+| Share original audio | Track menu → share the **original** FLAC file |
+| Share / copy link & title | `Artist — Title` to clipboard |
+| Long-press seek | Hold Previous / Next → −10s / +30s |
+| Double-tap cover | Left −10s · center favorite · right +30s |
+| Secure in-app updates | SHA-256 verified, exact-asset, with release notes |
+| Share the app | Settings → share APK, or **Wi‑Fi serve** on port `8765` |
 
 ---
 
@@ -84,34 +115,28 @@ Installs **next to** official Finamp (different package + signing).
 
 ## Install (Android)
 
-1. Download the APK from [Releases](https://github.com/demongroker/jellyamp/releases).  
-2. Allow install from your browser/file manager if prompted.  
-3. Open **Jellyamp** → log into your Jellyfin server.  
+1. Download the APK from [Releases](https://github.com/demongroker/jellyamp/releases).
+2. Allow install from your browser/file manager if prompted.
+3. Open **Jellyamp** → log into your Jellyfin server.
 
-**Share Jellyamp to another phone (same Wi‑Fi):**  
-Settings → **Share Jellyamp over Wi‑Fi** → open the shown URL on the other device.
+**Share Jellyamp to another phone (same Wi‑Fi):** Settings → **Share Jellyamp over Wi‑Fi** → open the URL on the other device.
 
 ---
 
 ## Development
 
-Active branch: **`features/share-seek-qol`** (fork work).  
-Upstream line: Finamp **`redesign`**.
+Active branch: **`features/share-seek-qol`** (fork work) · upstream: Finamp **`redesign`**.
 
 ```bash
 git clone https://github.com/demongroker/jellyamp.git
 cd jellyamp
 git checkout features/share-seek-qol
 
-# Flutter 3.9+ (or use the pinned toolchain you prefer)
 flutter pub get
 flutter run   # or: flutter build apk --release
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full Finamp/Flutter setup notes (still largely valid).  
-Fork-specific notes: [FORK.md](./FORK.md).
-
-### Remotes
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for Finamp/Flutter setup notes, and [FORK.md](./FORK.md) for fork-specific details. Roadmap: [ROADMAP.md](./ROADMAP.md) · Changelog: [CHANGELOG.md](./CHANGELOG.md).
 
 | Remote | URL |
 |--------|-----|
@@ -129,16 +154,11 @@ Fork-specific notes: [FORK.md](./FORK.md).
 
 ## Credits & license
 
-- **Jellyamp** changes © demongroker (this fork).  
-- **Finamp** © [finamp-app](https://github.com/finamp-app/finamp) / contributors — primary application.  
-- **Jellyfin** © Jellyfin contributors.  
+- **Jellyamp** changes © demongroker (this fork).
+- **Finamp** © [finamp-app](https://github.com/finamp-app/finamp) / contributors — primary application.
+- **Jellyfin** © Jellyfin contributors.
 
-Licensed under the **Mozilla Public License 2.0** — see [LICENSE](./LICENSE).
-
-Upstream project, issues, and community:  
-https://github.com/finamp-app/finamp  
-
-Privacy: [PRIVACY.md](./PRIVACY.md)
+Licensed under the **Mozilla Public License 2.0** — see [LICENSE](./LICENSE). Upstream project & community: https://github.com/finamp-app/finamp
 
 ---
 
