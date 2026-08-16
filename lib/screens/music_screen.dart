@@ -4,6 +4,7 @@ import 'package:finamp/components/HomeScreen/finamp_music_screen_header.dart';
 import 'package:finamp/components/HomeScreen/home_screen_content.dart';
 import 'package:finamp/components/MusicScreen/artist_type_selection_row.dart';
 import 'package:finamp/components/MusicScreen/music_screen_tab_view.dart';
+import 'package:finamp/components/MusicScreen/search_results_view.dart';
 import 'package:finamp/components/MusicScreen/sort_and_filter_row.dart';
 import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/components/now_playing_bar.dart';
@@ -266,6 +267,9 @@ class _MusicScreenState extends ConsumerState<MusicScreen> with TickerProviderSt
         ),
         body: Builder(
           builder: (context) {
+            if (isSearching && (searchQuery?.isNotEmpty ?? false)) {
+              return SearchResultsView(query: searchQuery!);
+            }
             final child = TabBarView(
               controller: _tabController,
               physics: ref.watch(finampSettingsProvider.disableGesture) || MediaQuery.disableAnimationsOf(context)

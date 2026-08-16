@@ -12,6 +12,7 @@ import '../models/finamp_models.dart';
 import '../models/jellyfin_models.dart';
 import '../models/music_models.dart';
 import '../models/music_slices.dart';
+import '../models/search_models.dart';
 import 'album_screen_provider.dart';
 import 'artist_content_provider.dart';
 import 'finamp_settings_helper.dart';
@@ -60,6 +61,76 @@ Future<List<BaseItemDto>> globalSearch(Ref ref, String searchTerm, {required boo
   }
   return out;
 }
+
+/// Unified, grouped search across the whole library.
+///
+/// Unlike [globalSearch] (which returns a flat list for Android Auto), this
+/// keeps each content type in its own bucket and applies the [SearchQuery]
+/// power syntax (type scoping, year/codec/bit/genre/favorite filters).
+final groupedSearchProvider = FutureProvider.family<SearchResults, String>((ref, rawQuery) async {
+  final query = SearchQuery.parse(rawQuery);
+  if (query.searchTerm.isEmpty && !query.hasFilters) {
+    return const SearchResults();
+  }
+
+  final jellyfinApiHelper = GetIt.instance<JellyfinApiHelper>();
+  final filters = query.favoriteOnly ? 'IsFavorite' : null;
+  final searchTerm = query.searchTerm.isEmpty ? null : query.searchTerm;
+
+  Future<List<BaseItemDto>?> fetch(
+    String includeItemTypes, {
+    bool recursive = true,
+    BaseItemDto? parentItem,
+  }) {
+    return jellyfinApiHelper.getItems(
+      includeItemTypes: includeItemTypes,
+      recursive: recursive,
+      searchTerm: searchTerm,
+      filters: filters,
+      limit: 30,
+      parentItem: parentItem,
+    );
+  }
+
+  Future<List<BaseItemDto>> fetchOrEmpty(
+    bool show,
+    String includeItemTypes, {
+    bool recursive = true,
+    BaseItemDto? parentItem,
+  }) async {
+    if (!show) return const [];
+    return await fetch(includeItemTypes, recursive: recursive, parentItem: parentItem) ??
+        const [];
+  }
+
+  final genreParent = GetIt.instance<FinampUserHelper>().currentUser!.currentView;
+  final results = await Future.wait([
+    fetchOrEmpty(
+      !query.hasTypeScope || query.onlyShowArtists,
+      BaseItemDtoType.artist.jellyfinName!,
+      recursive: false,
+    ),
+    fetchOrEmpty(!query.hasTypeScope || query.onlyShowAlbums, BaseItemDtoType.album.jellyfinName!),
+    fetchOrEmpty(!query.hasTypeScope || query.onlyShowTracks, BaseItemDtoType.track.jellyfinName!),
+    fetchOrEmpty(!query.hasTypeScope || query.onlyShowPlaylists, BaseItemDtoType.playlist.jellyfinName!),
+    fetchOrEmpty(
+      !query.hasTypeScope || query.onlyShowGenres,
+      BaseItemDtoType.genre.jellyfinName!,
+      recursive: false,
+      parentItem: genreParent,
+    ),
+  ]);
+
+  List<BaseItemDto> apply(List<BaseItemDto> items) => items.where(query.matches).toList();
+
+  return SearchResults(
+    artists: apply(results[0]),
+    albums: apply(results[1]),
+    tracks: apply(results[2]),
+    playlists: apply(results[3]),
+    genres: apply(results[4]),
+  );
+});
 
 @Riverpod(keepAlive: true)
 Future<FinampDisplayable<FinampPlayable>> resolveSection(Ref ref, HomeScreenSectionConfiguration section) async {

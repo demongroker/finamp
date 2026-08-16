@@ -3793,5 +3793,6 @@
     "shareApkServerDialogTitle": "Download Jellyamp nearby",
     "shareApkServerDialogBody": "On another phone (same Wi‑Fi / Tailscale), open one of these links:",
     "shareApkCopyUrls": "Copy links",
-    "shareApkUrlsCopied": "Download links copied"
+    "shareApkUrlsCopied": "Download links copied",
+    "searchError": "Search failed"
 }
