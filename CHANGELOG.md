@@ -1,0 +1,66 @@
+# Changelog
+
+All notable changes to Jellyamp are documented here, grouped by
+**Added / Changed / Fixed / Security**, following [Keep a Changelog](https://keepachangelog.com/).
+Tags are semver (`vX.Y.Z`) — the in-app update checker parses them.
+
+## [Unreleased]
+
+## [0.9.35] - 2026-08-16
+### Added
+- Remember the last Jellyfin server URL across launches
+### Fixed
+- Update banner overlapping the Home tab
+- Gradle daemon 2nd-build crash (raised metaspace to 1G)
+
+## [0.9.34] - 2026-08-16
+### Added
+- System notification when a new version is available
+- Release note shown in-app under the version line
+
+## [0.9.33] - 2026-08-15
+### Added
+- "Clear After Current" queue action
+
+## [0.9.32] - 2026-08-15
+### Changed
+- Update banner moved onto the Home screen (was hidden in Settings)
+
+## [0.9.31] - 2026-08-15
+### Added
+- Undo after removing a track from the queue
+
+## [0.9.30] - 2026-08-15
+### Added
+- In-app APK download + install (no browser)
+
+## [0.9.29] - 2026-08-15
+### Added
+- Track info sheet (codec, bitrate, bit depth, sample rate, channels, container, file size, path, server)
+- Direct Play / Direct Streaming / Transcoding distinction on the Now Playing chip
+- Year + Rating sort options for Albums and Tracks
+### Fixed
+- Stray `static` breaking release builds
+- SDK floor raised to Dart 3.7 (upstream wildcard `_` params)
+
+## [0.9.28-ice-glass] - 2026-08-12
+### Added
+- Ice liquid-glass theme (charcoal base + ice-cyan accent)
+- Jellyamp logo + launcher assets; APK size reduction
+
+## [0.9.27-icon-fix] - 2026-08-12
+### Fixed
+- Launcher icon
+
+## [0.9.26-jellyamp-ui] - 2026-08-12
+### Changed
+- Home / UI polish
+
+## [0.9.25] - 2026-08-12 (rebrand baseline)
+### Added
+- Rebrand Finamp → Jellyamp (`com.demongroker.jellyamp`, `Jellyamp` client header)
+- Share original FLAC audio; share / copy Jellyfin link and "Artist — Title"
+- Long-press / double-tap seek gestures
+- Share APK over Wi-Fi
+### Security
+- Privacy build: no storage/media/camera/location runtime prompts; app-private downloads; `allowBackup=false`

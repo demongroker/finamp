@@ -1,61 +1,57 @@
 # JellyAmp — Product Improvement Plan
 
-Source: power-user review (2026-08-15) + library-browsing review (2026-08-15)
+Source: power-user reviews + repo audits (2026-08-15 first pass; 2026-08-16 corrected second audit).
 Repo: https://github.com/demongroker/jellyamp · Branch: `features/share-seek-qol`
+Canonical priorities now live in [ROADMAP.md](../ROADMAP.md) — this file records the
+correction of the first audit and the current build focus.
 
-## Implemented now (this pass)
+## Audit correction (2026-08-16) — features already shipped, DO NOT re-propose
 
-### 0. Fixed pre-existing build blockers (were breaking every release build)
-- `lib/services/media_share_helper.dart` — `static` modifier on a top-level function (compile error) → removed
-- `pubspec.yaml` — SDK constraint `>=3.6.0` pinned language level below the Dart 3.7+ wildcard `_` params used throughout upstream code → bumped to `>=3.7.0 <4.0.0`
-- Verified: `flutter build apk --release` now succeeds (was failing on ~10 compile errors)
+The first audit listed these as missing; the second audit confirmed they are **already implemented**:
 
-### 1. Track Info sheet + Direct Play / Direct Stream / Transcoding clarity (Review §4, §7, §17 — their P0 #3)
-- **New:** `lib/components/PlayerScreen/track_info_sheet.dart` — tap the **Playback Mode chip** on Now Playing to open a technical sheet: playback mode, codec, bitrate, bit depth, sample rate, channels, container, file size, path, server name.
-- **Fixed the upstream TODO** (`feature_chips.dart`): Now Playing chip now distinguishes **Direct Streaming** (container remux, no transcode) from **Direct Playing** using `MediaSourceInfo.supportsDirectPlay/supportsDirectStream`, instead of labeling everything "Direct Playing".
-- 6 new l10n keys (`playbackModeDirectStreaming`, `channels`, `container`, `fileSize`, `path`, `server`).
+- Direct Play / Direct Streaming / Transcoding visibility + technical track info sheet
+- Queue: drag/reorder, swipe-to-remove, Play Next / Add Next, Undo, Clear After Current
+- Sort by Year and Rating (with per-view memory)
+- Clean default Home (intentionally sparse)
+- In-app updates, update notification, in-app release notes
+- Remember last Jellyfin server
+- Share original FLAC, share/copy links, copy "Artist — Title"
+- Long-press seek, double-tap album-art controls
+- Share APK + Wi-Fi APK serving
+- Offline downloads, gapless, ReplayGain/normalization, lyrics, dynamic colors,
+  favorites, playlists, Radio/Instant Mix, playback reporting
 
-### 2. Year + Rating sort options (Review 1 / §4)
-- Exposed `SortBy.productionYear` (Year) and `SortBy.communityRating` (Rating) in the Albums and Tracks sort menus (`jellyfin_models.dart` `defaultsFor`). Sort logic + Jellyfin API mapping already existed — only the menu exposure was missing.
-- Per-view sort memory already exists (tracking controllers persist `tabSortBy`/`tabSortOrder` per content type).
+## The actual problem (from the corrected audit)
 
-## Already satisfied by the fork (no work needed)
-- Alphabetical fast-scroll bar ✓ (keep)
-- Sort: Title/Artist/AlbumArtist/Date Added/Release Date/Play Count/Last Played/Duration/Random ✓
-- Filter: Favorite, Downloaded, Unplayed, Genre, Artist ✓
-- Ascending/Descending toggle + per-view persistence ✓
-- Dark interface, Offline Mode, Previous Queue, Surprise Me, queue management basics ✓
+Jellyamp is currently **Finamp + Jellyamp brand + QoL patches** — useful, but not yet a
+separate identity. The strongest differentiators so far are sharing, seek gestures, the
+clean Home, visual identity, and APK self-update.
 
-## Future roadmap (noted, not built — from the review)
+**Direction change:** stop asking "what cool feature next?" — instead perfect the
+**five workflows** that make Jellyamp worth choosing over Finamp:
 
-### P0 — next candidates
-- **Queue management upgrade** (§8): drag-to-reorder, swipe-to-remove, Add Next/Play Next, Clear After Current, Shuffle Remaining, Remove Duplicates, Save Queue as Playlist, **UNDO after destructive actions**
-- **Queue history expansion** (§9): Previous Queue → proper queue history with timestamps + restore
-- **Search grouping** (§5): results grouped ARTISTS / ALBUMS / TRACKS / PLAYLISTS
+1. Find music → 2. Start playback → 3. Manage queue → 4. Inspect playback quality → 5. Use music offline
 
-### P1
-- **Customizable Home** (§1): reorder/hide sections, density, "Edit Home" entry point — note: `HomeScreenConfiguration` + `_migrateHomescreen()` already exist in this fork
-- **Download Manager** (§10): pause/resume/retry/failed, storage usage, Downloaded vs Cached distinction
-- **Compact/Comfortable density modes** (§6)
-- **Navigation cleanup** (§2, §3): drawer reorg (Logs → Settings → Advanced → Diagnostics), rename "Restore Now Playing" → "Restore Previous Session"
-- **Multi-select** (§15) + richer context menus (§16)
-- **Error states** (§19): Jellyfin unreachable / auth expired / download failed / playback failed
+## Current build focus (P0 — do next)
 
-### P2
-- Smart Downloads (§11), Command Palette (§14), Advanced search syntax (§5), Track info already done (§17), Surprise Me discovery (§13), Settings search (§21)
+1. **Powerful unified search** — grouped results (artists/albums/tracks/playlists/genres) + query syntax
+2. **Advanced filtering** — Downloaded/Favorite/Played/Genre/Year/Album Artist/Codec/Bitrate/Lossless/Hi-Res
+3. **Download manager reliability + polish** — trustworthy subsystem, Downloaded vs Cached distinction
+4. **Transcoding explanation** — "why" + source→output chain
+5. **Queue / listening sessions** — restore-able sessions, save queue as playlist
+6. **Performance on huge libraries** (10k–100k tracks)
+7. **Stabilize releases + regression testing**
 
-### P3
-- Animations, micro-interactions, cosmetic polish (§23 progressive disclosure principle applies to all of the above)
+See ROADMAP.md for P1 / P2 / P3 and the NOT-planned list.
 
-## Design principle (from review)
-Simple on the surface, extremely powerful underneath. Five core flows to perfect: LIBRARY → SEARCH → QUEUE → PLAYBACK → OFFLINE. Progressive disclosure: normal interface simple, power features behind long-press / More / Advanced.
+## Design principle (unchanged)
 
-## Files changed this pass
-- [CREATED] `lib/components/PlayerScreen/track_info_sheet.dart`
-- [MODIFIED] `lib/components/PlayerScreen/feature_chips.dart` (Direct Stream distinction + tappable chip)
-- [MODIFIED] `lib/models/jellyfin_models.dart` (Year/Rating sort options)
-- [MODIFIED] `lib/l10n/app_en.arb` (+6 keys)
-- [MODIFIED] `lib/services/media_share_helper.dart` (build fix: stray `static`)
-- [MODIFIED] `pubspec.yaml` (build fix: SDK floor 3.7.0)
-- [CREATED] `docs/reviews-collected.md` (raw reviews)
-- [CREATED] `docs/improvement-plan.md` (this plan)
+Simple on the surface, extremely powerful underneath. Five core flows:
+LIBRARY → SEARCH → QUEUE → PLAYBACK → OFFLINE. Progressive disclosure:
+normal interface simple; power features behind long-press / More / Advanced.
+
+## Files changed this pass (2026-08-16 — governance, no code)
+
+- [CREATED] `ROADMAP.md` — identity + P0–P3 priorities + NOT-planned guardrails
+- [CREATED] `CHANGELOG.md` — release history grouped Added/Changed/Fixed/Security
+- [MODIFIED] `docs/improvement-plan.md` — this corrected plan

@@ -59,6 +59,12 @@ Users still on the old 4-action / 7-section stock layout are **auto-migrated onc
 
 https://github.com/demongroker/jellyamp/releases
 
+## Docs
+
+- [ROADMAP.md](./ROADMAP.md) — identity + priorities (P0–P3) + NOT-planned
+- [CHANGELOG.md](./CHANGELOG.md) — release history (Added/Changed/Fixed/Security)
+- [docs/improvement-plan.md](./docs/improvement-plan.md) — current build focus
+
 ## Build APK
 
 ```bash
