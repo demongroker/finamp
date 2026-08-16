@@ -9,6 +9,7 @@ import 'package:finamp/services/server_client_discovery_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 
@@ -97,6 +98,7 @@ class _LoginFlowState extends State<LoginFlow> {
                     serverState.selectedServer = server;
                     serverState.baseUrl = baseUrl;
                     serverState.clientDiscoveryHandler.stopDiscovery();
+                    Hive.box<String>("LastServerUrl").put("lastServerUrl", baseUrl);
                     loginNavigatorKey.currentState!.pushNamed(LoginUserSelectionPage.routeName);
                   },
                 ),

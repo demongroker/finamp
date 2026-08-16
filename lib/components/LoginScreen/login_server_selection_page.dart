@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:http/http.dart' show ClientException;
 import 'package:logging/logging.dart';
 
@@ -34,10 +35,15 @@ class _LoginServerSelectionPageState extends ConsumerState<LoginServerSelectionP
 
   final jellyfinApiHelper = GetIt.instance<JellyfinApiHelper>();
   final formKey = GlobalKey<FormState>();
+  late final TextEditingController _serverUrlController;
 
   @override
   void initState() {
     super.initState();
+
+    _serverUrlController = TextEditingController(
+      text: Hive.box<String>("LastServerUrl").get("lastServerUrl") ?? "",
+    );
 
     widget.serverState.updateCallback = () {
       if (mounted) {
@@ -46,6 +52,12 @@ class _LoginServerSelectionPageState extends ConsumerState<LoginServerSelectionP
     };
 
     _startDiscovery();
+
+    // Pre-fill + auto-test the last saved server so users don't have to re-type it.
+    final lastServerUrl = _serverUrlController.text;
+    if (lastServerUrl.isNotEmpty) {
+      widget.serverState.onBaseUrlChanged(lastServerUrl);
+    }
   }
 
   void _startDiscovery() {
@@ -104,6 +116,12 @@ class _LoginServerSelectionPageState extends ConsumerState<LoginServerSelectionP
   void deactivate() {
     widget.serverState.clientDiscoveryHandler.dispose();
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _serverUrlController.dispose();
+    super.dispose();
   }
 
   @override
@@ -325,6 +343,7 @@ class _LoginServerSelectionPageState extends ConsumerState<LoginServerSelectionP
               child: Text(AppLocalizations.of(context)!.serverUrl, textAlign: TextAlign.start),
             ),
             TextFormField(
+              controller: _serverUrlController,
               autocorrect: false,
               keyboardType: TextInputType.url,
               autofillHints: const [AutofillHints.url],

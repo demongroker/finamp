@@ -66,7 +66,10 @@ class _HomeScreenContentState extends ConsumerState<HomeScreenContent>
       onRefresh: () async => _refresh(),
       child: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(child: UpdateBanner()),
+          const SliverPadding(
+            padding: EdgeInsets.only(top: 8.0),
+            sliver: SliverToBoxAdapter(child: UpdateBanner()),
+          ),
           if (hasActions) const SliverPadding(padding: EdgeInsets.only(top: 6.0)),
           SliverLayoutBuilder(
             builder: (context, constraints) {
