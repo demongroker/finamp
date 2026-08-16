@@ -30,11 +30,13 @@ visibility, (6) fast self-hosted workflows, (7) privacy.
 
 ---
 
-## Current phase — CORE HARDENING (audit #3, 2026-08-16)
+## Current phase — CORE HARDENING ✅ shipped in 1.0.0 (audit #3, 2026-08-16)
 
-Unified grouped search + query syntax **shipped** (v0.9.36). The next phase hardens
-the core before adding anything else: security, search correctness, performance,
-download reliability. *Don't add features faster than the core is hardened.*
+All P0 core-hardening items are done and released in **1.0.0**: secure
+self-updater (SHA-256 + exact asset), `downloaded:` filter, search correctness
+(debounce / stale-cancel / limits), album quality semantics, and transcoding
+explanation. Remaining P1 work — advanced filtering UI, `main.dart` refactor,
+dependency-fork audit — targets **1.1**.
 
 ## P0 — do next (this cycle)
 

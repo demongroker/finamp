@@ -6,6 +6,27 @@ Tags are semver (`vX.Y.Z`) — the in-app update checker parses them.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-16
+### Added
+- **Core hardening milestone** — completes the P0 power-user audit:
+  - `downloaded:true/false` search filter (via the download store)
+  - Album quality semantics — an album matches `codec:`/`bit:` only when ALL its tracks do
+  - Transcoding explanation — track sheet shows source → output → reason
+  - Search result limits ("View all N") + stale-query auto-dispose
+### Fixed
+- Search `codec:`/`bit:`/`year:` filters now work (were reading missing MediaSources/ProductionYear fields)
+
+## [0.9.37] - 2026-08-16
+### Security
+- SHA-256 verification before install (checksum published in the release body)
+- Exact APK asset selection (`jellyamp-<version>.apk`) instead of "first *.apk"
+- Human-readable update errors
+
+## [0.9.36] - 2026-08-16
+### Added
+- Unified grouped search (Artists/Albums/Tracks/Playlists/Genres) + query syntax
+- ROADMAP.md + CHANGELOG.md
+
 ## [0.9.35] - 2026-08-16
 ### Added
 - Remember the last Jellyfin server URL across launches
