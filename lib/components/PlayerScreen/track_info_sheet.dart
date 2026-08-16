@@ -1,6 +1,7 @@
 import 'package:file_sizes/file_sizes.dart';
 import 'package:finamp/components/PlayerScreen/feature_chips.dart';
 import 'package:finamp/l10n/app_localizations.dart';
+import 'package:finamp/models/jellyfin_models.dart';
 import 'package:finamp/services/server_info_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,9 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 /// technical details of the currently playing track: playback mode (Direct
 /// Play / Direct Stream / Transcoding / Local), codec, bitrate, bit depth,
 /// sample rate, channels, container, file size, path, and server.
+///
+/// When transcoding, it also shows the source → output chain and the reason,
+/// so "TRANSCODING" always explains itself.
 class TrackInfoSheet extends ConsumerWidget {
   const TrackInfoSheet({super.key, required this.featureState});
 
@@ -41,6 +45,8 @@ class TrackInfoSheet extends ConsumerWidget {
 
     final rows = <(IconData, String, String)>[
       (TablerIcons.player_play, l10n.playbackMode, playbackModeLabel()),
+      if (featureState.isTranscodingAndStreaming)
+        ..._transcodingRows(featureState, mediaSource, l10n),
       (TablerIcons.music, l10n.codec, featureState.codec.toUpperCase()),
       if (featureState.bitrate != null)
         (TablerIcons.gauge, l10n.bitRate, l10n.kiloBitsPerSecondLabel(featureState.bitrate! ~/ 1000)),
@@ -103,6 +109,47 @@ class TrackInfoSheet extends ConsumerWidget {
       ),
     );
   }
+
+  /// Source → output → reason rows, shown only while transcoding.
+  List<(IconData, String, String)> _transcodingRows(
+    FeatureState fs,
+    MediaSourceInfo? mediaSource,
+    AppLocalizations l10n,
+  ) {
+    final source = _sourceAudioStream(mediaSource);
+    final output = [
+      fs.codec.toUpperCase(),
+      if (fs.bitrate != null) l10n.kiloBitsPerSecondLabel(fs.bitrate! ~/ 1000),
+    ].join(' · ');
+    return [
+      (
+        TablerIcons.music,
+        l10n.transcodingSource,
+        source == null ? l10n.unknown : _describeStream(source, l10n),
+      ),
+      (TablerIcons.arrow_right, l10n.transcodingOutput, output),
+      (TablerIcons.help, l10n.transcodingReason, l10n.transcodingReasonStreamingQuality),
+    ];
+  }
+}
+
+/// The original (pre-transcode) audio stream from the media source.
+MediaStream? _sourceAudioStream(MediaSourceInfo? mediaSource) {
+  final streams = mediaSource?.mediaStreams ?? const <MediaStream>[];
+  for (final s in streams) {
+    if (s.type == 'Audio') return s;
+  }
+  return streams.isNotEmpty ? streams.first : null;
+}
+
+String _describeStream(MediaStream s, AppLocalizations l10n) {
+  final parts = <String>[
+    (s.codec ?? '?').toUpperCase(),
+    if (s.bitDepth != null) l10n.numberAsBit(s.bitDepth!),
+    if (s.sampleRate != null) l10n.numberAsKiloHertz(s.sampleRate! / 1000.0),
+    if (s.bitRate != null) l10n.kiloBitsPerSecondLabel(s.bitRate! ~/ 1000),
+  ];
+  return parts.join(' · ');
 }
 
 Future<void> showTrackInfoSheet(BuildContext context, FeatureState featureState) {

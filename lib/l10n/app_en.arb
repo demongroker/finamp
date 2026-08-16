@@ -3795,5 +3795,9 @@
     "shareApkCopyUrls": "Copy links",
     "shareApkUrlsCopied": "Download links copied",
     "searchError": "Search failed",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "transcodingSource": "Source",
+    "transcodingOutput": "Output",
+    "transcodingReason": "Why",
+    "transcodingReasonStreamingQuality": "Streaming quality setting"
 }
