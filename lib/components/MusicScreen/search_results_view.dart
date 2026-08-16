@@ -1,7 +1,6 @@
 import 'package:finamp/components/MusicScreen/item_wrapper.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/jellyfin_models.dart';
-import 'package:finamp/models/search_models.dart';
 import 'package:finamp/services/music_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +23,6 @@ class SearchResultsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final async = ref.watch(groupedSearchProvider(query));
-    final downloadedRequested = SearchQuery.parse(query).downloadedRequested;
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -36,17 +34,11 @@ class SearchResultsView extends ConsumerWidget {
       ),
       data: (results) {
         if (results.isEmpty) {
-          return ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            children: [
-              if (downloadedRequested) _unsupportedNote(context, l10n),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(l10n.noSearchResults, textAlign: TextAlign.center),
-                ),
-              ),
-            ],
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(l10n.noSearchResults, textAlign: TextAlign.center),
+            ),
           );
         }
 
@@ -61,7 +53,6 @@ class SearchResultsView extends ConsumerWidget {
         return ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
-            if (downloadedRequested) _unsupportedNote(context, l10n),
             for (final (title, items) in sections) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 18, 16, 4),
@@ -78,18 +69,6 @@ class SearchResultsView extends ConsumerWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _unsupportedNote(BuildContext context, AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Text(
-        l10n.searchDownloadedUnsupported,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-      ),
     );
   }
 }

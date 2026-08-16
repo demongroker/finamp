@@ -15,6 +15,7 @@ import '../models/music_slices.dart';
 import '../models/search_models.dart';
 import 'album_screen_provider.dart';
 import 'artist_content_provider.dart';
+import 'downloads_service.dart';
 import 'finamp_settings_helper.dart';
 import 'finamp_user_helper.dart';
 import 'item_by_id_provider.dart';
@@ -121,7 +122,21 @@ final groupedSearchProvider = FutureProvider.autoDispose.family<SearchResults, S
     ),
   ]);
 
-  List<BaseItemDto> apply(List<BaseItemDto> items) => items.where(query.matches).toList();
+  List<BaseItemDto> apply(List<BaseItemDto> items) {
+    final wantDownloaded = query.downloadedFilter;
+    var filtered = items.where(query.matches).toList();
+    if (wantDownloaded != null) {
+      final downloads = GetIt.instance<DownloadsService>();
+      filtered = filtered.where((item) {
+        final type = BaseItemDtoType.fromItem(item) == BaseItemDtoType.track
+            ? DownloadItemType.track
+            : DownloadItemType.collection;
+        final stub = DownloadStub.fromItem(type: type, item: item);
+        return downloads.getStatus(stub, null).isDownloaded == wantDownloaded;
+      }).toList();
+    }
+    return filtered;
+  }
 
   return SearchResults(
     artists: apply(results[0]),

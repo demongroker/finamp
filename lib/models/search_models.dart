@@ -15,13 +15,10 @@ import 'package:finamp/models/jellyfin_models.dart';
 ///   codec:flac                keep only items whose audio codec is "flac"
 ///   bit:24  (or bitdepth:24)  keep only 24-bit items
 ///   favorite:true             keep only favorites
+///   downloaded:true           keep only downloaded items (false = not downloaded)
 ///
 /// Free text and `key:value` terms can be mixed freely. Quoted phrases are
 /// supported, e.g. `album:"master of puppets"`.
-///
-/// `downloaded:` is recognised but **not yet applied** — it sets
-/// [downloadedRequested] so the UI can say "not supported yet" instead of
-/// silently ignoring a filter the user asked for.
 class SearchQuery {
   const SearchQuery({
     required this.searchTerm,
@@ -36,7 +33,7 @@ class SearchQuery {
     this.onlyShowTracks = false,
     this.onlyShowPlaylists = false,
     this.onlyShowGenres = false,
-    this.downloadedRequested = false,
+    this.downloadedFilter,
   });
 
   final String searchTerm;
@@ -52,9 +49,9 @@ class SearchQuery {
   final bool onlyShowPlaylists;
   final bool onlyShowGenres;
 
-  /// True when a `downloaded:` term was present. Parsed but not yet applied —
-  /// surfaced as "not supported yet" so a no-op filter is never silent.
-  final bool downloadedRequested;
+  /// Whether to keep only downloaded (`true`) or non-downloaded (`false`)
+  /// items. Null when no `downloaded:` term was given.
+  final bool? downloadedFilter;
 
   /// Whether any type-scoping term (`artist:`, `album:`, …) was present.
   bool get hasTypeScope =>
@@ -64,14 +61,15 @@ class SearchQuery {
       onlyShowPlaylists ||
       onlyShowGenres;
 
-  /// Whether any filter term (year/codec/bit/genre/favorite) was present.
+  /// Whether any filter term (year/codec/bit/genre/favorite/downloaded) was present.
   bool get hasFilters =>
       yearMin != null ||
       yearMax != null ||
       codec != null ||
       bitDepth != null ||
       favoriteOnly ||
-      genreFilter != null;
+      genreFilter != null ||
+      downloadedFilter != null;
 
   factory SearchQuery.parse(String raw) {
     final free = <String>[];
@@ -86,7 +84,7 @@ class SearchQuery {
     var onlyTracks = false;
     var onlyPlaylists = false;
     var onlyGenres = false;
-    var downloadedRequested = false;
+    bool? downloadedFilter;
 
     for (final token in _tokenize(raw)) {
       final kv = _splitKeyValue(token);
@@ -125,8 +123,7 @@ class SearchQuery {
           onlyPlaylists = true;
           free.add(value);
         case 'downloaded':
-          // Recognised but not yet applied — flagged so the UI can say so.
-          downloadedRequested = true;
+          downloadedFilter = _parseBool(value);
         default:
           // Unknown key: keep it as literal search text rather than dropping it.
           free.add(token);
@@ -146,7 +143,7 @@ class SearchQuery {
       onlyShowTracks: onlyTracks,
       onlyShowPlaylists: onlyPlaylists,
       onlyShowGenres: onlyGenres,
-      downloadedRequested: downloadedRequested,
+      downloadedFilter: downloadedFilter,
     );
   }
 
