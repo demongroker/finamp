@@ -19,11 +19,16 @@ class UpdateInfo {
   /// Used for in-app update; null means "open the release page instead".
   final String? downloadUrl;
 
+  /// Expected SHA-256 hex of the APK, published in the release body as
+  /// `SHA-256: <hex>`. When present, the installer verifies before installing.
+  final String? sha256;
+
   const UpdateInfo({
     required this.latestVersion,
     required this.htmlUrl,
     this.body,
     this.downloadUrl,
+    this.sha256,
   });
 
   /// Short one-line release note derived from the GitHub release body
@@ -87,15 +92,34 @@ class UpdateChecker {
       final latestTag = rawTag.replaceFirst(RegExp(r'^v'), '').split('+').first;
       final htmlUrl = data['html_url'] as String? ?? 'https://github.com/$_repo/releases';
 
-      // Find the APK asset download URL for in-app updates.
-      String? downloadUrl;
+      // Select the APK by an exact release contract (jellyamp-<version>.apk),
+      // never "the first *.apk". Fall back only to a single jellyamp-*.apk asset.
       final assets = (data['assets'] as List?) ?? const [];
+      final exactName = 'jellyamp-$latestTag.apk';
+      String? downloadUrl;
       for (final asset in assets) {
-        if (asset is Map &&
-            ((asset['name'] as String?)?.toLowerCase().endsWith('.apk') ?? false)) {
+        if (asset is Map && asset['name'] == exactName) {
           downloadUrl = asset['browser_download_url'] as String?;
           if (downloadUrl != null) break;
         }
+      }
+      if (downloadUrl == null) {
+        final apks = assets
+            .whereType<Map<String, dynamic>>()
+            .where((a) => ((a['name'] as String?) ?? '').toLowerCase().endsWith('.apk'))
+            .toList();
+        if (apks.length == 1 &&
+            (((apks.first['name'] as String?) ?? '').toLowerCase().startsWith('jellyamp-'))) {
+          downloadUrl = apks.first['browser_download_url'] as String?;
+        }
+      }
+
+      // Expected SHA-256, published in the release body as "SHA-256: <hex>".
+      final body = data['body'] as String?;
+      String? sha256;
+      if (body != null) {
+        final match = RegExp(r'SHA-256[:\s]+([0-9a-fA-F]{64})').firstMatch(body);
+        if (match != null) sha256 = match.group(1)!.toLowerCase();
       }
 
       if (latestTag.isEmpty) return null;
@@ -104,8 +128,9 @@ class UpdateChecker {
         final info = UpdateInfo(
           latestVersion: latestTag,
           htmlUrl: htmlUrl,
-          body: data['body'] as String?,
+          body: body,
           downloadUrl: downloadUrl,
+          sha256: sha256,
         );
 
         _cachedResult = info;

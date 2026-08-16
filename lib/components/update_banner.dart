@@ -1,8 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:finamp/services/update_checker.dart';
 import 'package:finamp/services/update_checker_provider.dart';
 import 'package:finamp/services/update_installer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 /// Subtle, non-intrusive update banner with in-app download + install.
@@ -173,7 +177,26 @@ class _UpdateBannerState extends ConsumerState<UpdateBanner> {
       );
 
       if (!mounted) return;
-      setState(() => _status = _UpdateStatus.installing);
+
+      // Verify integrity before install (SHA-256 published with the release).
+      if (update.sha256 != null) {
+        setState(() => _message = 'Verifying package…');
+        final ok = await UpdateInstaller.verifySha256(file, update.sha256!);
+        if (!mounted) return;
+        if (!ok) {
+          setState(() {
+            _status = _UpdateStatus.idle;
+            _message =
+                'Update verification failed — the download does not match the release. Tap Update to retry.';
+          });
+          return;
+        }
+      }
+
+      setState(() {
+        _status = _UpdateStatus.installing;
+        _message = null;
+      });
 
       await UpdateInstaller.installApk(file.path);
 
@@ -187,9 +210,17 @@ class _UpdateBannerState extends ConsumerState<UpdateBanner> {
       if (mounted) {
         setState(() {
           _status = _UpdateStatus.idle;
-          _message = 'Update failed: $e';
+          _message = _friendlyUpdateError(e);
         });
       }
     }
+  }
+
+  /// Maps low-level update exceptions to human-readable messages.
+  String _friendlyUpdateError(Object e) {
+    if (e is SocketException || e is TimeoutException || e is http.ClientException) {
+      return 'Couldn\'t download the update. Check your connection and try again.';
+    }
+    return 'Update failed. Check your connection and try again, or open the release page.';
   }
 }

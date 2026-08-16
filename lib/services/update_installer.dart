@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -44,6 +45,18 @@ class UpdateInstaller {
     } finally {
       client.close();
     }
+  }
+
+  /// Computes the SHA-256 hex digest of [file].
+  static Future<String> sha256Of(File file) async {
+    final bytes = await file.readAsBytes();
+    return sha256.convert(bytes).toString();
+  }
+
+  /// Returns true when [file]'s SHA-256 matches [expectedHex] (case-insensitive).
+  static Future<bool> verifySha256(File file, String expectedHex) async {
+    final actual = await sha256Of(file);
+    return actual.toLowerCase() == expectedHex.toLowerCase();
   }
 
   /// Fires the Android install intent for [path].

@@ -18,6 +18,10 @@ import 'package:finamp/models/jellyfin_models.dart';
 ///
 /// Free text and `key:value` terms can be mixed freely. Quoted phrases are
 /// supported, e.g. `album:"master of puppets"`.
+///
+/// `downloaded:` is recognised but **not yet applied** — it sets
+/// [downloadedRequested] so the UI can say "not supported yet" instead of
+/// silently ignoring a filter the user asked for.
 class SearchQuery {
   const SearchQuery({
     required this.searchTerm,
@@ -32,6 +36,7 @@ class SearchQuery {
     this.onlyShowTracks = false,
     this.onlyShowPlaylists = false,
     this.onlyShowGenres = false,
+    this.downloadedRequested = false,
   });
 
   final String searchTerm;
@@ -46,6 +51,10 @@ class SearchQuery {
   final bool onlyShowTracks;
   final bool onlyShowPlaylists;
   final bool onlyShowGenres;
+
+  /// True when a `downloaded:` term was present. Parsed but not yet applied —
+  /// surfaced as "not supported yet" so a no-op filter is never silent.
+  final bool downloadedRequested;
 
   /// Whether any type-scoping term (`artist:`, `album:`, …) was present.
   bool get hasTypeScope =>
@@ -77,6 +86,7 @@ class SearchQuery {
     var onlyTracks = false;
     var onlyPlaylists = false;
     var onlyGenres = false;
+    var downloadedRequested = false;
 
     for (final token in _tokenize(raw)) {
       final kv = _splitKeyValue(token);
@@ -114,8 +124,9 @@ class SearchQuery {
         case 'playlist':
           onlyPlaylists = true;
           free.add(value);
-        // `downloaded:` is recognised but not yet filtered — download-status
-        // resolution needs the Isar download store (tracked for a follow-up).
+        case 'downloaded':
+          // Recognised but not yet applied — flagged so the UI can say so.
+          downloadedRequested = true;
         default:
           // Unknown key: keep it as literal search text rather than dropping it.
           free.add(token);
@@ -135,6 +146,7 @@ class SearchQuery {
       onlyShowTracks: onlyTracks,
       onlyShowPlaylists: onlyPlaylists,
       onlyShowGenres: onlyGenres,
+      downloadedRequested: downloadedRequested,
     );
   }
 

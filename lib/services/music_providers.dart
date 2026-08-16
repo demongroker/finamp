@@ -67,7 +67,7 @@ Future<List<BaseItemDto>> globalSearch(Ref ref, String searchTerm, {required boo
 /// Unlike [globalSearch] (which returns a flat list for Android Auto), this
 /// keeps each content type in its own bucket and applies the [SearchQuery]
 /// power syntax (type scoping, year/codec/bit/genre/favorite filters).
-final groupedSearchProvider = FutureProvider.family<SearchResults, String>((ref, rawQuery) async {
+final groupedSearchProvider = FutureProvider.autoDispose.family<SearchResults, String>((ref, rawQuery) async {
   final query = SearchQuery.parse(rawQuery);
   if (query.searchTerm.isEmpty && !query.hasFilters) {
     return const SearchResults();
