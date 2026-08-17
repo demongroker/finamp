@@ -171,7 +171,7 @@ class DefaultSettings {
   static const playbackPitch = 1.0;
   static const syncPlaybackSpeedAndPitch = false;
   static const autoLoadLastQueueOnStartup = true;
-  static const shouldTranscodeDownloads = TranscodeDownloadsSetting.ask;
+  static const shouldTranscodeDownloads = TranscodeDownloadsSetting.never; // lossless-first: default to original, no transcode
   static const multichannelHandlingSetting = MultichannelHandlingSetting.stereoDownmixLossy;
   static const shouldRedownloadTranscodes = false;
   static const resyncOnStartup = true;

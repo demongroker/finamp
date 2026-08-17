@@ -1203,6 +1203,9 @@ class JellyfinApiHelper {
       );
 
       queryParameters.addAll({
+        // Jellyfin 10.11's UniversalAudioStream requires an explicit userId
+        // query param — without it the server throws "Guid can't be empty".
+        "userId": _finampUserHelper.currentUser!.id,
         "transcodingContainer": transcodingProfile.codec.container!,
         "audioCodec": transcodingProfile.codec.name,
         "audioBitRate": transcodingProfile.stereoBitrate.toString(),
