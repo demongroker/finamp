@@ -8,6 +8,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:background_downloader/background_downloader.dart';
 import 'package:collection/collection.dart';
 import 'package:finamp/color_schemes.g.dart';
+import 'package:finamp/theme/jellyamp_theme.dart';
 import 'package:finamp/components/Buttons/cta_medium.dart';
 import 'package:finamp/gen/assets.gen.dart';
 import 'package:finamp/hive_registrar.g.dart';
@@ -1023,7 +1024,7 @@ class FinampApp extends ConsumerWidget {
       initialRoute: SplashScreen.routeName,
       navigatorObservers: [SplitScreenNavigatorObserver(), KeepScreenOnObserver()],
       builder: buildPlayerSplitScreenScaffold,
-      theme: ThemeData(
+      theme: applyJellyAmpTheme(ThemeData(
         brightness: Brightness.light,
         colorScheme: getColorScheme(accentColor, Brightness.light, amoledTheme),
         appBarTheme: const AppBarThemeData(
@@ -1046,8 +1047,8 @@ class FinampApp extends ConsumerWidget {
         ),
         tooltipTheme: const TooltipThemeData(waitDuration: Duration(milliseconds: 800), preferBelow: false),
         pageTransitionsTheme: transitionBuilder,
-      ),
-      darkTheme: ThemeData(
+      )),
+      darkTheme: applyJellyAmpTheme(ThemeData(
         brightness: Brightness.dark,
         colorScheme: getColorScheme(accentColor, Brightness.dark, amoledTheme),
         snackBarTheme: const SnackBarThemeData(
@@ -1062,7 +1063,7 @@ class FinampApp extends ConsumerWidget {
           dismissDirection: DismissDirection.horizontal,
         ),
         pageTransitionsTheme: transitionBuilder,
-      ),
+      )),
       scrollBehavior: FinampScrollBehavior(),
       themeMode: themeMode,
       localizationsDelegates: const [

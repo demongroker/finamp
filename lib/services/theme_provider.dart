@@ -275,7 +275,7 @@ class FinampThemeFromImage extends _$FinampThemeFromImage {
     }
     HSLColor average;
     if (population == 0) {
-      return RawThemeResult.fromColors(Color.fromARGB(255, 0, 164, 220), Color.fromARGB(255, 0, 164, 220));
+      return RawThemeResult.fromColors(Color(0xFF7DD3FC), Color(0xFF7DD3FC));
     } else {
       average = HSLColor.fromColor(
         Color.from(alpha: 1.0, red: r / population, green: g / population, blue: b / population),
@@ -305,7 +305,7 @@ class FinampThemeFromImage extends _$FinampThemeFromImage {
     }
 
     return RawThemeResult.fromColors(
-      palette.vibrantColor?.color ?? palette.dominantColor?.color ?? const Color.fromARGB(255, 0, 164, 220),
+      palette.vibrantColor?.color ?? palette.dominantColor?.color ?? const Color(0xFF7DD3FC),
       background,
     );
   }
@@ -365,12 +365,12 @@ ColorScheme getGrayTheme(Brightness brightness) {
 }
 
 final defaultThemeDark = ColorScheme.fromSeed(
-  seedColor: const Color.fromARGB(255, 0, 164, 220),
+  seedColor: const Color(0xFF7DD3FC),
   brightness: Brightness.dark,
 );
 
 final defaultThemeLight = ColorScheme.fromSeed(
-  seedColor: const Color.fromARGB(255, 0, 164, 220),
+  seedColor: const Color(0xFF7DD3FC),
   brightness: Brightness.light,
 );
 

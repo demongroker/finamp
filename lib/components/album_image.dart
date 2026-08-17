@@ -57,7 +57,7 @@ class AlbumImage extends ConsumerStatefulWidget {
   /// look incorrect due to AlbumImage having an aspect ratio of 1:1
   final Decoration? decoration;
 
-  static final defaultBorderRadius = BorderRadius.circular(4);
+  static final defaultBorderRadius = BorderRadius.circular(8);
 
   @override
   ConsumerState<AlbumImage> createState() => _AlbumImageState();
