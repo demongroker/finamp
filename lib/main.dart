@@ -809,6 +809,7 @@ Future<void> _setupFinampUserHelper() async {
     await GetIt.instance<FinampUserHelper>().migrateFromHive();
     FinampSetters.setHasCompletedIsarUserMigration(true);
   }
+  await GetIt.instance<FinampUserHelper>().hydrateAccessTokens();
   await GetIt.instance<FinampUserHelper>().setAuthHeader();
 }
 

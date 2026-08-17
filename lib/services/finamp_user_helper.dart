@@ -83,11 +83,12 @@ class FinampUserHelper {
         });
       }
     }
-    await _migrateAccessTokens();
   }
 
-  /// Moves plaintext access tokens out of Isar into secure storage (Keychain/Keystore).
-  Future<void> _migrateAccessTokens() async {
+  /// Hydrates access tokens from secure storage into memory and migrates any
+  /// remaining plaintext Isar tokens to secure storage. Idempotent — safe to run
+  /// on every startup.
+  Future<void> hydrateAccessTokens() async {
     final users = _isar.finampUsers.where().findAllSync();
     for (final u in users) {
       final key = 'finamp_accessToken_${u.id}';
@@ -165,6 +166,8 @@ class FinampUserHelper {
     _isar.writeTxnSync(() {
       _isar.finampUsers.filter().idEqualTo(id).deleteAllSync();
     });
+    _accessTokenCache.remove(id);
+    _secureStorage.delete(key: 'finamp_accessToken_$id');
     if (_currentUserCache?.id == id) {
       _currentUserCache = null;
     }
