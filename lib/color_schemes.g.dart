@@ -95,26 +95,31 @@ const darkColorScheme = ColorScheme(
 /// [lightColorScheme] or [darkColorScheme]
 ColorScheme getColorScheme(Color? color, Brightness brightness, bool amoledTheme) {
   // A user-picked custom accent always wins; otherwise use the platform brand
-  // — ember on Android, liquid ice glass elsewhere (iOS).
+  // — ember M3 on Android, curated liquid ice glass elsewhere (iOS).
   final hasCustomAccent = color != null && color != icePrimaryColor;
-  final Color seed = hasCustomAccent
-      ? color!
-      : (Platform.isAndroid ? emberPrimaryColor : icePrimaryColor);
 
-  ColorScheme scheme = ColorScheme.fromSeed(
-    seedColor: seed,
-    brightness: brightness,
-    dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-  );
-
-  // Warm charcoal surfaces for the ember brand.
-  if (!hasCustomAccent && Platform.isAndroid) {
-    scheme = scheme.copyWith(
+  ColorScheme scheme;
+  if (hasCustomAccent) {
+    scheme = ColorScheme.fromSeed(
+      seedColor: color!,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    );
+  } else if (Platform.isAndroid) {
+    // Ember brand with warm charcoal surfaces.
+    scheme = ColorScheme.fromSeed(
+      seedColor: emberPrimaryColor,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+    ).copyWith(
       background: brightness == Brightness.dark ? emberBgColor : const Color(0xFFFFF6F0),
       surface: brightness == Brightness.dark ? emberBgColor : const Color(0xFFFFF6F0),
       surfaceContainerHighest:
           brightness == Brightness.dark ? emberSurfaceColor : const Color(0xFFFFE5D8),
     );
+  } else {
+    // Curated liquid ice glass (hand-tuned charcoal surfaces, kept intact).
+    scheme = brightness == Brightness.dark ? darkColorScheme : lightColorScheme;
   }
 
   if (amoledTheme && brightness == Brightness.dark) {
