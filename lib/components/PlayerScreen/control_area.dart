@@ -1,5 +1,6 @@
 import 'package:finamp/components/Shortcuts/global_shortcut_manager.dart';
 import 'package:finamp/components/Shortcuts/music_control_shortcuts.dart';
+import 'package:finamp/components/glass/glass_surface.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/screens/player_screen.dart';
 import 'package:finamp/utils/platform_helper.dart';
@@ -16,24 +17,27 @@ class ControlArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (controller.shouldShow(PlayerHideable.features)) const FeatureChips(),
-        if (controller.shouldShow(PlayerHideable.progressSlider))
-          if (isDesktop)
-            Tooltip(
-              message: AppLocalizations.of(context)!.seekControlHint(
-                "${GlobalShortcuts.getDisplay(SeekForwardIntent)} / "
-                "${GlobalShortcuts.getDisplay(SeekBackwardIntent)}",
-              ),
-              triggerMode: TooltipTriggerMode.tap,
-              child: const ProgressSlider(),
-            )
-          else
-            const ProgressSlider(),
-        PlayerButtons(controller),
-      ],
+    return GlassSurface(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (controller.shouldShow(PlayerHideable.features)) const FeatureChips(),
+          if (controller.shouldShow(PlayerHideable.progressSlider))
+            if (isDesktop)
+              Tooltip(
+                message: AppLocalizations.of(context)!.seekControlHint(
+                  "${GlobalShortcuts.getDisplay(SeekForwardIntent)} / "
+                  "${GlobalShortcuts.getDisplay(SeekBackwardIntent)}",
+                ),
+                triggerMode: TooltipTriggerMode.tap,
+                child: const ProgressSlider(),
+              )
+            else
+              const ProgressSlider(),
+          PlayerButtons(controller),
+        ],
+      ),
     );
   }
 }

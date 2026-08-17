@@ -346,12 +346,10 @@ class NowPlayingBar extends ConsumerWidget {
                                             key: ValueKey(currentTrack.item.id),
                                             text: currentTrack.item.title,
                                             style: TextStyle(
-                                              fontSize: 14.5,
+                                              fontSize: 15,
                                               height: 26 / 20,
                                               color: primaryTextColor,
-                                              fontWeight: Theme.brightnessOf(context) == Brightness.light
-                                                  ? FontWeight.w500
-                                                  : FontWeight.w600,
+                                              fontWeight: FontWeight.w600,
                                             ),
                                           ),
                                           const SizedBox(height: 4),

@@ -49,9 +49,9 @@ class TrackNameContent extends ConsumerWidget {
                     !(MediaQuery.textScalerOf(context).scale(18) > 18 * 1.11);
 
                 final textStyle = TextStyle(
-                  fontSize: 18,
+                  fontSize: 22,
                   height: 1.2,
-                  fontWeight: Theme.brightnessOf(context) == Brightness.light ? FontWeight.w500 : FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                 );
 
                 final textSpan = TextSpan(text: text, style: textStyle);
