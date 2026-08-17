@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
@@ -5,11 +7,16 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 const jellyfinBlueColor = Color(0xFF00A4DC);
 const jellyfinPurpleColor = Color(0xFFAA5CC3);
 
-/// Jellyamp ice-glass brand accents.
+/// Jellyamp ice-glass brand accents (iOS liquid glass).
 const icePrimaryColor = Color(0xFF7DD3FC);
 const iceBgColor = Color(0xFF0B0F14);
 const iceSurfaceColor = Color(0xFF121820);
 const iceHighlightColor = Color(0xFFE0F2FE);
+
+/// Jellyamp ember brand accents (Android M3 re-skin).
+const emberPrimaryColor = Color(0xFFFF6B35);
+const emberBgColor = Color(0xFF160C07);
+const emberSurfaceColor = Color(0xFF221309);
 
 /// Jellyamp light: frosted ice / platinum glass.
 const lightColorScheme = ColorScheme(
@@ -87,18 +94,31 @@ const darkColorScheme = ColorScheme(
 /// otherwise falls back to default color schemes
 /// [lightColorScheme] or [darkColorScheme]
 ColorScheme getColorScheme(Color? color, Brightness brightness, bool amoledTheme) {
-  ColorScheme scheme = brightness == Brightness.dark ? darkColorScheme : lightColorScheme;
+  // A user-picked custom accent always wins; otherwise use the platform brand
+  // — ember on Android, liquid ice glass elsewhere (iOS).
+  final hasCustomAccent = color != null && color != icePrimaryColor;
+  final Color seed = hasCustomAccent
+      ? color!
+      : (Platform.isAndroid ? emberPrimaryColor : icePrimaryColor);
 
-  if (color != null) {
-    scheme = ColorScheme.fromSeed(
-      seedColor: color,
-      brightness: brightness,
-      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+  ColorScheme scheme = ColorScheme.fromSeed(
+    seedColor: seed,
+    brightness: brightness,
+    dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+  );
+
+  // Warm charcoal surfaces for the ember brand.
+  if (!hasCustomAccent && Platform.isAndroid) {
+    scheme = scheme.copyWith(
+      background: brightness == Brightness.dark ? emberBgColor : const Color(0xFFFFF6F0),
+      surface: brightness == Brightness.dark ? emberBgColor : const Color(0xFFFFF6F0),
+      surfaceContainerHighest:
+          brightness == Brightness.dark ? emberSurfaceColor : const Color(0xFFFFE5D8),
     );
   }
 
   if (amoledTheme && brightness == Brightness.dark) {
-    scheme = scheme.copyWith(background: Color(0xFF000000), surface: Color(0xFF000000));
+    scheme = scheme.copyWith(background: const Color(0xFF000000), surface: const Color(0xFF000000));
   }
 
   return scheme;
