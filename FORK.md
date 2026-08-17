@@ -3,7 +3,7 @@
 **Repo:** https://github.com/demongroker/jellyamp  
 **Branch:** `features/share-seek-qol`  
 **Upstream:** [finamp-app/finamp](https://github.com/finamp-app/finamp) (`redesign`)  
-**Local path (this host):** `/home/adnan/finamp`
+**Local path (this host):** `~/finamp`
 
 ## Identity
 
@@ -71,7 +71,7 @@ https://github.com/demongroker/jellyamp/releases
 export JAVA_HOME=$HOME/sdk/java
 export ANDROID_SDK_ROOT=$HOME/sdk/android
 export PATH="$HOME/.cargo/bin:$JAVA_HOME/bin:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$HOME/sdk/flutter/bin:$PATH"
-cd /home/adnan/finamp   # or your clone
+cd ~/finamp   # or your clone
 flutter build apk --release
 # → build/app/outputs/flutter-apk/app-release.apk
 ```
