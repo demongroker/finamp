@@ -279,8 +279,9 @@ msix_config:
   # capabilities: backgroundMediaPlayback,internetClient,musicLibrary,privateNetworkClientServer,globalMediaControl
   capabilities: internetClient,musicLibrary,privateNetworkClientServer
   enable_at_startup: false
-  certificate_path: ./windows/runner/resources/FINAMP_MSIX_LOCAL_CERTIFICATE_NEW.pfx
-  certificate_password: finamp
+  # MSIX signing cert REMOVED from repo (P1 #4) — rotate before any Windows distribution.
+  # certificate_path: ./windows/runner/resources/FINAMP_MSIX_LOCAL_CERTIFICATE_NEW.pfx
+  # certificate_password: <removed>
   # Building during msix:create is currently bugged, so build manually beforehand.
   build_windows: false
   protocol_activation: finamp # the protocols to activate the app

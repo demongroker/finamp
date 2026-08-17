@@ -30,6 +30,18 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Decode release keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/demongroker-finamp.jks
+
+      - name: Write key.properties
+        run: |
+          cat > android/key.properties <<'EOF'
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=demongroker-finamp.jks
+          EOF
+
       - name: Build APK (arm64)
         run: flutter build apk --release --target-platform android-arm64
 
