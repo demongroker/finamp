@@ -43,6 +43,7 @@ dependencies:
       ref: feat/queue-shuffle
 
   media_kit_libs_linux: ^1.2.1
+  media_kit_libs_ios_audio: ^1.1.4
 
   # Transcoding does not work on windows with current media-kit release.  This fork uses the most recent
   # build of MPV from https://github.com/zhongfly/mpv-winbuild, which works correctly while transcoding.
