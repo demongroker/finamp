@@ -139,20 +139,24 @@ class FinampUserHelper {
 
     currentUserTemp.views = Map<BaseItemId, BaseItemDto>.fromEntries(newViews.map((e) => MapEntry(e.id, e)));
     currentUserTemp.currentViewId = currentUserTemp.views.keys.first;
+    currentUserTemp.accessToken = ''; // token lives in secure storage; never re-persist plaintext
 
     _isar.writeTxnSync(() {
       _isar.finampUsers.putSync(currentUserTemp, saveLinks: false);
     });
+    _currentUserCache = null;
   }
 
   void setCurrentUserCurrentViewId(BaseItemId newViewId) {
     FinampUser currentUserTemp = currentUser!;
 
     currentUserTemp.currentViewId = newViewId;
+    currentUserTemp.accessToken = ''; // token lives in secure storage; never re-persist plaintext
 
     _isar.writeTxnSync(() {
       _isar.finampUsers.putSync(currentUserTemp, saveLinks: false);
     });
+    _currentUserCache = null;
   }
 
   /// Removes the user with the given id. If the given id is the current user
