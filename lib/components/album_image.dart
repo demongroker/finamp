@@ -14,7 +14,7 @@ import '../services/theme_provider.dart';
 typedef ImageProviderCallback = void Function(ImageProvider theme);
 
 /// This widget provides the default look for album images throughout Finamp -
-/// Aspect ratio 1 with a circular border radius of 4. If you don't want these
+/// Aspect ratio 1 with a border radius of 8. If you don't want these
 /// customisations, use [BareAlbumImage] or get an [ImageProvider] directly
 /// through [AlbumImageInfo.init].
 class AlbumImage extends ConsumerStatefulWidget {

@@ -247,7 +247,7 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
                             singleTabConfig?.getTitle(context.l10n) ??
                                 finampUserHelper.currentUser?.currentView?.name ??
                                 appName,
-                            style: TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           );

@@ -422,7 +422,7 @@ class JellyfinServerSelectionWidget extends StatelessWidget {
         ? ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
             ),
             onPressed: onPressed,
@@ -431,7 +431,7 @@ class JellyfinServerSelectionWidget extends StatelessWidget {
         : Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: buildContent(),

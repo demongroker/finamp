@@ -55,7 +55,7 @@ class ArtistScreenContentFlexibleSpaceBar extends ConsumerWidget {
                 Row(
                   children: [
                     SizedBox(height: 125, child: AlbumImage(item: parentItem, tapToZoom: true)),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 12),
                     Expanded(
                       flex: 2,
                       child: FutureBuilder(

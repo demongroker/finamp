@@ -259,11 +259,10 @@ class JellyfinUserWidget extends StatelessWidget {
         if (avatarUrl != null) {
           return Image.network(avatarUrl, width: avatarSize, height: avatarSize);
         } else {
-          return Container(
-            decoration: BoxDecoration(
-              color: Theme.brightnessOf(context) == Brightness.dark ? Colors.white : Colors.black,
-            ),
-            child: Image.asset('images/finamp.png', width: avatarSize, height: avatarSize),
+          return SizedBox(
+            width: avatarSize,
+            height: avatarSize,
+            child: FinampIcon(avatarSize, avatarSize),
           );
         }
       } else {

@@ -146,7 +146,7 @@ class _TracksSectionState extends ConsumerState<TracksSection> {
                       Expanded(
                         child: Text(
                           widget.tracksText,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -349,7 +349,7 @@ class _ItemsSectionState extends ConsumerState<CollectionsSection> {
                       Expanded(
                         child: Text(
                           widget.itemsText,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],

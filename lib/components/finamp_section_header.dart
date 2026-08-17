@@ -93,7 +93,7 @@ class FinampSectionHeader extends ConsumerWidget {
                     alignment: Alignment.centerLeft,
                     child: Material(
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(6.0),
+                        borderRadius: BorderRadius.circular(8.0),
                         // all handled by the [GestureDetector] above,
                         // but kept here for the desktop hover effect
                         onTap: onTap,
