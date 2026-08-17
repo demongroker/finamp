@@ -229,7 +229,13 @@ class NowPlayingBar extends ConsumerWidget {
                 },
                 child: Material(
                   shadowColor: ColorScheme.of(context).primary.withOpacity(isDark ? 0.22 : 0.40),
-                  borderRadius: BorderRadius.circular(16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    side: BorderSide(
+                      color: ColorScheme.of(context).primary.withOpacity(isDark ? 0.30 : 0.35),
+                      width: 1.0,
+                    ),
+                  ),
                   clipBehavior: Clip.antiAlias,
                   // Ice glass tint over progress colors
                   color: isDark
@@ -267,7 +273,7 @@ class NowPlayingBar extends ConsumerWidget {
                             AlbumImage(
                               placeholderBuilder: (_) => const SizedBox.shrink(),
                               imageListenable: currentAlbumImageProvider,
-                              borderRadius: BorderRadius.zero,
+                              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
                             ),
                             if (!showPlayButtonAtEnd)
                               AudioFadeProgressVisualizerContainer(
