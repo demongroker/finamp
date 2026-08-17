@@ -1,0 +1,34 @@
+name: Build Jellyamp iOS (unsigned)
+
+on:
+  push:
+    branches: [ features/*, main ]
+  pull_request:
+    branches: [ features/*, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install
+
+      - name: Build iOS (unsigned, debug)
+        run: flutter build ios --debug --no-codesign
