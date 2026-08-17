@@ -1,4 +1,4 @@
-name: Build Jellyamp iOS (unsigned)
+name: Build Jellyamp iOS (unsigned IPA)
 
 on:
   push:
@@ -30,5 +30,38 @@ jobs:
           cd ios
           pod install
 
-      - name: Build iOS (unsigned, debug)
-        run: flutter build ios --debug --no-codesign
+      - name: Build iOS (unsigned, release)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find build/ios -name "Runner.app" -type d -print -quit)
+          if [ -z "${APP_PATH}" ]; then
+            echo "::error::Runner.app not found under build/ios"
+            exit 1
+          fi
+          echo "App bundle: ${APP_PATH}"
+          rm -rf Payload JellyAmp.ipa
+          mkdir -p Payload
+          cp -R "${APP_PATH}" "Payload/Runner.app"
+          # Drop any residual signature so the sideload tool re-signs cleanly
+          codesign --remove-signature "Payload/Runner.app" 2>/dev/null || true
+          find "Payload/Runner.app" -name "*.framework" -exec codesign --remove-signature {} \; 2>/dev/null || true
+          zip -qr -y JellyAmp.ipa Payload
+          echo "=== IPA created ==="
+          ls -la JellyAmp.ipa
+          echo "=== Bundle ID ==="
+          plutil -extract CFBundleIdentifier raw "Payload/Runner.app/Info.plist"
+          echo "=== Frameworks ==="
+          ls -1 "Payload/Runner.app/Frameworks/" 2>/dev/null || echo "(no Frameworks dir)"
+          echo "=== IPA top-level structure ==="
+          unzip -l JellyAmp.ipa | head -n 25
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JellyAmp-unsigned-ipa
+          path: JellyAmp.ipa
+          if-no-files-found: error
+          retention-days: 14
