@@ -268,6 +268,24 @@ class _PlayerScreenContent extends ConsumerWidget {
               body: Stack(
                 children: [
                   if (ref.watch(finampSettingsProvider.useCoverAsBackground)) const BlurredPlayerScreenBackground(),
+                  // Brand accent scrim — a subtle ember/ice glow behind the artwork.
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              ColorScheme.of(context).primary.withOpacity(0.10),
+                              Colors.transparent,
+                              ColorScheme.of(context).primary.withOpacity(0.06),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   SafeArea(
                     minimum: EdgeInsets.only(top: toolbarHeight),
                     child: LayoutBuilder(
