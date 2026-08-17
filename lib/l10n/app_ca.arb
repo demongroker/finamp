@@ -204,7 +204,7 @@
     "playButtonLabel": "Reprodueix",
     "downloads": "Descàrregues",
     "required": "Requerit",
-    "finamp": "Finamp",
+    "finamp": "Jellyamp",
     "@finamp": {
         "description": "App name, possibly translated"
     },

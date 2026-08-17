@@ -319,7 +319,7 @@ class QueueService {
           .toList(),
     );
     // _audioHandler.queueTitle.add(_order.originalSource.name.toString());
-    _audioHandler.queueTitle.add("Finamp");
+    _audioHandler.queueTitle.add("Jellyamp");
 
     if (_savedQueueState == SavedQueueState.saving) {
       _saveCurrentQueue(withPosition: false);

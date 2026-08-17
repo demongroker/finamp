@@ -62,7 +62,7 @@ class PlaybackHistoryService {
       // stop periodic background updates if playback has ended
       _periodicUpdateTimer?.cancel();
       if (isDesktop) {
-        WindowManager.instance.setTitle("Finamp");
+        WindowManager.instance.setTitle("Jellyamp");
       }
       return;
     }
@@ -101,7 +101,7 @@ class PlaybackHistoryService {
             currentIndex < 0 ||
             currentIndex >= _audioService.sequenceState.effectiveSequence.length) {
           if (isDesktop) {
-            WindowManager.instance.setTitle("Finamp");
+            WindowManager.instance.setTitle("Jellyamp");
           }
           return;
         }
@@ -109,7 +109,7 @@ class PlaybackHistoryService {
           currentItem = item;
         } else {
           if (isDesktop) {
-            WindowManager.instance.setTitle("Finamp");
+            WindowManager.instance.setTitle("Jellyamp");
           }
           return;
         }

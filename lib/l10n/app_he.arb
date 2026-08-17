@@ -310,7 +310,7 @@
     "@playbackSpeedDecreaseLabel": {
         "description": "Label for the button in the speed menu that decreases the playback speed."
     },
-    "finamp": "Finamp",
+    "finamp": "Jellyamp",
     "@finamp": {
         "description": "App name, possibly translated"
     },

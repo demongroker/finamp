@@ -209,7 +209,7 @@
     "sortOrder": "Urutan",
     "sortBy": "Urutkan berdasarkan",
     "title": "Judul",
-    "finamp": "Finamp",
+    "finamp": "Jellyamp",
     "@finamp": {
         "description": "App name, possibly translated"
     },
