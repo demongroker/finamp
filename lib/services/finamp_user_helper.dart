@@ -83,6 +83,18 @@ class FinampUserHelper {
         });
       }
     }
+    // Scrub the legacy plaintext Hive user boxes now that the token lives in
+    // secure storage + Isar. Leaving them on disk would keep the old
+    // FinampUser.accessToken plaintext around (Advisor follow-up).
+    for (final name in const ["FinampUsers", "CurrentUserId"]) {
+      try {
+        final box = Hive.box(name);
+        await box.close();
+        await Hive.deleteBoxFromDisk(name);
+      } catch (e) {
+        finampUserHelperLogger.warning("Failed to scrub legacy Hive box '$name': $e");
+      }
+    }
   }
 
   /// Hydrates access tokens from secure storage into memory and migrates any
