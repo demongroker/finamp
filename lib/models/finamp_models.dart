@@ -1856,7 +1856,6 @@ enum DownloadItemState {
   }
 
   static DownloadItemState fromTaskStatus(TaskStatus status) {
-    assert(status != TaskStatus.paused);
     return switch (status) {
       // DownloadItemState.enqueued should only be reachable via _initiateDownload
       // or background_downloader listener to ensure item is ready to download
