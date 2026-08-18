@@ -638,7 +638,16 @@ class DownloadsDeleteService {
     }
 
     await _downloadsService.downloadTaskQueue.remove(item);
-    if (item.file != null && item.file!.existsSync()) {
+    // Explicit user downloads are user-owned persistent content.  When the app
+    // is offline no re-download is possible, so deleting the file here would be
+    // a silent, permanent removal of the user's download.  Preserve it; the node
+    // is still reset to notDownloaded below so a later re-sync can re-verify.
+    // Online, deletion proceeds normally so the re-download queue can replace
+    // the file.  User-initiated removal is unaffected: the ownership marker is
+    // cleared before this runs, so isExplicitUserDownload(item) is false.
+    final bool preserveOfflineExplicit =
+        FinampSettingsHelper.finampSettings.isOffline && _downloadsService.isExplicitUserDownload(item);
+    if (item.file != null && item.file!.existsSync() && !preserveOfflineExplicit) {
       try {
         await item.file!.delete();
         _deleteLogger.finer("Deleted file for ${item.name}");

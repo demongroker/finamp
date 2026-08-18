@@ -178,3 +178,24 @@ NOT a main-isolate cost in production: it already runs in the background worker 
 objects back to the UI, which only becomes significant at extreme single-response sizes and
 is addressed by paging rather than off-loading. Any P0.2+ optimization should move the sort
 and search numbers; they are the reference points.
+
+---
+
+## P0.2 status — Downloaded vs Cached ownership (step 5)
+
+This document is the P0.1 bottleneck ledger; P0.2 step 5 is a safety/data-ownership change,
+not a performance change, so it is recorded here only as a status marker rather than a
+bottleneck. See `benchmark/DOWNLOAD_OWNERSHIP_AUDIT.md` for the full subsystem audit.
+
+Completed (step 5, 2026-08-18, minimal migration-safe change):
+- Added `DownloadsService.isExplicitUserDownload(item)` — an explicit ownership predicate
+  derived from the existing `userTranscodingProfile` marker + the `requiredBy` graph
+  (no schema change, so no Isar migration and no build_runner).
+- Guarded the three automatic removal paths so they cannot silently delete an explicit
+  user download's file: `repairAllDownloads` step 2 (bad-state delete), step 6 (orphan
+  file cleanup), and the offline file-delete in `DownloadsDeleteService.deleteDownload`.
+
+Not in scope here (P0.2 step 6): the full QUEUED/DOWNLOADING/PAUSED/VERIFYING/...
+state machine and the Downloads-screen UX. Online delete-then-redownload re-sync
+mechanics, `requireWifiForDownloads`, and the download queue are unchanged.
+

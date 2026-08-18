@@ -695,11 +695,21 @@ class DownloadsService {
           break;
         case DownloadItemState.enqueued: // fall through
         case DownloadItemState.downloading:
-        case DownloadItemState.failed:
+          await deleteBuffer.deleteDownload(item);
+        case DownloadItemState.failed: // fall through
         case DownloadItemState.syncFailed:
         case DownloadItemState.needsRedownload:
         case DownloadItemState.needsRedownloadComplete:
-          await deleteBuffer.deleteDownload(item);
+          // An explicit user download that still has its file on disk is
+          // user-owned content.  Do not delete it here just because the node
+          // is not in the "complete" state (e.g. after an offline or flaky
+          // re-sync) — leave it for the normal re-sync/redownload path.  Only
+          // clean up content with no file on disk, or incidental/cached items.
+          if (!isExplicitUserDownload(item) || !(item.file?.existsSync() ?? false)) {
+            await deleteBuffer.deleteDownload(item);
+          } else {
+            _downloadsLogger.info("Preserving explicit user download file for ${item.name} during repair.");
+          }
       }
     }
     // Clean up missing download locations.  Download location delete verification should theoretically prevent
@@ -831,10 +841,15 @@ class DownloadsService {
             .typeEqualTo(DownloadItemType.track)
             .or()
             .typeEqualTo(DownloadItemType.image)
-            .filter()
-            .stateEqualTo(DownloadItemState.complete)
             .findAllSync()) {
-      if (item.file != null) {
+      // A file is never an orphan to be cleaned up if it belongs to a node that
+      // is complete, OR to an explicit user download (which is user-owned
+      // persistent content regardless of its transient node state, e.g. a
+      // `failed`/`needsRedownload` track after an offline or flaky re-sync).
+      // Only truly orphaned files (no metadata node, or a removed/incidental
+      // cache node) are candidates for deletion.
+      if (item.file != null &&
+          (item.state == DownloadItemState.complete || isExplicitUserDownload(item))) {
         filePaths.remove(path_helper.canonicalize(item.file!.path));
       }
     }
@@ -879,6 +894,38 @@ class DownloadsService {
       }
     });
     _downloadsLogger.info("${item.name} failed download verification, not located at ${item.file?.path}.");
+    return false;
+  }
+
+  /// Whether [item] is part of an EXPLICIT user download, i.e. it is either the
+  /// direct target of a user "Download" action or is transitively required by
+  /// such a target (a track/image/collection inside a downloaded album, artist,
+  /// playlist, etc.).
+  ///
+  /// This is the DOWNLOADED-vs-CACHED ownership boundary: an explicit user
+  /// download is persistent, user-owned, offline content that automatic
+  /// cache-cleanup / repair must NEVER silently remove.  Items with no
+  /// [DownloadItem.userTranscodingProfile] on themselves or any required
+  /// ancestor are incidental/cached (image cache, auto-downloaded metadata)
+  /// and are not protected.
+  ///
+  /// The direct marker is [DownloadItem.userTranscodingProfile], which
+  /// [addDownload] sets on the item the user explicitly downloaded and
+  /// [deleteDownload] clears before unlinking.  Because the marker lives only
+  /// on the top-level node, we walk the `requiredBy` chain to cover every item
+  /// in the user's download subtree.
+  bool isExplicitUserDownload(DownloadItem item) {
+    if (item.userTranscodingProfile != null) return true;
+    final visited = <int>{item.isarId};
+    final queue = <int>[...item.requiredBy.filter().isarIdProperty().findAllSync()];
+    while (queue.isNotEmpty) {
+      final id = queue.removeLast();
+      if (!visited.add(id)) continue;
+      final parent = _isar.downloadItems.getSync(id);
+      if (parent == null) continue;
+      if (parent.userTranscodingProfile != null) return true;
+      queue.addAll(parent.requiredBy.filter().isarIdProperty().findAllSync());
+    }
     return false;
   }
 
