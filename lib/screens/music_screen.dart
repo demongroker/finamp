@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:finamp/components/HomeScreen/finamp_music_screen_header.dart';
+import 'package:finamp/components/HomeScreen/finamp_navigation_rail.dart';
 import 'package:finamp/components/HomeScreen/home_screen_content.dart';
 import 'package:finamp/components/MusicScreen/artist_type_selection_row.dart';
 import 'package:finamp/components/MusicScreen/music_screen_tab_view.dart';
@@ -9,7 +8,6 @@ import 'package:finamp/components/MusicScreen/sort_and_filter_row.dart';
 import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/components/now_playing_bar.dart';
 import 'package:finamp/l10n/app_localizations.dart';
-import 'package:finamp/menus/music_screen_drawer.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/models/music_models.dart';
 import 'package:finamp/services/audio_service_helper.dart';
@@ -259,8 +257,6 @@ class _MusicScreenState extends ConsumerState<MusicScreen> with TickerProviderSt
           isSearching: isSearching,
         ),
         bottomNavigationBar: NowPlayingBar(),
-        drawerEnableOpenDragGesture: widget.showHeader,
-        drawer: widget.showHeader ? const MusicScreenDrawer() : null,
         floatingActionButton: Padding(
           padding: EdgeInsets.only(right: ref.watch(finampSettingsProvider.showFastScroller) ? 24.0 : 8.0),
           child: getFloatingActionButton(sortedTabs.toList()),
@@ -346,34 +342,16 @@ class _MusicScreenState extends ConsumerState<MusicScreen> with TickerProviderSt
               }).toList(),
             );
 
-            // This tracks whether the latest scroll was the tabbar or a child widget.
-            // The drawer open gesture ignores the gesture arena because it always looses to the tab view, and instead
-            // uses this variable and a check of the tab index to determine when to fire.
-            bool tabbarScrolling = false;
-
-            if (Platform.isAndroid || Platform.isIOS) {
-              return TransparentRightSwipeDetector(
-                action: (wonArena) {
-                  if (_tabController?.index == 0 &&
-                      (wonArena || tabbarScrolling) &&
-                      !ref.watch(finampSettingsProvider.disableGesture)) {
-                    Scaffold.of(context).openDrawer();
-                    // showFinampMainMenu(context: context);
-                  }
-                },
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollStartNotification) {
-                      if (notification.depth == 0) {
-                        tabbarScrolling = true;
-                      } else {
-                        tabbarScrolling = false;
-                      }
-                    }
-                    return false;
-                  },
-                  child: child,
-                ),
+            // The full-width navigation drawer has been replaced by a slim,
+            // always-visible left NavigationRail (shown for the main home
+            // shell only; single-tab configs keep their embedded layout).
+            if (widget.showHeader) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const FinampNavigationRail(),
+                  Expanded(child: child),
+                ],
               );
             }
 
@@ -385,110 +363,3 @@ class _MusicScreenState extends ConsumerState<MusicScreen> with TickerProviderSt
   }
 }
 
-// This class causes a horizontal swipe to be processed even when another widget
-// wins the GestureArena.
-class _TransparentSwipeRecognizer extends HorizontalDragGestureRecognizer {
-  _TransparentSwipeRecognizer({super.debugOwner, super.supportedDevices});
-
-  bool wonArena = false;
-
-  @override
-  void rejectGesture(int pointer) {
-    wonArena = false;
-    super.acceptGesture(pointer);
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    wonArena = true;
-    super.acceptGesture(pointer);
-  }
-}
-
-// This class is a cut-down version of SimplifiedGestureDetector/GestureDetector,
-// but using _TransparentSwipeRecognizer instead of HorizontalDragGestureRecognizer
-// to allow both it and the TabBarView to process the same gestures.
-class TransparentRightSwipeDetector extends StatefulWidget {
-  const TransparentRightSwipeDetector({super.key, this.child, required this.action});
-
-  final Widget? child;
-
-  final void Function(bool wonArena) action;
-
-  @override
-  State<TransparentRightSwipeDetector> createState() => _TransparentRightSwipeDetectorState();
-}
-
-class _TransparentRightSwipeDetectorState extends State<TransparentRightSwipeDetector> {
-  late double _devicePixelRatio;
-
-  @override
-  Widget build(BuildContext context) {
-    /// Device types that scrollables should accept drag gestures from by default.
-    const Set<PointerDeviceKind> supportedDevices = <PointerDeviceKind>{
-      PointerDeviceKind.touch,
-      PointerDeviceKind.stylus,
-      PointerDeviceKind.invertedStylus,
-      PointerDeviceKind.trackpad,
-      // The VoiceAccess sends pointer events with unknown type when scrolling
-      // scrollables.
-      PointerDeviceKind.unknown,
-    };
-
-    _devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    gestures[_TransparentSwipeRecognizer] = GestureRecognizerFactoryWithHandlers<_TransparentSwipeRecognizer>(
-      () => _TransparentSwipeRecognizer(debugOwner: this, supportedDevices: supportedDevices),
-      (_TransparentSwipeRecognizer instance) {
-        instance
-          ..onStart = ((details) => _onHorizontalDragStart(details, instance))
-          ..onUpdate = ((details) => _onHorizontalDragUpdate(details, instance))
-          ..onEnd = ((details) => _onHorizontalDragEnd(details, instance))
-          ..supportedDevices = supportedDevices;
-      },
-    );
-
-    return RawGestureDetector(gestures: gestures, child: widget.child);
-  }
-
-  Offset? _initialSwipeOffset;
-
-  void _onHorizontalDragStart(DragStartDetails details, _TransparentSwipeRecognizer instance) {
-    _initialSwipeOffset = details.globalPosition;
-  }
-
-  bool _isRightHorizontal(Offset finalOffset, double minValue) {
-    assert(minValue <= 0);
-    final initialOffset = _initialSwipeOffset;
-    if (initialOffset != null) {
-      final horizontalOffset = initialOffset.dx - finalOffset.dx;
-      final verticalOffset = initialOffset.dy - finalOffset.dy;
-      // Only trigger if swipe angle primarily horizontal
-      if (horizontalOffset <= minValue && horizontalOffset.abs() > verticalOffset.abs() * 1.5) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void _onHorizontalDragUpdate(DragUpdateDetails details, _TransparentSwipeRecognizer instance) {
-    if (_isRightHorizontal(details.globalPosition, -100)) {
-      _initialSwipeOffset = null;
-      widget.action(instance.wonArena);
-    }
-  }
-
-  void _onHorizontalDragEnd(DragEndDetails details, _TransparentSwipeRecognizer instance) {
-    if (details.primaryVelocity != null && _isRightHorizontal(details.globalPosition, -10.0)) {
-      final horizontalVelocity = details.velocity.pixelsPerSecond.dx;
-      final verticalVelocity = details.velocity.pixelsPerSecond.dy;
-      // This minimum velocity is copied from ScrollPhysics
-      if (horizontalVelocity > 1.0 / (0.050 * _devicePixelRatio) &&
-          horizontalVelocity.abs() > verticalVelocity.abs() * 1.5) {
-        widget.action(instance.wonArena);
-      }
-    }
-    _initialSwipeOffset = null;
-  }
-}

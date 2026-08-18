@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:finamp/components/MusicScreen/offline_mode_switch_list_tile.dart';
 import 'package:finamp/components/SettingsScreen/logout_list_tile.dart';
 import 'package:finamp/components/finamp_app_bar_back_button.dart';
 import 'package:finamp/components/finamp_icon.dart';
@@ -141,6 +142,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 200.0),
         children: [
+          const OfflineModeSwitchListTile(),
+          const Divider(),
           ListTile(
             leading: const Icon(TablerIcons.home),
             title: Text(AppLocalizations.of(context)!.homeScreenSettingsTitle),
