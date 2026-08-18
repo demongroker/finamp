@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import '../../models/finamp_models.dart';
 import '../../services/downloads_service.dart';
 import '../../services/finamp_settings_helper.dart';
+import 'download_state.dart';
 
 class ItemFileSize extends ConsumerWidget {
   const ItemFileSize({super.key, required this.stub});
@@ -84,7 +85,11 @@ final downloadSizeTextProvider = FutureProvider.autoDispose.family((Ref ref, Dow
     case DownloadItemState.enqueued:
     case DownloadItemState.paused:
     case DownloadItemState.needsRedownload:
-      return (BuildContext context) => AppLocalizations.of(context)!.activeDownloadSize;
+      // P0.2 step 7: show the real per-download state instead of the generic
+      // "Downloading…" placeholder (no progress events are emitted yet, so no
+      // bytes/percent is available — see the documented transfer-rate gap).
+      return (BuildContext context) =>
+          downloadStateLabel(context, item!.state) ?? AppLocalizations.of(context)!.activeDownloadSize;
     case null:
       return (BuildContext context) => AppLocalizations.of(context)!.missingDownloadSize;
   }

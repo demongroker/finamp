@@ -9,6 +9,8 @@ import 'package:get_it/get_it.dart';
 import '../../models/finamp_models.dart';
 import '../../services/downloads_service.dart';
 import '../album_image.dart';
+import 'download_actions.dart';
+import 'download_state.dart';
 import 'item_file_size.dart';
 
 class DownloadedItemsTitle extends StatelessWidget {
@@ -64,6 +66,8 @@ class _DownloadedItemTypeListState extends ConsumerState<DownloadedItemsList> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // P0.2 step 7: pause/resume/cancel wired to the state machine
+                    DownloadActions(stub: stub),
                     if ((!(stub.baseItemType == BaseItemDtoType.album || stub.baseItemType == BaseItemDtoType.track)) &&
                         !ref.watch(finampSettingsProvider.isOffline))
                       IconButton(
@@ -147,13 +151,26 @@ class _DownloadedChildrenListState extends ConsumerState<DownloadedChildrenList>
             ListTile(
               title: Text(stub.baseItem?.name ?? stub.name),
               leading: AlbumImage(item: stub.baseItem),
-              subtitle: ItemFileSize(stub: stub),
-              trailing: ref.watch(_downloadsService.statusProvider((stub, null))).isRequired
-                  ? IconButton(
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // P0.2 step 7: real per-download state label (queued/downloading/
+                  // paused/failed/stale/complete) from the authoritative state machine.
+                  DownloadStateLabel(state: ref.watch(_downloadsService.stateProvider(stub)).value),
+                  ItemFileSize(stub: stub),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DownloadActions(stub: stub),
+                  if (ref.watch(_downloadsService.statusProvider((stub, null))).isRequired)
+                    IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () => askBeforeDeleteDownloadFromDevice(context, stub),
-                    )
-                  : null,
+                    ),
+                ],
+              ),
             ),
         ],
       ),

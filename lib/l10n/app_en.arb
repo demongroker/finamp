@@ -321,6 +321,43 @@
             }
         }
     },
+    "dlPaused": "{count} paused",
+    "@dlPaused": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "dlStale": "{count} need update",
+    "@dlStale": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "downloadStateQueued": "Queued",
+    "downloadStateDownloading": "Downloading",
+    "downloadStatePaused": "Paused",
+    "downloadStateFailed": "Failed",
+    "downloadStateStale": "Needs update",
+    "downloadStateComplete": "Complete",
+    "downloadStateNotDownloaded": "Not downloaded",
+    "pauseDownload": "Pause",
+    "resumeDownload": "Resume",
+    "cancelDownload": "Cancel download",
+    "pauseAllDownloads": "Pause all",
+    "resumeAllDownloads": "Resume all",
+    "retryFailedDownloads": "Retry failed downloads",
+    "storageUsed": "Storage used: {size}",
+    "@storageUsed": {
+        "placeholders": {
+            "size": {
+                "type": "String"
+            }
+        }
+    },
     "activeDownloadsTitle": "Active Downloads",
     "noActiveDownloads": "No active downloads.",
     "errorScreenError": "An error occurred while getting the list of errors! At this point, you should probably just create an issue on GitHub and delete app data",

@@ -86,3 +86,51 @@ Storage:
 - `flutter test benchmark/db_bench_test.dart`: PASS (schema intact, ~20x speedup still reported).
 - Two tiny exhaustive-switch fixes for the new `paused` state: downloaded_indicator.dart and
   item_file_size.dart render paused like other in-progress items.
+
+## P0.2 step 7 — Downloads-screen UI wiring (consumes the step-6 service API)
+
+UI only; the step-6 state machine and service API are the contract and were NOT modified.
+The Downloads screen now reads real per-download state and drives the step-6 actions.
+
+Wired (files under `lib/components/DownloadsScreen/`):
+- `download_state.dart` (new): `DownloadStateLabel` + `downloadStateLabel()`/`downloadStateColor()`
+  map the authoritative `DownloadItemState` to a localized label + accent
+  (queued/downloading/paused/failed/stale/complete). Pure display.
+- `download_actions.dart` (new): `DownloadActions` watches `DownloadsService.stateProvider`
+  and exposes only state-appropriate actions — downloading → Pause + Cancel;
+  enqueued → Cancel; paused → Resume + Cancel. Cancel = `cancelDownload` (keeps any
+  already-downloaded file). Remove (`deleteDownload`) intentionally stays on the existing
+  delete affordance so the DOWNLOADED != CACHED removal contract stays explicit.
+- `downloaded_items_list.dart`: `DownloadActions` added to top-level collection tiles'
+  trailing row (next to the existing sync + delete); child track tiles now show a
+  `DownloadStateLabel` above `ItemFileSize` and get `DownloadActions` + the existing
+  delete-when-required.
+- `item_file_size.dart`: the generic `activeDownloadSize` ("Downloading…") placeholder for
+  in-progress states now returns the real state label instead (e.g. "Paused"/"Queued").
+- `downloads_overview.dart`: now a `ConsumerStatefulWidget` (proper timer lifecycle, was a
+  timer-created-in-build StatelessWidget). Card adds paused + stale count lines, storage used
+  (`getStorageUsed()` via `FileSize`, refreshed on the 4s tick), and a global action row:
+  pause-all, resume-all, retry-failed — each enabled only when there is something to act on.
+- `l10n/app_en.arb`: new keys (`downloadState*`, `dlPaused`, `dlStale`, `pauseDownload`,
+  `resumeDownload`, `cancelDownload`, `pauseAllDownloads`, `resumeAllDownloads`,
+  `retryFailedDownloads`, `storageUsed`); `flutter gen-l10n` regenerated the localizations.
+
+Paused UX: the new `paused` state renders as an amber "Paused" label and the per-item Resume
+(play) button re-enqueues via `resumeDownload`; Pause (downloading) via `pauseDownload`. Pause
+survives restart/network loss because it is persisted in Isar (step 6).
+
+Design: frozen design system preserved — no restyle. Reuses existing widget patterns
+(`StreamBuilder`, `IconButton`, `ExpansionTile`, `ListTile`, plain `Text` accents
+blue/grey/red/orange used across the screen). New labels use the same accent convention.
+
+Analyze gate: `flutter analyze` on all touched files — 0 issues.
+
+Remaining documented gaps (NOT addressed — need a dependency / deferred, per roadmap):
+- transfer-rate (`transferRateBytesPerSecond` => null): no `Updates.statusAndProgress` progress
+  events yet, so no bytes/sec or % is shown — the state label substitutes for it.
+- remaining-storage unknown (`dart:io` has no free-space stat).
+- per-item retry: `retryFailedDownloads()` is global-only, so individual failed rows rely on the
+  global Retry button + the existing per-item sync button (no per-item retry added).
+- collections: anchors are organizational (not file transfers), so real per-file state is shown
+  on the child track rows; the top-level tile shows its own anchor state + actions only where
+  the anchor itself is in an in-progress state.
