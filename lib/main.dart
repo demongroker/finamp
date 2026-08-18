@@ -82,6 +82,7 @@ import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'components/Buttons/simple_button.dart';
+import 'components/connectivity_status_indicator.dart';
 import 'components/LogsScreen/copy_logs_button.dart';
 import 'components/LogsScreen/share_logs_button.dart';
 import 'components/PlayerScreen/player_split_screen_scaffold.dart';
@@ -1024,7 +1025,7 @@ class FinampApp extends ConsumerWidget {
       },
       initialRoute: SplashScreen.routeName,
       navigatorObservers: [SplitScreenNavigatorObserver(), KeepScreenOnObserver()],
-      builder: buildPlayerSplitScreenScaffold,
+      builder: buildAppWithConnectivityIndicator,
       theme: applyJellyAmpTheme(ThemeData(
         brightness: Brightness.light,
         colorScheme: getColorScheme(accentColor, Brightness.light, amoledTheme),

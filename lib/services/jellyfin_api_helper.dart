@@ -7,6 +7,7 @@ import 'package:chopper/chopper.dart';
 import 'package:collection/collection.dart';
 import 'package:finamp/components/global_snackbar.dart';
 import 'package:finamp/services/client_certificate_installer.dart';
+import 'package:finamp/services/connectivity_state.dart';
 import 'package:finamp/services/http_aggregate_logging_interceptor.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -113,7 +114,14 @@ class JellyfinApiHelper {
   /// Runs the given function in a background isolate, supplying a valid API instance.
   Future<T> runInIsolate<T>(Future<T> Function(jellyfin_api.JellyfinApi) func) async {
     if (_workerIsolatePort == null) {
-      return func(jellyfinApi);
+      try {
+        final result = await func(jellyfinApi);
+        ServerRequestSignals.instance.record(success: true, timeout: false);
+        return result;
+      } catch (e) {
+        ServerRequestSignals.instance.record(success: false, timeout: _isTimeout(e));
+        rethrow;
+      }
     }
     ReceivePort port = ReceivePort();
     try {
@@ -123,10 +131,20 @@ class JellyfinApiHelper {
     }
     dynamic output = await port.first;
     if (output is T) {
+      ServerRequestSignals.instance.record(success: true, timeout: false);
       return output;
     }
+    ServerRequestSignals.instance.record(success: false, timeout: _isTimeout(output as Object));
     _jellyfinApiHelperLogger.severe("Error in background isolate: $output", output);
     throw output as Object;
+  }
+
+  /// Whether an error indicates a timeout rather than an immediate rejection.
+  /// Feeds the DEGRADED vs OFFLINE heuristic as a qualitative signal.
+  bool _isTimeout(Object error) {
+    if (error is TimeoutException) return true;
+    final message = error.toString().toLowerCase();
+    return message.contains("timed out") || message.contains("timeout");
   }
 
   Future<List<BaseItemDto>?> getItems({
