@@ -113,6 +113,7 @@ class FinampNavigationRail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final finampUserHelper = GetIt.instance<FinampUserHelper>();
     final colorScheme = ColorScheme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final views = finampUserHelper.currentUser?.views.values ?? const <BaseItemDto>[];
     final currentViewId = ref.watch(FinampUserHelper.finampCurrentUserProvider.select((value) => value?.currentViewId));
 
@@ -144,6 +145,10 @@ class FinampNavigationRail extends ConsumerWidget {
               views.isEmpty
                   ? Column(
                     children: [
+                      // No libraries configured yet, so there is nothing for the
+                      // brand logo to navigate to - it is deliberately left
+                      // non-interactive (plain Center, no tap affordance) rather
+                      // than rendered as a dead button.
                       const Padding(
                         padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
                         child: Center(child: FinampIcon(36, 36)),
@@ -166,9 +171,25 @@ class FinampNavigationRail extends ConsumerWidget {
                     // a huge/negative extent; Flutter's NavigationRail already
                     // handles vertical placement of the trailing segment.
                     trailingAtBottom: true,
-                    leading: const Padding(
-                      padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
-                      child: Center(child: FinampIcon(36, 36)),
+                    leading: Padding(
+                      padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                      // The brand logo doubles as the rail's home affordance.
+                      // Tapping it returns the user to their primary library
+                      // (the SAME destination the rail's first destination
+                      // selects), so it is a real button, not a dead/decorative
+                      // logo. No new route/screen is introduced.
+                      child: Center(
+                        child: IconButton(
+                          tooltip: l10n.home,
+                          onPressed: () {
+                            if (views.isNotEmpty) {
+                              finampUserHelper
+                                  .setCurrentUserCurrentViewId(views.first.id);
+                            }
+                          },
+                          icon: const FinampIcon(36, 36),
+                        ),
+                      ),
                     ),
                     trailing: Align(
                       alignment: Alignment.bottomCenter,
