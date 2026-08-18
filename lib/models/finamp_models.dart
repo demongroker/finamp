@@ -1579,6 +1579,7 @@ class DownloadStub {
 
   /// For use by downloadsService during database inserts.  Do not call directly.
   DownloadItem asItem(DownloadProfile? transcodingProfile) {
+    final fc = type == DownloadItemType.finampCollection ? finampCollection : null;
     return DownloadItem(
       id: id,
       type: type,
@@ -1595,6 +1596,8 @@ class DownloadStub {
       userTranscodingProfile: null,
       syncTranscodingProfile: transcodingProfile,
       fileTranscodingProfile: null,
+      finampCollectionLibraryId:
+          fc != null && fc.type == FinampCollectionType.collectionWithLibraryFilter ? fc.library?.id.raw : null,
     );
   }
 
@@ -1623,6 +1626,7 @@ class DownloadItem extends DownloadStub {
     required this.userTranscodingProfile,
     required this.syncTranscodingProfile,
     required this.fileTranscodingProfile,
+    this.finampCollectionLibraryId,
   }) : super._build() {
     assert(!(type == DownloadItemType.collection && baseItemType == BaseItemDtoType.playlist) || viewId == null);
   }
@@ -1641,6 +1645,19 @@ class DownloadItem extends DownloadStub {
   @Enumerated(EnumType.ordinal)
   @Index()
   DownloadItemState state;
+
+  /// Discriminator for `finampCollection` DownloadItems of type
+  /// [FinampCollectionType.collectionWithLibraryFilter]: the raw id of the
+  /// library (`BaseItemId.raw`) that the filtered collection belongs to.
+  /// Null for every other DownloadItem type and every other collection type.
+  ///
+  /// Indexed so the `getAllCollections` fullyDownloaded/library-filter path can
+  /// run as a bounded index scan instead of materializing every finampCollection
+  /// row and filtering client-side. Non-unique and additive, so adding it is
+  /// migration-safe (Isar fills the index in place from existing rows; no
+  /// schema-version bump, no collection drop, no 1.0 data loss).
+  @Index()
+  String? finampCollectionLibraryId;
 
   /// index numbers from backing BaseItemDto.  Used to order tracks in albums.
   final int? baseIndexNumber;
@@ -1693,6 +1710,7 @@ class DownloadItem extends DownloadStub {
     BaseItemDto? item,
     List<DownloadStub>? orderedChildItems,
     BaseItemId? viewId,
+    String? finampCollectionLibraryId,
     required bool forceCopy,
   }) {
     String? json;
@@ -1759,6 +1777,7 @@ class DownloadItem extends DownloadStub {
       userTranscodingProfile: userTranscodingProfile,
       syncTranscodingProfile: syncTranscodingProfile,
       fileTranscodingProfile: fileTranscodingProfile,
+      finampCollectionLibraryId: finampCollectionLibraryId,
     );
   }
 }

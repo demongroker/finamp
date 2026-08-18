@@ -30,6 +30,11 @@ class DownloadsService {
   final _downloadsLogger = Logger("downloadsService");
   final _isar = GetIt.instance<Isar>();
   final _finampUserHelper = GetIt.instance<FinampUserHelper>();
+  // Session-guard for the one-time legacy-1.0 backfill (see
+  // _backfillFinampCollectionLibraryIds). Once we have populated the indexed
+  // finampCollectionLibraryId discriminator on pre-existing rows in this
+  // session we never rescan.
+  bool _finampCollectionLibraryIdBackfilled = false;
 
   final _anchor = DownloadStub.fromId(id: BaseItemId("Anchor"), type: DownloadItemType.anchor, name: null);
   late final downloadTaskQueue = IsarTaskQueue(this);
@@ -1431,6 +1436,70 @@ class DownloadsService {
         .findAllSync();
   }
 
+  /// One-time migration for the P0.1 option C `finampCollectionLibraryId`
+  /// discriminator (see [DownloadItem.finampCollectionLibraryId]). Pre-existing
+  /// 1.0-era finampCollection rows store their collection in jsonItem but the new
+  /// indexed discriminator field is null, so before the bounded index scan in
+  /// [getAllCollections] can rely on it we populate it once per session for rows
+  /// whose collection is a [FinampCollectionType.collectionWithLibraryFilter].
+  /// Guarded so it runs at most once; wrapped in try/catch so a mid-migration
+  /// failure can never break the subsequent collection read. It only touches rows
+  /// that still need it and is entirely out of the hot path.
+  Future<void> _backfillFinampCollectionLibraryIds() async {
+    if (_finampCollectionLibraryIdBackfilled) return;
+    try {
+      final legacyRows = _isar.downloadItems
+          .where()
+          .typeEqualTo(DownloadItemType.finampCollection)
+          .filter()
+          .finampCollectionLibraryIdIsNull()
+          .jsonItemIsNotNull()
+          .findAllSync();
+      if (legacyRows.isNotEmpty) {
+        final toUpdate = <DownloadItem>[];
+        for (final row in legacyRows) {
+          // jsonItem is non-null (filtered above), so decoding is safe.
+          final fc = row.finampCollection;
+          if (fc == null ||
+              fc.type != FinampCollectionType.collectionWithLibraryFilter) {
+            continue;
+          }
+          final raw = fc.library?.id.raw;
+          // Never null values out and only write where the field actually changes.
+          if (raw == null || raw == row.finampCollectionLibraryId) continue;
+          toUpdate.add(
+            DownloadItem(
+              id: row.id,
+              type: row.type,
+              jsonItem: row.jsonItem,
+              isarId: row.isarId,
+              name: row.name,
+              baseItemType: row.baseItemType,
+              state: row.state,
+              baseIndexNumber: row.baseIndexNumber,
+              parentIndexNumber: row.parentIndexNumber,
+              orderedChildren: row.orderedChildren,
+              path: row.path,
+              isarViewId: row.isarViewId,
+              userTranscodingProfile: row.userTranscodingProfile,
+              syncTranscodingProfile: row.syncTranscodingProfile,
+              fileTranscodingProfile: row.fileTranscodingProfile,
+              finampCollectionLibraryId: raw,
+            ),
+          );
+        }
+        if (toUpdate.isNotEmpty) {
+          _isar.writeTxnSync(() {
+            _isar.downloadItems.putAllSync(toUpdate, saveLinks: false);
+          });
+        }
+      }
+    } catch (e, st) {
+      _downloadsLogger.warning("finampCollection library-id backfill failed: $e ($st)");
+    }
+    _finampCollectionLibraryIdBackfilled = true;
+  }
+
   /// Get all downloaded collections.  Used for non-tracks tabs on music screen and
   /// on artist/genre screens.  Can have one or more filters applied:
   /// + nameFilter - only return collections containing nameFilter in their name, case insensitive.
@@ -1457,31 +1526,37 @@ class DownloadsService {
     BaseItemDtoType? infoForType,
     ArtistType? artistType,
     BaseItemId? genreFilter,
-  }) {
+  }) async {
     List<int> favoriteIds = [];
     List<int> libraryFilteredIds = [];
     if (onlyFavorites && !includeItemTypes.contains(BaseItemDtoType.genre)) {
       favoriteIds = _getFavoriteIds() ?? [];
     }
     if (fullyDownloaded) {
-      final libraryId = _finampUserHelper.currentUser?.currentViewId;
-      libraryFilteredIds = _isar.downloadItems
-          .where()
-          .typeEqualTo(DownloadItemType.finampCollection)
-          .filter()
-          .not()
-          .stateEqualTo(DownloadItemState.notDownloaded)
-          .findAllSync()
-          .where(
-            (collection) =>
-                collection.finampCollection!.type == FinampCollectionType.collectionWithLibraryFilter &&
-                collection.finampCollection!.library?.id == libraryId,
-          )
-          .map(
-            (collection) =>
-                DownloadStub.getHash(collection.finampCollection!.item!.id.raw, DownloadItemType.collection),
-          )
-          .toList();
+      final libraryId = _finampUserHelper.currentUser?.currentViewId?.raw;
+      if (libraryId != null) {
+        await _backfillFinampCollectionLibraryIds();
+      }
+      // Push the finampCollection type/library discriminator into an indexed,
+      // bounded DB query (finampCollectionLibraryId is only non-null for
+      // collectionWithLibraryFilter rows, so this exactly matches the old
+      // client-side filter) instead of materializing every finampCollection row
+      // with findAllSync and filtering in Dart.
+      libraryFilteredIds = libraryId == null
+          ? <int>[]
+          : _isar.downloadItems
+              .where()
+              .finampCollectionLibraryIdEqualTo(libraryId)
+              .filter()
+              .typeEqualTo(DownloadItemType.finampCollection)
+              .not()
+              .stateEqualTo(DownloadItemState.notDownloaded)
+              .findAllSync()
+              .map(
+                (collection) => DownloadStub.getHash(
+                    collection.finampCollection!.item!.id.raw, DownloadItemType.collection),
+              )
+              .toList();
     }
 
     return _isar.downloadItems

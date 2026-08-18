@@ -24,17 +24,17 @@ class FinampUserAdapter extends TypeAdapter<FinampUser> {
     return FinampUser(
       id: fields[0] as String,
       publicAddress: fields[1] as String,
-      localAddress: fields[7] == null
-          ? 'http://0.0.0.0:8096'
-          : fields[7] as String,
+      localAddress:
+          fields[7] == null ? 'http://0.0.0.0:8096' : fields[7] as String,
       preferLocalNetwork: fields[9] == null ? false : fields[9] as bool,
       isLocal: fields[8] == null ? false : fields[8] as bool,
       accessToken: fields[2] as String,
       serverId: fields[3] as String,
       currentViewId: fields[4] as BaseItemId?,
-      views: fields[5] == null
-          ? const {}
-          : (fields[5] as Map).cast<BaseItemId, BaseItemDto>(),
+      views:
+          fields[5] == null
+              ? const {}
+              : (fields[5] as Map).cast<BaseItemId, BaseItemDto>(),
     );
   }
 
@@ -86,368 +86,349 @@ class FinampSettingsAdapter extends TypeAdapter<FinampSettings> {
     return FinampSettings(
         isOffline: fields[0] == null ? false : fields[0] as bool,
         shouldTranscode: fields[1] == null ? false : fields[1] as bool,
-        transcodeBitrate: fields[2] == null
-            ? 320000
-            : (fields[2] as num).toInt(),
+        transcodeBitrate:
+            fields[2] == null ? 320000 : (fields[2] as num).toInt(),
         downloadLocations: (fields[3] as List).cast<DownloadLocation>(),
-        androidStopForegroundOnPause: fields[4] == null
-            ? true
-            : fields[4] as bool,
-        showTabs: fields[5] == null
-            ? DefaultSettings.showTabs
-            : (fields[5] as Map).cast<ContentType, bool>(),
+        androidStopForegroundOnPause:
+            fields[4] == null ? true : fields[4] as bool,
+        showTabs:
+            fields[5] == null
+                ? DefaultSettings.showTabs
+                : (fields[5] as Map).cast<ContentType, bool>(),
         onlyShowFavorites: fields[6] == null ? false : fields[6] as bool,
-        trackShuffleItemCount: fields[9] == null
-            ? 250
-            : (fields[9] as num).toInt(),
-        volumeNormalizationActive: fields[29] == null
-            ? true
-            : fields[29] as bool,
-        volumeNormalizationIOSBaseGain: fields[30] == null
-            ? 6.0
-            : (fields[30] as num).toDouble(),
-        volumeNormalizationMode: fields[33] == null
-            ? VolumeNormalizationMode.hybrid
-            : fields[33] as VolumeNormalizationMode,
-        contentViewType: fields[10] == null
-            ? ContentViewType.list
-            : fields[10] as ContentViewType,
-        playbackSpeedVisibility: fields[57] == null
-            ? PlaybackSpeedVisibility.automatic
-            : fields[57] as PlaybackSpeedVisibility,
+        trackShuffleItemCount:
+            fields[9] == null ? 250 : (fields[9] as num).toInt(),
+        volumeNormalizationActive:
+            fields[29] == null ? true : fields[29] as bool,
+        volumeNormalizationIOSBaseGain:
+            fields[30] == null ? 6.0 : (fields[30] as num).toDouble(),
+        volumeNormalizationMode:
+            fields[33] == null
+                ? VolumeNormalizationMode.hybrid
+                : fields[33] as VolumeNormalizationMode,
+        contentViewType:
+            fields[10] == null
+                ? ContentViewType.list
+                : fields[10] as ContentViewType,
+        playbackSpeedVisibility:
+            fields[57] == null
+                ? PlaybackSpeedVisibility.automatic
+                : fields[57] as PlaybackSpeedVisibility,
         contentGridViewCrossAxisCountPortrait: (fields[11] as num?)?.toInt(),
         contentGridViewCrossAxisCountLandscape: (fields[12] as num?)?.toInt(),
         showTextOnGridView: fields[13] == null ? true : fields[13] as bool,
-        downloadLocationsMap: fields[15] == null
-            ? {}
-            : (fields[15] as Map).cast<String, DownloadLocation>(),
+        downloadLocationsMap:
+            fields[15] == null
+                ? {}
+                : (fields[15] as Map).cast<String, DownloadLocation>(),
         useCoverAsBackground: fields[16] == null ? true : fields[16] as bool,
-        playerScreenCoverMinimumPadding: fields[48] == null
-            ? 1.5
-            : (fields[48] as num).toDouble(),
-        showArtistsTracksSection: fields[54] == null
-            ? true
-            : fields[54] as bool,
-        bufferDisableSizeConstraints: fields[78] == null
-            ? false
-            : fields[78] as bool,
-        bufferDurationSeconds: fields[18] == null
-            ? 600
-            : (fields[18] as num).toInt(),
-        bufferSizeMegabytes: fields[79] == null
-            ? 50
-            : (fields[79] as num).toInt(),
-        tabSortBy: fields[20] == null
-            ? {}
-            : (fields[20] as Map).cast<ContentType, SortBy>(),
-        tabSortOrder: fields[21] == null
-            ? {}
-            : (fields[21] as Map).cast<ContentType, SortOrder>(),
-        loopMode: fields[27] == null
-            ? FinampLoopMode.none
-            : fields[27] as FinampLoopMode,
-        playbackSpeed: fields[56] == null
-            ? 1.0
-            : (fields[56] as num).toDouble(),
-        playbackPitch: fields[118] == null
-            ? 1.0
-            : (fields[118] as num).toDouble(),
-        syncPlaybackSpeedAndPitch: fields[119] == null
-            ? false
-            : fields[119] as bool,
-        tabOrder: fields[22] == null
-            ? [
-                ContentType.home,
-                ContentType.albums,
-                ContentType.genericArtists,
-                ContentType.albumArtists,
-                ContentType.performingArtists,
-                ContentType.playlists,
-                ContentType.tracks,
-                ContentType.genres,
-              ]
-            : (fields[22] as List).cast<ContentType>(),
-        autoloadLastQueueOnStartup: fields[28] == null
-            ? true
-            : fields[28] as bool,
-        hasCompletedDownloadsServiceMigration: fields[34] == null
-            ? false
-            : fields[34] as bool,
+        playerScreenCoverMinimumPadding:
+            fields[48] == null ? 1.5 : (fields[48] as num).toDouble(),
+        showArtistsTracksSection:
+            fields[54] == null ? true : fields[54] as bool,
+        bufferDisableSizeConstraints:
+            fields[78] == null ? false : fields[78] as bool,
+        bufferDurationSeconds:
+            fields[18] == null ? 600 : (fields[18] as num).toInt(),
+        bufferSizeMegabytes:
+            fields[79] == null ? 50 : (fields[79] as num).toInt(),
+        tabSortBy:
+            fields[20] == null
+                ? {}
+                : (fields[20] as Map).cast<ContentType, SortBy>(),
+        tabSortOrder:
+            fields[21] == null
+                ? {}
+                : (fields[21] as Map).cast<ContentType, SortOrder>(),
+        loopMode:
+            fields[27] == null
+                ? FinampLoopMode.none
+                : fields[27] as FinampLoopMode,
+        playbackSpeed:
+            fields[56] == null ? 1.0 : (fields[56] as num).toDouble(),
+        playbackPitch:
+            fields[118] == null ? 1.0 : (fields[118] as num).toDouble(),
+        syncPlaybackSpeedAndPitch:
+            fields[119] == null ? false : fields[119] as bool,
+        tabOrder:
+            fields[22] == null
+                ? [
+                  ContentType.home,
+                  ContentType.albums,
+                  ContentType.genericArtists,
+                  ContentType.albumArtists,
+                  ContentType.performingArtists,
+                  ContentType.playlists,
+                  ContentType.tracks,
+                  ContentType.genres,
+                ]
+                : (fields[22] as List).cast<ContentType>(),
+        autoloadLastQueueOnStartup:
+            fields[28] == null ? true : fields[28] as bool,
+        hasCompletedDownloadsServiceMigration:
+            fields[34] == null ? false : fields[34] as bool,
         requireWifiForDownloads: fields[35] == null ? true : fields[35] as bool,
-        onlyShowFullyDownloaded: fields[36] == null
-            ? false
-            : fields[36] as bool,
-        showDownloadsWithUnknownLibrary: fields[37] == null
-            ? true
-            : fields[37] as bool,
-        maxConcurrentDownloads: fields[38] == null
-            ? 5
-            : (fields[38] as num).toInt(),
+        onlyShowFullyDownloaded:
+            fields[36] == null ? false : fields[36] as bool,
+        showDownloadsWithUnknownLibrary:
+            fields[37] == null ? true : fields[37] as bool,
+        maxConcurrentDownloads:
+            fields[38] == null ? 5 : (fields[38] as num).toInt(),
         downloadWorkers: fields[39] == null ? 1 : (fields[39] as num).toInt(),
         resyncOnStartup: fields[40] == null ? true : fields[40] as bool,
         preferQuickSyncs: fields[41] == null ? true : fields[41] as bool,
-        hasCompletedIsarUserMigration: fields[42] == null
-            ? false
-            : fields[42] as bool,
+        hasCompletedIsarUserMigration:
+            fields[42] == null ? false : fields[42] as bool,
         downloadTranscodingCodec: fields[43] as FinampTranscodingCodec?,
         downloadTranscodeBitrate: (fields[45] as num?)?.toInt(),
-        shouldTranscodeDownloads: fields[44] == null
-            ? TranscodeDownloadsSetting.never
-            : fields[44] as TranscodeDownloadsSetting,
-        multichannelHandlingSetting: fields[144] == null
-            ? MultichannelHandlingSetting.stereoDownmixLossy
-            : fields[144] as MultichannelHandlingSetting,
-        shouldRedownloadTranscodes: fields[46] == null
-            ? false
-            : fields[46] as bool,
-        itemSwipeActionLeftToRight: fields[90] == null
-            ? ItemSwipeActions.nothing
-            : fields[90] as ItemSwipeActions,
-        itemSwipeActionRightToLeft: fields[91] == null
-            ? ItemSwipeActions.addToNextUp
-            : fields[91] as ItemSwipeActions,
+        shouldTranscodeDownloads:
+            fields[44] == null
+                ? TranscodeDownloadsSetting.never
+                : fields[44] as TranscodeDownloadsSetting,
+        multichannelHandlingSetting:
+            fields[144] == null
+                ? MultichannelHandlingSetting.stereoDownmixLossy
+                : fields[144] as MultichannelHandlingSetting,
+        shouldRedownloadTranscodes:
+            fields[46] == null ? false : fields[46] as bool,
+        itemSwipeActionLeftToRight:
+            fields[90] == null
+                ? ItemSwipeActions.nothing
+                : fields[90] as ItemSwipeActions,
+        itemSwipeActionRightToLeft:
+            fields[91] == null
+                ? ItemSwipeActions.addToNextUp
+                : fields[91] as ItemSwipeActions,
         useFixedSizeGridTiles: fields[59] as bool?,
         fixedGridTileSize: (fields[60] as num?)?.toInt(),
         allowSplitScreen: fields[61] == null ? true : fields[61] as bool,
-        splitScreenPlayerWidth: fields[62] == null
-            ? 400.0
-            : (fields[62] as num).toDouble(),
-        enableVibration: fields[47] == null ? true : fields[47] as bool,
-        prioritizeCoverFactor: fields[49] == null
-            ? 8.0
-            : (fields[49] as num).toDouble(),
+        splitScreenPlayerWidth:
+            fields[62] == null ? 400.0 : (fields[62] as num).toDouble(),
+        enableVibration: fields[47] == null ? false : fields[47] as bool,
+        prioritizeCoverFactor:
+            fields[49] == null ? 8.0 : (fields[49] as num).toDouble(),
         suppressPlayerPadding: fields[50] == null ? false : fields[50] as bool,
-        hidePlayerBottomActions: fields[51] == null
-            ? false
-            : fields[51] as bool,
+        hidePlayerBottomActions:
+            fields[51] == null ? false : fields[51] as bool,
         reportQueueToServer: fields[52] == null ? false : fields[52] as bool,
-        periodicPlaybackSessionUpdateFrequencySeconds: fields[53] == null
-            ? 150
-            : (fields[53] as num).toInt(),
+        periodicPlaybackSessionUpdateFrequencySeconds:
+            fields[53] == null ? 150 : (fields[53] as num).toInt(),
         playOnStaleDelay: fields[94] == null ? 90 : (fields[94] as num).toInt(),
-        playOnReconnectionDelay: fields[95] == null
-            ? 5
-            : (fields[95] as num).toInt(),
+        playOnReconnectionDelay:
+            fields[95] == null ? 5 : (fields[95] as num).toInt(),
         enablePlayon: fields[96] == null ? true : fields[96] as bool,
-        currentVolume: fields[93] == null
-            ? 1.0
-            : (fields[93] as num).toDouble(),
+        currentVolume:
+            fields[93] == null ? 1.0 : (fields[93] as num).toDouble(),
         showArtistChipImage: fields[55] == null ? true : fields[55] as bool,
         trackOfflineFavorites: fields[63] == null ? true : fields[63] as bool,
-        showProgressOnNowPlayingBar: fields[64] == null
-            ? true
-            : fields[64] as bool,
-        startInstantMixForIndividualTracks: fields[65] == null
-            ? false
-            : fields[65] as bool,
+        showProgressOnNowPlayingBar:
+            fields[64] == null ? true : fields[64] as bool,
+        startInstantMixForIndividualTracks:
+            fields[65] == null ? false : fields[65] as bool,
         showLyricsTimestamps: fields[66] == null ? true : fields[66] as bool,
-        lyricsAlignment: fields[67] == null
-            ? LyricsAlignment.start
-            : fields[67] as LyricsAlignment,
-        lyricsFontSize: fields[70] == null
-            ? LyricsFontSize.medium
-            : fields[70] as LyricsFontSize,
-        showLyricsScreenAlbumPrelude: fields[71] == null
-            ? true
-            : fields[71] as bool,
-        showStopButtonOnMediaNotification: fields[68] == null
-            ? false
-            : fields[68] as bool,
-        showShuffleButtonOnMediaNotification: fields[98] == null
-            ? true
-            : fields[98] as bool,
-        showFavoriteButtonOnMediaNotification: fields[99] == null
-            ? true
-            : fields[99] as bool,
-        showSeekControlsOnMediaNotification: fields[69] == null
-            ? true
-            : fields[69] as bool,
-        keepScreenOnOption: fields[72] == null
-            ? KeepScreenOnOption.whileLyrics
-            : fields[72] as KeepScreenOnOption,
-        keepScreenOnWhilePluggedIn: fields[73] == null
-            ? false
-            : fields[73] as bool,
-        featureChipsConfiguration: fields[76] == null
-            ? DefaultSettings.featureChipsConfiguration
-            : fields[76] as FinampFeatureChipsConfiguration,
-        showCoversOnAlbumScreen: fields[77] == null
-            ? false
-            : fields[77] as bool,
-        hasDownloadedPlaylistInfo: fields[74] == null
-            ? false
-            : fields[74] as bool,
-        transcodingStreamingFormat: fields[75] == null
-            ? FinampTranscodingStreamingFormat.aacFragmentedMp4
-            : fields[75] as FinampTranscodingStreamingFormat,
-        downloadSizeWarningCutoff: fields[80] == null
-            ? 150
-            : (fields[80] as num).toInt(),
+        lyricsAlignment:
+            fields[67] == null
+                ? LyricsAlignment.start
+                : fields[67] as LyricsAlignment,
+        lyricsFontSize:
+            fields[70] == null
+                ? LyricsFontSize.medium
+                : fields[70] as LyricsFontSize,
+        showLyricsScreenAlbumPrelude:
+            fields[71] == null ? true : fields[71] as bool,
+        showStopButtonOnMediaNotification:
+            fields[68] == null ? false : fields[68] as bool,
+        showShuffleButtonOnMediaNotification:
+            fields[98] == null ? true : fields[98] as bool,
+        showFavoriteButtonOnMediaNotification:
+            fields[99] == null ? true : fields[99] as bool,
+        showSeekControlsOnMediaNotification:
+            fields[69] == null ? true : fields[69] as bool,
+        keepScreenOnOption:
+            fields[72] == null
+                ? KeepScreenOnOption.whileLyrics
+                : fields[72] as KeepScreenOnOption,
+        keepScreenOnWhilePluggedIn:
+            fields[73] == null ? false : fields[73] as bool,
+        featureChipsConfiguration:
+            fields[76] == null
+                ? DefaultSettings.featureChipsConfiguration
+                : fields[76] as FinampFeatureChipsConfiguration,
+        showCoversOnAlbumScreen:
+            fields[77] == null ? false : fields[77] as bool,
+        hasDownloadedPlaylistInfo:
+            fields[74] == null ? false : fields[74] as bool,
+        transcodingStreamingFormat:
+            fields[75] == null
+                ? FinampTranscodingStreamingFormat.aacFragmentedMp4
+                : fields[75] as FinampTranscodingStreamingFormat,
+        downloadSizeWarningCutoff:
+            fields[80] == null ? 150 : (fields[80] as num).toInt(),
         allowDeleteFromServer: fields[81] == null ? false : fields[81] as bool,
-        oneLineMarqueeTextButton: fields[82] == null
-            ? false
-            : fields[82] as bool,
-        showAlbumReleaseDateOnPlayerScreen: fields[83] == null
-            ? false
-            : fields[83] as bool,
-        releaseDateFormat: fields[84] == null
-            ? ReleaseDateFormat.year
-            : fields[84] as ReleaseDateFormat,
-        defaultArtistType: fields[92] == null
-            ? ArtistType.albumArtist
-            : fields[92] as ArtistType,
-        autoOffline: fields[88] == null
-            ? AutoOfflineOption.disconnected
-            : fields[88] as AutoOfflineOption,
-        autoOfflineListenerActive: fields[89] == null
-            ? true
-            : fields[89] as bool,
-        audioFadeOutDuration: fields[86] == null
-            ? Duration.zero
-            : fields[86] as Duration,
-        audioFadeInDuration: fields[87] == null
-            ? Duration.zero
-            : fields[87] as Duration,
+        oneLineMarqueeTextButton:
+            fields[82] == null ? false : fields[82] as bool,
+        showAlbumReleaseDateOnPlayerScreen:
+            fields[83] == null ? false : fields[83] as bool,
+        releaseDateFormat:
+            fields[84] == null
+                ? ReleaseDateFormat.year
+                : fields[84] as ReleaseDateFormat,
+        defaultArtistType:
+            fields[92] == null
+                ? ArtistType.albumArtist
+                : fields[92] as ArtistType,
+        autoOffline:
+            fields[88] == null
+                ? AutoOfflineOption.disconnected
+                : fields[88] as AutoOfflineOption,
+        autoOfflineListenerActive:
+            fields[89] == null ? true : fields[89] as bool,
+        audioFadeOutDuration:
+            fields[86] == null ? Duration.zero : fields[86] as Duration,
+        audioFadeInDuration:
+            fields[87] == null ? Duration.zero : fields[87] as Duration,
         autoReloadQueue: fields[97] == null ? false : fields[97] as bool,
         screenSize: fields[100] as ScreenSize?,
-        genreCuratedItemSelectionTypeTracks: fields[101] == null
-            ? CuratedItemSelectionType.mostPlayed
-            : fields[101] as CuratedItemSelectionType,
-        genreCuratedItemSelectionTypeAlbums: fields[102] == null
-            ? CuratedItemSelectionType.latestReleases
-            : fields[102] as CuratedItemSelectionType,
-        genreCuratedItemSelectionTypeArtists: fields[103] == null
-            ? CuratedItemSelectionType.favorites
-            : fields[103] as CuratedItemSelectionType,
-        genreItemSectionsOrder: fields[104] == null
-            ? [
-                GenreItemSections.tracks,
-                GenreItemSections.albums,
-                GenreItemSections.artists,
-              ]
-            : (fields[104] as List).cast<GenreItemSections>(),
-        genreFilterArtistScreens: fields[105] == null
-            ? true
-            : fields[105] as bool,
-        genreListsInheritSorting: fields[106] == null
-            ? true
-            : fields[106] as bool,
-        genreItemSectionFilterChipOrder: fields[107] == null
-            ? [
-                CuratedItemSelectionType.mostPlayed,
-                CuratedItemSelectionType.favorites,
-                CuratedItemSelectionType.random,
-                CuratedItemSelectionType.latestReleases,
-                CuratedItemSelectionType.recentlyAdded,
-                CuratedItemSelectionType.recentlyPlayed,
-              ]
-            : (fields[107] as List).cast<CuratedItemSelectionType>(),
-        applyFilterOnGenreChipTap: fields[108] == null
-            ? false
-            : fields[108] as bool,
-        artistCuratedItemSelectionType: fields[109] == null
-            ? CuratedItemSelectionType.mostPlayed
-            : fields[109] as CuratedItemSelectionType,
-        artistItemSectionFilterChipOrder: fields[110] == null
-            ? [
-                CuratedItemSelectionType.mostPlayed,
-                CuratedItemSelectionType.favorites,
-                CuratedItemSelectionType.random,
-                CuratedItemSelectionType.latestReleases,
-                CuratedItemSelectionType.recentlyAdded,
-                CuratedItemSelectionType.recentlyPlayed,
-              ]
-            : (fields[110] as List).cast<CuratedItemSelectionType>(),
-        artistItemSectionsOrder: fields[111] == null
-            ? [
-                ArtistItemSections.tracks,
-                ArtistItemSections.albums,
-                ArtistItemSections.appearsOn,
-              ]
-            : (fields[111] as List).cast<ArtistItemSections>(),
-        autoSwitchItemCurationType: fields[112] == null
-            ? true
-            : fields[112] as bool,
+        genreCuratedItemSelectionTypeTracks:
+            fields[101] == null
+                ? CuratedItemSelectionType.mostPlayed
+                : fields[101] as CuratedItemSelectionType,
+        genreCuratedItemSelectionTypeAlbums:
+            fields[102] == null
+                ? CuratedItemSelectionType.latestReleases
+                : fields[102] as CuratedItemSelectionType,
+        genreCuratedItemSelectionTypeArtists:
+            fields[103] == null
+                ? CuratedItemSelectionType.favorites
+                : fields[103] as CuratedItemSelectionType,
+        genreItemSectionsOrder:
+            fields[104] == null
+                ? [
+                  GenreItemSections.tracks,
+                  GenreItemSections.albums,
+                  GenreItemSections.artists,
+                ]
+                : (fields[104] as List).cast<GenreItemSections>(),
+        genreFilterArtistScreens:
+            fields[105] == null ? true : fields[105] as bool,
+        genreListsInheritSorting:
+            fields[106] == null ? true : fields[106] as bool,
+        genreItemSectionFilterChipOrder:
+            fields[107] == null
+                ? [
+                  CuratedItemSelectionType.mostPlayed,
+                  CuratedItemSelectionType.favorites,
+                  CuratedItemSelectionType.random,
+                  CuratedItemSelectionType.latestReleases,
+                  CuratedItemSelectionType.recentlyAdded,
+                  CuratedItemSelectionType.recentlyPlayed,
+                ]
+                : (fields[107] as List).cast<CuratedItemSelectionType>(),
+        applyFilterOnGenreChipTap:
+            fields[108] == null ? false : fields[108] as bool,
+        artistCuratedItemSelectionType:
+            fields[109] == null
+                ? CuratedItemSelectionType.mostPlayed
+                : fields[109] as CuratedItemSelectionType,
+        artistItemSectionFilterChipOrder:
+            fields[110] == null
+                ? [
+                  CuratedItemSelectionType.mostPlayed,
+                  CuratedItemSelectionType.favorites,
+                  CuratedItemSelectionType.random,
+                  CuratedItemSelectionType.latestReleases,
+                  CuratedItemSelectionType.recentlyAdded,
+                  CuratedItemSelectionType.recentlyPlayed,
+                ]
+                : (fields[110] as List).cast<CuratedItemSelectionType>(),
+        artistItemSectionsOrder:
+            fields[111] == null
+                ? [
+                  ArtistItemSections.tracks,
+                  ArtistItemSections.albums,
+                  ArtistItemSections.appearsOn,
+                ]
+                : (fields[111] as List).cast<ArtistItemSections>(),
+        autoSwitchItemCurationType:
+            fields[112] == null ? true : fields[112] as bool,
         genreFilterPlaylists: fields[115] == null ? false : fields[115] as bool,
-        clearQueueOnStopEvent: fields[117] == null
-            ? false
-            : fields[117] as bool,
-        useHighContrastColors: fields[120] == null
-            ? false
-            : fields[120] as bool,
-        hasCompletedDownloadsFileOwnerMigration: fields[121] == null
-            ? false
-            : fields[121] as bool,
-        tileAdditionalInfoType: fields[122] == null
-            ? {
-                ContentType.tracks: TileAdditionalInfoType.adaptive,
-                ContentType.albums: TileAdditionalInfoType.adaptive,
-                ContentType.performingArtists: TileAdditionalInfoType.adaptive,
-                ContentType.albumArtists: TileAdditionalInfoType.adaptive,
-                ContentType.playlists: TileAdditionalInfoType.adaptive,
-                ContentType.genres: TileAdditionalInfoType.adaptive,
-              }
-            : (fields[122] as Map).cast<ContentType, TileAdditionalInfoType>(),
+        clearQueueOnStopEvent:
+            fields[117] == null ? false : fields[117] as bool,
+        useHighContrastColors:
+            fields[120] == null ? false : fields[120] as bool,
+        hasCompletedDownloadsFileOwnerMigration:
+            fields[121] == null ? false : fields[121] as bool,
+        tileAdditionalInfoType:
+            fields[122] == null
+                ? {
+                  ContentType.tracks: TileAdditionalInfoType.adaptive,
+                  ContentType.albums: TileAdditionalInfoType.adaptive,
+                  ContentType.performingArtists:
+                      TileAdditionalInfoType.adaptive,
+                  ContentType.albumArtists: TileAdditionalInfoType.adaptive,
+                  ContentType.playlists: TileAdditionalInfoType.adaptive,
+                  ContentType.genres: TileAdditionalInfoType.adaptive,
+                }
+                : (fields[122] as Map)
+                    .cast<ContentType, TileAdditionalInfoType>(),
         rpcEnabled: fields[123] == null ? false : fields[123] as bool,
-        rpcIcon: fields[124] == null
-            ? DiscordRpcIcon.transparent
-            : fields[124] as DiscordRpcIcon,
-        preferAddingToFavoritesOverPlaylists: fields[126] == null
-            ? false
-            : fields[126] as bool,
-        previousTracksExpanded: fields[127] == null
-            ? false
-            : fields[127] as bool,
-        autoplayRestoredQueue: fields[128] == null
-            ? false
-            : fields[128] as bool,
-        preferNextUpPrepending: fields[129] == null
-            ? true
-            : fields[129] as bool,
-        rememberLastUsedPlaybackActionRowPage: fields[130] == null
-            ? true
-            : fields[130] as bool,
-        lastUsedPlaybackActionRowPage: fields[131] == null
-            ? PlaybackActionRowPage.newQueue
-            : fields[131] as PlaybackActionRowPage,
-        lastUsedPlaybackActionRowPageForQueueMenu: fields[139] == null
-            ? PlaybackActionRowPage.moveWithinQueue
-            : fields[139] as PlaybackActionRowPage,
-        accentColor: fields[132] == null
-            ? DefaultSettings.accentColor
-            : fields[132] as Color?,
-        themeMode: fields[133] == null
-            ? ThemeMode.system
-            : fields[133] as ThemeMode,
+        rpcIcon:
+            fields[124] == null
+                ? DiscordRpcIcon.transparent
+                : fields[124] as DiscordRpcIcon,
+        preferAddingToFavoritesOverPlaylists:
+            fields[126] == null ? false : fields[126] as bool,
+        previousTracksExpanded:
+            fields[127] == null ? false : fields[127] as bool,
+        autoplayRestoredQueue:
+            fields[128] == null ? false : fields[128] as bool,
+        preferNextUpPrepending:
+            fields[129] == null ? true : fields[129] as bool,
+        rememberLastUsedPlaybackActionRowPage:
+            fields[130] == null ? true : fields[130] as bool,
+        lastUsedPlaybackActionRowPage:
+            fields[131] == null
+                ? PlaybackActionRowPage.newQueue
+                : fields[131] as PlaybackActionRowPage,
+        lastUsedPlaybackActionRowPageForQueueMenu:
+            fields[139] == null
+                ? PlaybackActionRowPage.moveWithinQueue
+                : fields[139] as PlaybackActionRowPage,
+        accentColor:
+            fields[132] == null
+                ? const Color(4286436348)
+                : fields[132] as Color?,
+        themeMode:
+            fields[133] == null ? ThemeMode.system : fields[133] as ThemeMode,
         amoledTheme: fields[148] == null ? false : fields[148] as bool,
-        locale: fields[134] == null
-            ? DefaultSettings.locale
-            : fields[134] as Locale?,
-        hasCompletedThemeModeLocaleMigration: fields[135] == null
-            ? false
-            : fields[135] as bool,
-        systemAccentColor: fields[136] == null
-            ? DefaultSettings.accentColor
-            : fields[136] as Color?,
+        locale:
+            fields[134] == null
+                ? DefaultSettings.locale
+                : fields[134] as Locale?,
+        hasCompletedThemeModeLocaleMigration:
+            fields[135] == null ? false : fields[135] as bool,
+        systemAccentColor:
+            fields[136] == null
+                ? const Color(4286436348)
+                : fields[136] as Color?,
         useSystemAccentColor: fields[137] == null ? false : fields[137] as bool,
         useMonochromeIcon: fields[138] == null ? false : fields[138] as bool,
-        duckOnAudioInterruption: fields[142] == null
-            ? true
-            : fields[142] as bool,
-        forceAudioOffloadingOnAndroid: fields[143] == null
-            ? false
-            : fields[143] as bool,
+        duckOnAudioInterruption:
+            fields[142] == null ? true : fields[142] as bool,
+        forceAudioOffloadingOnAndroid:
+            fields[143] == null ? false : fields[143] as bool,
         verboseLogging: fields[153] == null ? false : fields[153] as bool,
-        previousTracksPersistenceMode: fields[145] == null
-            ? PreviousTracksPersistenceMode.persistent
-            : fields[145] as PreviousTracksPersistenceMode,
-        homeScreenConfiguration: fields[146] == null
-            ? const FinampHomeScreenConfiguration(actions: [], sections: [])
-            : fields[146] as FinampHomeScreenConfiguration,
+        previousTracksPersistenceMode:
+            fields[145] == null
+                ? PreviousTracksPersistenceMode.persistent
+                : fields[145] as PreviousTracksPersistenceMode,
+        homeScreenConfiguration:
+            fields[146] == null
+                ? const FinampHomeScreenConfiguration(actions: [], sections: [])
+                : fields[146] as FinampHomeScreenConfiguration,
         gridImageSize: fields[147] == null ? 130 : (fields[147] as num).toInt(),
-        homeScreenImageSize: fields[150] == null
-            ? 90
-            : (fields[150] as num).toInt(),
+        homeScreenImageSize:
+            fields[150] == null ? 90 : (fields[150] as num).toInt(),
         useAndroidGainEffect: fields[149] == null ? true : fields[149] as bool,
         deviceId: fields[152] == null ? 'unset' : fields[152] as String,
       )
@@ -460,13 +441,11 @@ class FinampSettingsAdapter extends TypeAdapter<FinampSettings> {
       ..playlistTracksSortBy = fields[113] as SortBy?
       ..playlistTracksSortOrder = fields[114] as SortOrder?
       ..sleepTimer = fields[116] as SleepTimer?
-      ..autoExpandPlayerScreen = fields[125] == null
-          ? false
-          : fields[125] as bool
+      ..autoExpandPlayerScreen =
+          fields[125] == null ? false : fields[125] as bool
       ..radioEnabled = fields[140] == null ? false : fields[140] as bool
-      ..radioMode = fields[141] == null
-          ? RadioMode.similar
-          : fields[141] as RadioMode
+      ..radioMode =
+          fields[141] == null ? RadioMode.similar : fields[141] as RadioMode
       ..clientCertificate = fields[151] as ClientCertificate?;
   }
 
@@ -797,9 +776,10 @@ class DownloadLocationAdapter extends TypeAdapter<DownloadLocation> {
       id: fields[4] == null ? '0' : fields[4] as String,
       legacyUseHumanReadableNames: fields[2] as bool?,
       legacyDeletable: fields[3] as bool?,
-      baseDirectory: fields[5] == null
-          ? DownloadLocationType.migrated
-          : fields[5] as DownloadLocationType,
+      baseDirectory:
+          fields[5] == null
+              ? DownloadLocationType.migrated
+              : fields[5] as DownloadLocationType,
     );
   }
 
@@ -1130,9 +1110,10 @@ class FinampQueueItemAdapter extends TypeAdapter<FinampQueueItem> {
     return FinampQueueItem(
       item: fields[1] as MediaItem,
       source: fields[2] as QueueItemSource,
-      type: fields[3] == null
-          ? QueueItemQueueType.queue
-          : fields[3] as QueueItemQueueType,
+      type:
+          fields[3] == null
+              ? QueueItemQueueType.queue
+              : fields[3] as QueueItemQueueType,
     )..id = fields[0] as String;
   }
 
@@ -5741,51 +5722,56 @@ const DownloadItemSchema = CollectionSchema(
 
       target: r'DownloadProfile',
     ),
-    r'id': PropertySchema(id: 3, name: r'id', type: IsarType.string),
+    r'finampCollectionLibraryId': PropertySchema(
+      id: 3,
+      name: r'finampCollectionLibraryId',
+      type: IsarType.string,
+    ),
+    r'id': PropertySchema(id: 4, name: r'id', type: IsarType.string),
     r'jsonItem': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'jsonItem',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 5, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 6, name: r'name', type: IsarType.string),
     r'orderedChildren': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'orderedChildren',
       type: IsarType.longList,
     ),
     r'parentIndexNumber': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'parentIndexNumber',
       type: IsarType.long,
     ),
-    r'path': PropertySchema(id: 8, name: r'path', type: IsarType.string),
+    r'path': PropertySchema(id: 9, name: r'path', type: IsarType.string),
     r'state': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'state',
       type: IsarType.byte,
       enumMap: _DownloadItemstateEnumValueMap,
     ),
     r'syncTranscodingProfile': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'syncTranscodingProfile',
       type: IsarType.object,
 
       target: r'DownloadProfile',
     ),
     r'type': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'type',
       type: IsarType.byte,
       enumMap: _DownloadItemtypeEnumValueMap,
     ),
     r'userTranscodingProfile': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'userTranscodingProfile',
       type: IsarType.object,
 
       target: r'DownloadProfile',
     ),
-    r'viewId': PropertySchema(id: 13, name: r'viewId', type: IsarType.string),
+    r'viewId': PropertySchema(id: 14, name: r'viewId', type: IsarType.string),
   },
 
   estimateSize: _downloadItemEstimateSize,
@@ -5804,6 +5790,19 @@ const DownloadItemSchema = CollectionSchema(
           name: r'state',
           type: IndexType.value,
           caseSensitive: false,
+        ),
+      ],
+    ),
+    r'finampCollectionLibraryId': IndexSchema(
+      id: 6065426842812522769,
+      name: r'finampCollectionLibraryId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'finampCollectionLibraryId',
+          type: IndexType.hash,
+          caseSensitive: true,
         ),
       ],
     ),
@@ -5875,6 +5874,12 @@ int _downloadItemEstimateSize(
           );
     }
   }
+  {
+    final value = object.finampCollectionLibraryId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.id.length * 3;
   {
     final value = object.jsonItem;
@@ -5942,27 +5947,28 @@ void _downloadItemSerialize(
     DownloadProfileSchema.serialize,
     object.fileTranscodingProfile,
   );
-  writer.writeString(offsets[3], object.id);
-  writer.writeString(offsets[4], object.jsonItem);
-  writer.writeString(offsets[5], object.name);
-  writer.writeLongList(offsets[6], object.orderedChildren);
-  writer.writeLong(offsets[7], object.parentIndexNumber);
-  writer.writeString(offsets[8], object.path);
-  writer.writeByte(offsets[9], object.state.index);
+  writer.writeString(offsets[3], object.finampCollectionLibraryId);
+  writer.writeString(offsets[4], object.id);
+  writer.writeString(offsets[5], object.jsonItem);
+  writer.writeString(offsets[6], object.name);
+  writer.writeLongList(offsets[7], object.orderedChildren);
+  writer.writeLong(offsets[8], object.parentIndexNumber);
+  writer.writeString(offsets[9], object.path);
+  writer.writeByte(offsets[10], object.state.index);
   writer.writeObject<DownloadProfile>(
-    offsets[10],
+    offsets[11],
     allOffsets,
     DownloadProfileSchema.serialize,
     object.syncTranscodingProfile,
   );
-  writer.writeByte(offsets[11], object.type.index);
+  writer.writeByte(offsets[12], object.type.index);
   writer.writeObject<DownloadProfile>(
-    offsets[12],
+    offsets[13],
     allOffsets,
     DownloadProfileSchema.serialize,
     object.userTranscodingProfile,
   );
-  writer.writeString(offsets[13], object.isarViewId);
+  writer.writeString(offsets[14], object.isarViewId);
 }
 
 DownloadItem _downloadItemDeserialize(
@@ -5983,30 +5989,31 @@ DownloadItem _downloadItemDeserialize(
       DownloadProfileSchema.deserialize,
       allOffsets,
     ),
-    id: reader.readString(offsets[3]),
+    finampCollectionLibraryId: reader.readStringOrNull(offsets[3]),
+    id: reader.readString(offsets[4]),
     isarId: id,
-    jsonItem: reader.readStringOrNull(offsets[4]),
-    name: reader.readString(offsets[5]),
-    orderedChildren: reader.readLongList(offsets[6]),
-    parentIndexNumber: reader.readLongOrNull(offsets[7]),
-    path: reader.readStringOrNull(offsets[8]),
+    jsonItem: reader.readStringOrNull(offsets[5]),
+    name: reader.readString(offsets[6]),
+    orderedChildren: reader.readLongList(offsets[7]),
+    parentIndexNumber: reader.readLongOrNull(offsets[8]),
+    path: reader.readStringOrNull(offsets[9]),
     state:
-        _DownloadItemstateValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+        _DownloadItemstateValueEnumMap[reader.readByteOrNull(offsets[10])] ??
         DownloadItemState.notDownloaded,
     syncTranscodingProfile: reader.readObjectOrNull<DownloadProfile>(
-      offsets[10],
+      offsets[11],
       DownloadProfileSchema.deserialize,
       allOffsets,
     ),
     type:
-        _DownloadItemtypeValueEnumMap[reader.readByteOrNull(offsets[11])] ??
+        _DownloadItemtypeValueEnumMap[reader.readByteOrNull(offsets[12])] ??
         DownloadItemType.collection,
     userTranscodingProfile: reader.readObjectOrNull<DownloadProfile>(
-      offsets[12],
+      offsets[13],
       DownloadProfileSchema.deserialize,
       allOffsets,
     ),
-    isarViewId: reader.readStringOrNull(offsets[13]),
+    isarViewId: reader.readStringOrNull(offsets[14]),
   );
   return object;
 }
@@ -6034,40 +6041,42 @@ P _downloadItemDeserializeProp<P>(
           ))
           as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
-    case 5:
       return (reader.readString(offset)) as P;
-    case 6:
-      return (reader.readLongList(offset)) as P;
-    case 7:
-      return (reader.readLongOrNull(offset)) as P;
-    case 8:
+    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readLongList(offset)) as P;
+    case 8:
+      return (reader.readLongOrNull(offset)) as P;
     case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
       return (_DownloadItemstateValueEnumMap[reader.readByteOrNull(offset)] ??
               DownloadItemState.notDownloaded)
           as P;
-    case 10:
+    case 11:
       return (reader.readObjectOrNull<DownloadProfile>(
             offset,
             DownloadProfileSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 11:
+    case 12:
       return (_DownloadItemtypeValueEnumMap[reader.readByteOrNull(offset)] ??
               DownloadItemType.collection)
           as P;
-    case 12:
+    case 13:
       return (reader.readObjectOrNull<DownloadProfile>(
             offset,
             DownloadProfileSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 13:
+    case 14:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -6385,6 +6394,87 @@ extension DownloadItemQueryWhere
     });
   }
 
+  QueryBuilder<DownloadItem, DownloadItem, QAfterWhereClause>
+  finampCollectionLibraryIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'finampCollectionLibraryId',
+          value: [null],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterWhereClause>
+  finampCollectionLibraryIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'finampCollectionLibraryId',
+          lower: [null],
+          includeLower: false,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterWhereClause>
+  finampCollectionLibraryIdEqualTo(String? finampCollectionLibraryId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'finampCollectionLibraryId',
+          value: [finampCollectionLibraryId],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterWhereClause>
+  finampCollectionLibraryIdNotEqualTo(String? finampCollectionLibraryId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'finampCollectionLibraryId',
+                lower: [],
+                upper: [finampCollectionLibraryId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'finampCollectionLibraryId',
+                lower: [finampCollectionLibraryId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'finampCollectionLibraryId',
+                lower: [finampCollectionLibraryId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'finampCollectionLibraryId',
+                lower: [],
+                upper: [finampCollectionLibraryId],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
   QueryBuilder<DownloadItem, DownloadItem, QAfterWhereClause> typeEqualTo(
     DownloadItemType type,
   ) {
@@ -6635,6 +6725,177 @@ extension DownloadItemQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         const FilterCondition.isNotNull(property: r'fileTranscodingProfile'),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'finampCollectionLibraryId'),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'finampCollectionLibraryId'),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'finampCollectionLibraryId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'finampCollectionLibraryId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'finampCollectionLibraryId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'finampCollectionLibraryId',
+          value: '',
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterFilterCondition>
+  finampCollectionLibraryIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          property: r'finampCollectionLibraryId',
+          value: '',
+        ),
       );
     });
   }
@@ -8126,6 +8387,20 @@ extension DownloadItemQuerySortBy
     });
   }
 
+  QueryBuilder<DownloadItem, DownloadItem, QAfterSortBy>
+  sortByFinampCollectionLibraryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'finampCollectionLibraryId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterSortBy>
+  sortByFinampCollectionLibraryIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'finampCollectionLibraryId', Sort.desc);
+    });
+  }
+
   QueryBuilder<DownloadItem, DownloadItem, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -8252,6 +8527,20 @@ extension DownloadItemQuerySortThenBy
   thenByBaseItemTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'baseItemType', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterSortBy>
+  thenByFinampCollectionLibraryId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'finampCollectionLibraryId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadItem, DownloadItem, QAfterSortBy>
+  thenByFinampCollectionLibraryIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'finampCollectionLibraryId', Sort.desc);
     });
   }
 
@@ -8382,6 +8671,16 @@ extension DownloadItemQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DownloadItem, DownloadItem, QDistinct>
+  distinctByFinampCollectionLibraryId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'finampCollectionLibraryId',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
   QueryBuilder<DownloadItem, DownloadItem, QDistinct> distinctById({
     bool caseSensitive = true,
   }) {
@@ -8474,6 +8773,13 @@ extension DownloadItemQueryProperty
   fileTranscodingProfileProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fileTranscodingProfile');
+    });
+  }
+
+  QueryBuilder<DownloadItem, String?, QQueryOperations>
+  finampCollectionLibraryIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'finampCollectionLibraryId');
     });
   }
 
@@ -9422,9 +9728,8 @@ DownloadedTrack _$DownloadedTrackFromJson(Map json) => DownloadedTrack(
     Map<String, dynamic>.from(json['mediaSourceInfo'] as Map),
   ),
   downloadId: json['downloadId'] as String,
-  requiredBy: (json['requiredBy'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  requiredBy:
+      (json['requiredBy'] as List<dynamic>).map((e) => e as String).toList(),
   path: json['path'] as String,
   useHumanReadableNames: json['useHumanReadableNames'] as bool,
   viewId: json['viewId'] as String,
@@ -9493,12 +9798,18 @@ const _$BaseItemDtoTypeEnumMap = {
 
 FinampCollection _$FinampCollectionFromJson(Map json) => FinampCollection(
   type: $enumDecode(_$FinampCollectionTypeEnumMap, json['Type']),
-  library: json['Library'] == null
-      ? null
-      : BaseItemDto.fromJson(Map<String, dynamic>.from(json['Library'] as Map)),
-  item: json['Item'] == null
-      ? null
-      : BaseItemDto.fromJson(Map<String, dynamic>.from(json['Item'] as Map)),
+  library:
+      json['Library'] == null
+          ? null
+          : BaseItemDto.fromJson(
+            Map<String, dynamic>.from(json['Library'] as Map),
+          ),
+  item:
+      json['Item'] == null
+          ? null
+          : BaseItemDto.fromJson(
+            Map<String, dynamic>.from(json['Item'] as Map),
+          ),
 );
 
 Map<String, dynamic> _$FinampCollectionToJson(FinampCollection instance) =>
@@ -9580,9 +9891,10 @@ FinampFeatureChipsConfiguration _$FinampFeatureChipsConfigurationFromJson(
   Map<String, dynamic> json,
 ) => FinampFeatureChipsConfiguration(
   enabled: json['enabled'] as bool,
-  features: (json['features'] as List<dynamic>)
-      .map((e) => $enumDecode(_$FinampFeatureChipTypeEnumMap, e))
-      .toList(),
+  features:
+      (json['features'] as List<dynamic>)
+          .map((e) => $enumDecode(_$FinampFeatureChipTypeEnumMap, e))
+          .toList(),
   migrated: json['migrated'] as bool,
 );
 
@@ -9590,9 +9902,8 @@ Map<String, dynamic> _$FinampFeatureChipsConfigurationToJson(
   FinampFeatureChipsConfiguration instance,
 ) => <String, dynamic>{
   'enabled': instance.enabled,
-  'features': instance.features
-      .map((e) => _$FinampFeatureChipTypeEnumMap[e]!)
-      .toList(),
+  'features':
+      instance.features.map((e) => _$FinampFeatureChipTypeEnumMap[e]!).toList(),
   'migrated': instance.migrated,
 };
 
@@ -9748,9 +10059,10 @@ SortAndFilterConfiguration _$SortAndFilterConfigurationFromJson(
 ) => SortAndFilterConfiguration(
   sortBy: $enumDecode(_$SortByEnumMap, json['sortBy']),
   sortOrder: $enumDecode(_$SortOrderEnumMap, json['sortOrder']),
-  filters: (json['filters'] as List<dynamic>)
-      .map((e) => ItemFilter.fromJson(e as Map<String, dynamic>))
-      .toSet(),
+  filters:
+      (json['filters'] as List<dynamic>)
+          .map((e) => ItemFilter.fromJson(e as Map<String, dynamic>))
+          .toSet(),
 );
 
 Map<String, dynamic> _$SortAndFilterConfigurationToJson(
@@ -9793,9 +10105,10 @@ QuickActionConfig _$QuickActionConfigFromJson(Map<String, dynamic> json) =>
         const BaseItemIdConverter().fromJson,
       ),
       itemName: json['itemName'] as String?,
-      itemTypes: (json['itemTypes'] as List<dynamic>?)
-          ?.map((e) => $enumDecode(_$ContentTypeEnumMap, e))
-          .toSet(),
+      itemTypes:
+          (json['itemTypes'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$ContentTypeEnumMap, e))
+              .toSet(),
     );
 
 Map<String, dynamic> _$QuickActionConfigToJson(QuickActionConfig instance) =>

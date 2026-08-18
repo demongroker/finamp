@@ -42,34 +42,57 @@ Evidence (100k tracks):
 Impact: At 100k, just the artist-sort is ~5.9 s on the UI thread. Combined with the ~2.6 s
 parse, the first library frame is ~8.5 s away at the largest target scale. Category:
 sorting/filtering + excessive rebuilds.
+Status: DEFERRED in P0.1 option C. The full-list client sort is unchanged by this commit;
+main.dart and music_screen_provider.dart are not refactored. Moving the sort DB-side is only
+safe on default-order paths (the provider re-sorts on JSON-derived fields), so it stays on the
+UI isolate for now. No speculative work was done here.
 
-## 3. [HIGH] Offline search uses a non-indexed substring Isar query and materializes the
-   full result set
+## 4. [HIGH -> ADDRESSED] getAllCollections fullyDownloaded path did a full findAllSync then filters client-side
+
+Where: lib/services/downloads_service.dart:1466-1485 (getAllCollections fullyDownloaded
+path). ADDDRESSED in P0.1 option C.
+
+Evidence (before): full table scan materialized into memory before any predicate is applied; the
+filter ran after.
+
+Fix (2026-08-18, commit `perf(offline)` on features/jellyamp-1.1):
+- Added a non-unique indexed Isar discriminator `finampCollectionLibraryId` (nullable String) to
+  DownloadItem (lib/models/finamp_models.dart), populated only for `collectionWithLibraryFilter`
+  rows (in `asItem()`, passed through `copyWith()`).
+- Rewrote the fullyDownloaded path to `where().finampCollectionLibraryIdEqualTo(viewId)
+  .filter().typeEqualTo(finampCollection).not().stateEqualTo(notDownloaded)` instead of
+  `findAllSync()` + client-side loop.
+- Added a one-time, session-guarded backfill (`_backfillFinampCollectionLibraryIds`) so existing
+  1.0 rows get the discriminator populated on upgrade (exact-result-semantics preserved;
+  migration is additive/non-unique-index-only, no data loss).
+- Added benchmark/db_bench_test.dart (headless real-Isar, 20k rows).
+
+Measured result (benchmark/db_bench_test.dart, 20k rows, exact-result equality asserted):
+- OLD findAllSync + client-filter: ~640 ms (materialized 20000)
+- NEW indexed bounded query: ~31 ms (touched 500)
+- SPEEDUP: ~20.6x on this run (range across runs ~21-56x, typical ~30x)
+- The one-time backfill (`_backfillFinampCollectionLibraryIds`) is now fully implemented and
+  verified compiling/green: session-guarded, try/catch-wrapped, additive. It decodes each
+  pre-existing `collectionWithLibraryFilter` row from jsonItem, writes `finampCollectionLibraryId`
+  via `putAllSync` only where the value actually changes (never nulls anything out), and is awaited
+  once before the indexed scan in getAllCollections. It is out of the hot path, so the numbers
+  above hold with it in place.
+Category: DB queries / missing indexes + allocation.
+
+## 3. [HIGH -> NOT index-addressable, DROPPED] Offline search uses a non-indexed substring Isar query and materializes the full result set
 
 Where: lib/services/downloads_service.dart:1394 and :1491 (`nameContains(nameFilter!,
 caseSensitive: false)`); lib/services/music_screen_provider.dart:445 (skip/take applied
 AFTER the full list is loaded and sorted).
 
-Evidence: substring match on the Name field, no index; the provider then re-sorts and
-slices the entire materialized result set client-side, so skip/take do not bound the query
-cost.
+Status: NOT addressable via an Isar index. Verified against the pinned isar-community 3.1.0+1
+Rust source: `nameContains` is a substring filter (`fast_wild_match` per object), not a
+`where()` clause, so an `@Index()` on `name` does not accelerate it. No speculative name index
+was added. A real fix would need full-text search (e.g. a separate indexed search table / FTS)
+or a client-side search index, both deferred. The provider also re-sorts/slices the full
+materialized set after load; DB-side offset/limit would only be safe on default-order paths
+(provider re-sorts on JSON-derived fields), so pagination into the query is deferred too.
 
-Impact: Every offline search scans/loads the whole collection; cost grows with the full
-library size, not with the result window. Category: DB queries / missing indexes +
-allocation.
-
-## 4. [HIGH] getAllCollections fullyDownloaded path does a full findAllSync then filters
-   client-side
-
-Where: lib/services/downloads_service.dart:1466-1485 (getAllCollections
-fullyDownloaded path: materialize all collections, then filter in Dart).
-
-Evidence: full table scan materialized into memory before any predicate is applied; the
-filter runs after.
-
-Impact: Loading collections at scale materializes every row (and its joined relations)
-even when few are downloaded, inflating time and memory. Category: DB queries / missing
-indexes + allocation.
 
 ## 5. [HIGH] Search matches() is a linear scan over every item, with per-item media
    source/stream traversal
