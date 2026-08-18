@@ -4,6 +4,7 @@ import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/jellyfin_api.dart' as jellyfin_api;
 import 'package:finamp/services/jellyfin_api_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:isar/isar.dart';
@@ -30,6 +31,9 @@ class FinampUserHelper {
 
   final _isar = GetIt.instance<Isar>();
 
+  final _secureStorage = FlutterSecureStorage();
+  final Map<String, String> _accessTokenCache = {};
+
   final String deviceId;
 
   final List<void Function()> _postUserHooks = [];
@@ -42,10 +46,24 @@ class FinampUserHelper {
 
   /// Loads the FinampUser with the id from CurrentUserId. Returns null if no
   /// user exists.
-  FinampUser? get currentUser => _currentUserCache ??= _isar.finampUsers.getSync(0);
+  FinampUser? get currentUser {
+    var user = _currentUserCache ??= _isar.finampUsers.getSync(0);
+    if (user != null && _accessTokenCache.containsKey(user.id)) {
+      user.accessToken = _accessTokenCache[user.id]!;
+    }
+    return user;
+  }
   FinampUser? _currentUserCache;
 
-  Iterable<FinampUser> get finampUsers => _isar.finampUsers.where().findAllSync();
+  Iterable<FinampUser> get finampUsers {
+    final users = _isar.finampUsers.where().findAllSync();
+    for (final u in users) {
+      if (_accessTokenCache.containsKey(u.id)) {
+        u.accessToken = _accessTokenCache[u.id]!;
+      }
+    }
+    return users;
+  }
 
   late String authorizationHeader;
 
@@ -65,13 +83,55 @@ class FinampUserHelper {
         });
       }
     }
+    // Scrub the legacy plaintext Hive user boxes now that the token lives in
+    // secure storage + Isar. Leaving them on disk would keep the old
+    // FinampUser.accessToken plaintext around (Advisor follow-up).
+    for (final name in const ["FinampUsers", "CurrentUserId"]) {
+      try {
+        final box = Hive.box(name);
+        await box.close();
+        await Hive.deleteBoxFromDisk(name);
+      } catch (e) {
+        finampUserHelperLogger.warning("Failed to scrub legacy Hive box '$name': $e");
+      }
+    }
+  }
+
+  /// Hydrates access tokens from secure storage into memory and migrates any
+  /// remaining plaintext Isar tokens to secure storage. Idempotent — safe to run
+  /// on every startup.
+  Future<void> hydrateAccessTokens() async {
+    final users = _isar.finampUsers.where().findAllSync();
+    for (final u in users) {
+      final key = 'finamp_accessToken_${u.id}';
+      final stored = await _secureStorage.read(key: key);
+      if (stored != null && stored.isNotEmpty) {
+        _accessTokenCache[u.id] = stored;
+        if (u.accessToken.isNotEmpty) {
+          u.accessToken = '';
+          _isar.writeTxnSync(() => _isar.finampUsers.putSync(u, saveLinks: false));
+        }
+      } else if (u.accessToken.isNotEmpty) {
+        await _secureStorage.write(key: key, value: u.accessToken);
+        _accessTokenCache[u.id] = u.accessToken;
+        u.accessToken = '';
+        _isar.writeTxnSync(() => _isar.finampUsers.putSync(u, saveLinks: false));
+      }
+    }
   }
 
   /// Saves a new user to the Hive box and sets the CurrentUserId.
   Future<void> saveUser(FinampUser newUser) async {
+    final token = newUser.accessToken;
+    if (token.isNotEmpty) {
+      await _secureStorage.write(key: 'finamp_accessToken_${newUser.id}', value: token);
+      _accessTokenCache[newUser.id] = token;
+      newUser.accessToken = '';
+    }
     _isar.writeTxnSync(() {
       _isar.finampUsers.putSync(newUser, saveLinks: false);
     });
+    _currentUserCache = null;
     await setAuthHeader();
     while (_postUserHooks.isNotEmpty) {
       _postUserHooks.removeAt(0)();
@@ -92,20 +152,24 @@ class FinampUserHelper {
 
     currentUserTemp.views = Map<BaseItemId, BaseItemDto>.fromEntries(newViews.map((e) => MapEntry(e.id, e)));
     currentUserTemp.currentViewId = currentUserTemp.views.keys.first;
+    currentUserTemp.accessToken = ''; // token lives in secure storage; never re-persist plaintext
 
     _isar.writeTxnSync(() {
       _isar.finampUsers.putSync(currentUserTemp, saveLinks: false);
     });
+    _currentUserCache = null;
   }
 
   void setCurrentUserCurrentViewId(BaseItemId newViewId) {
     FinampUser currentUserTemp = currentUser!;
 
     currentUserTemp.currentViewId = newViewId;
+    currentUserTemp.accessToken = ''; // token lives in secure storage; never re-persist plaintext
 
     _isar.writeTxnSync(() {
       _isar.finampUsers.putSync(currentUserTemp, saveLinks: false);
     });
+    _currentUserCache = null;
   }
 
   /// Removes the user with the given id. If the given id is the current user
@@ -114,6 +178,8 @@ class FinampUserHelper {
     _isar.writeTxnSync(() {
       _isar.finampUsers.filter().idEqualTo(id).deleteAllSync();
     });
+    _accessTokenCache.remove(id);
+    _secureStorage.delete(key: 'finamp_accessToken_$id');
     if (_currentUserCache?.id == id) {
       _currentUserCache = null;
     }

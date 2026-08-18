@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  JellyAmp network security policy.
+  Cleartext (http) is blocked by default and only permitted for the owner's
+  own Jellyfin endpoints. The hostnames/IPs below are PLACEHOLDERS — replace
+  them with your real Jellyfin host(s) when building for yourself, and keep
+  your private addresses out of this public repository.
+-->
 <network-security-config>
-  <base-config cleartextTrafficPermitted="true">
+  <base-config cleartextTrafficPermitted="false">
     <trust-anchors>
       <certificates src="system"/>
       <certificates src="user"/>
     </trust-anchors>
   </base-config>
+
+  <!-- Owner Jellyfin hosts — allow plain http here only (https always works). -->
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="true">jellyfin.example.com</domain>
+    <domain includeSubdomains="false">192.168.1.100</domain>
+    <domain includeSubdomains="false">100.100.100.100</domain>
+    <domain includeSubdomains="false">localhost</domain>
+    <domain includeSubdomains="false">127.0.0.1</domain>
+  </domain-config>
 </network-security-config>

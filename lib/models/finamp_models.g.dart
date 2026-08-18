@@ -192,7 +192,7 @@ class FinampSettingsAdapter extends TypeAdapter<FinampSettings> {
         downloadTranscodingCodec: fields[43] as FinampTranscodingCodec?,
         downloadTranscodeBitrate: (fields[45] as num?)?.toInt(),
         shouldTranscodeDownloads: fields[44] == null
-            ? TranscodeDownloadsSetting.ask
+            ? TranscodeDownloadsSetting.never
             : fields[44] as TranscodeDownloadsSetting,
         multichannelHandlingSetting: fields[144] == null
             ? MultichannelHandlingSetting.stereoDownmixLossy

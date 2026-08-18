@@ -674,7 +674,7 @@ Future<String> getAuthHeader({required String deviceId}) async {
     authHeader = '${authHeader}UserId="${finampUserHelper.currentUser!.id}", ';
   }
 
-  if (finampUserHelper.currentUser?.accessToken != null) {
+  if (finampUserHelper.currentUser?.accessToken.isNotEmpty ?? false) {
     authHeader = '${authHeader}Token="${finampUserHelper.currentUser!.accessToken}", ';
   }
 

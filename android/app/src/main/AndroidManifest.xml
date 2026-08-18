@@ -45,7 +45,6 @@
     android:roundIcon="@mipmap/ic_launcher"
     android:localeConfig="@xml/locales_config"
     android:appCategory="audio"
-    android:usesCleartextTraffic="true"
     android:supportsRtl="true"
     android:allowBackup="false"
     android:fullBackupContent="false"

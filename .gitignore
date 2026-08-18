@@ -136,3 +136,6 @@ app.*.map.json
 
 # Integration testing artifacts
 integration_test/testing
+
+# MSIX signing certs (removed P1 #4)
+*.pfx

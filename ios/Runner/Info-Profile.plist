@@ -57,7 +57,7 @@
 			<string>_dartobservatory._tcp</string>
 		</array>
 		<key>NSLocalNetworkUsageDescription</key>
-		<string>Required for debugging</string>
+		<string>JellyAmp connects to your self-hosted Jellyfin server on your local network to stream your music library.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Jellyamp does not need camera or photo library access. Deny this if prompted.</string>
 		<key>NSSiriUsageDescription</key>

@@ -84,6 +84,8 @@
 		<string>Jellyamp stores downloads in app-private storage by default and does not need media library access.</string>
 		<key>NSCameraUsageDescription</key>
 		<string>Jellyamp does not need camera or photo library access. Deny this if prompted.</string>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>JellyAmp connects to your self-hosted Jellyfin server on your local network to stream your music library.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Jellyamp does not need camera or photo library access. Deny this if prompted.</string>
 		<key>NSSiriUsageDescription</key>
