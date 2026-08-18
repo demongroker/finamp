@@ -31,6 +31,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:finamp/models/jellyfin_models.dart'
@@ -77,6 +78,66 @@ void main() {
             .toStringAsFixed(2);
       }
     });
+
+    test(
+        'parse off the UI isolate (P0.1 #1): sync-on-main vs background isolate',
+        () async {
+      // The production library-load path already runs this parse in a
+      // persistent background worker isolate (`JellyfinApiHelper.runInIsolate`).
+      // This measures what that offloading actually costs: the wall time of an
+      // equivalent background-isolate parse (Isolate.run) vs a synchronous
+      // parse on the calling (main) isolate, plus the isolate transfer cost of
+      // delivering the parsed object graph back to the main isolate. The parse
+      // result is asserted identical to prove the offload is semantics-preserving.
+      final tracks = datasetFiles
+          .where((d) => d.name.startsWith('library_') && d.name.endsWith('_tracks'))
+          .toList();
+      // Delivery (transfer) cost is measured on a subset to keep the harness
+      // fast; the wall-vs-sync comparison covers every scale.
+      const deliveryScales = <String>{'library_50k_tracks', 'library_100k_tracks'};
+      for (final ds in tracks) {
+        final map = jsonDecode(ds.text) as Map<String, dynamic>;
+        // Sync parse on the calling (main) isolate -- the reference cost.
+        QueryResult_BaseItemDto.fromJson(map); // warm up JIT
+        final swSync = Stopwatch()..start();
+        final syncParsed = QueryResult_BaseItemDto.fromJson(map);
+        swSync.stop();
+
+        // Background-isolate parse: wall time as seen by the caller.
+        final swBg = Stopwatch()..start();
+        final bgParsed = await Isolate.run(() => QueryResult_BaseItemDto.fromJson(map));
+        swBg.stop();
+
+        // Result identity: same item count and same first/last item id proves
+        // the background parse produced the same objects (pure off-loading).
+        final sameCount = (syncParsed.items?.length ?? 0) ==
+            (bgParsed.items?.length ?? 0);
+        final sameEdges = syncParsed.items!.first.id == bgParsed.items!.first.id &&
+            syncParsed.items!.last.id == bgParsed.items!.last.id;
+        results['parse_bg_wall_ms_${ds.name}'] = _ms(swBg.elapsedMicroseconds);
+        results['parse_sync_ms_${ds.name}'] = _ms(swSync.elapsedMicroseconds);
+        results['parse_bg_over_sync_${ds.name}'] =
+            (swBg.elapsedMicroseconds / swSync.elapsedMicroseconds)
+                .toStringAsFixed(2);
+        results['parse_bg_identical_${ds.name}'] = sameCount && sameEdges;
+
+        // Transfer cost: the main-isolate work of delivering the already-parsed
+        // object graph back across an isolate boundary (what actually lands on
+        // the UI isolate -- the parse itself no longer does).
+        if (deliveryScales.contains(ds.name)) {
+          final swRt = Stopwatch()..start();
+          final roundTripped = await _roundTrip(bgParsed);
+          swRt.stop();
+          results['parse_transfer_roundtrip_ms_${ds.name}'] =
+              _ms(swRt.elapsedMicroseconds);
+          results['parse_transfer_items_${ds.name}'] =
+              (roundTripped as QueryResult_BaseItemDto).items!.length;
+        }
+
+        expect(sameCount, isTrue, reason: '${ds.name}: count mismatch');
+        expect(sameEdges, isTrue, reason: '${ds.name}: item edge mismatch');
+      }
+    }, timeout: const Timeout(Duration(minutes: 5)));
 
     test('client-side sortItems() latency by sort key (100k tracks)', () {
       final ds = datasetFiles.firstWhere((d) => d.name == 'library_100k_tracks');
@@ -178,6 +239,33 @@ void main() {
 }
 
 String _ms(int micros) => (micros / 1000.0).toStringAsFixed(2);
+
+/// Sends [message] to a fresh echo isolate and back, measuring the cost of
+/// delivering an already-parsed object graph across an isolate boundary
+/// (the part of the production `runInIsolate` round-trip that lands on the
+/// receiving, i.e. main, isolate).
+Future<Object> _roundTrip(Object message) async {
+  final handshake = ReceivePort();
+  await Isolate.spawn(_echoLoop, handshake.sendPort);
+  final echoPort = await handshake.first as SendPort;
+  handshake.close();
+  final reply = ReceivePort();
+  echoPort.send((message, reply.sendPort));
+  final out = await reply.first as Object;
+  reply.close();
+  return out;
+}
+
+/// Echo-isolate entry: receives a (message, SendPort) and sends the message
+/// back. Used by [_roundTrip].
+void _echoLoop(SendPort startupPort) async {
+  final requests = ReceivePort();
+  startupPort.send(requests.sendPort);
+  await for (final req in requests) {
+    final rec = req as (Object, SendPort);
+    rec.$2.send(rec.$1);
+  }
+}
 
 class _Dataset {
   _Dataset(this.name, this.bytes, this.text);

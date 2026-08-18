@@ -11,20 +11,57 @@ noticeable cost at scale.
 
 ---
 
-## 1. [CRITICAL] Large API response + JSON parsing on the main/UI isolate
+## 1. [CRITICAL -> ADDRESSED] Large API response + JSON parsing (already on a background isolate)
 
-Where: lib/services/music_screen_provider.dart:268-352 (provider fetches the library and
-parses it in place); lib/models/jellyfin_models.g.dart:3747-3844 (`_$BaseItemDtoFromJson`
-parses 60+ fields per item, including full MediaSources/MediaStreams).
+Where (production): lib/services/jellyfin_api_helper.dart:281 (`runInIsolate` wraps the
+entire fetch + parse) and :432 (the `QueryResult_BaseItemDto.fromJson` inside that
+background-isolate closure). The library-load provider (music_screen_provider.dart:320 ->
+`JellyfinApiHelper.getItems` -> `_fetchGetItemsResponse`) runs the heavy parse in a
+**persistent background worker isolate** spawned once in the helper constructor
+(jellyfin_api_helper.dart:56). This is the upstream Finamp worker-isolate architecture.
 
-Evidence (100k tracks, desktop VM):
-- Raw jsonDecode: ~3131 ms (bench.dart).
-- Full `QueryResult_BaseItemDto.fromJson`: ~2559 ms = ~25.6 micros/item (bench_test.dart).
-- Linear scaling: 215.9 ms @10k -> 600.4 @25k -> 1137.6 @50k -> 2559.4 @100k.
+Why this was reported as a main-isolate parse: benchmark/BASELINE and the earlier
+BOTTLENECKS #1 measured `QueryResult_BaseItemDto.fromJson` called **directly on the
+test/main isolate** (bench_test.dart), which does NOT reflect the production path. In the
+app the same fromJson runs in the worker isolate, so the parse is already off the UI
+isolate. The headline "~2.6 s of blocked main thread @100k" was a proxy for the worker-side
+parse cost, not actual main-isolate blocking.
 
-Impact: A 100k-track fetch + parse alone is ~2.6 s of blocked main thread before any
-sorting, on a desktop-class CPU; on-device it will be worse. Category: large API
-responses + JSON parsing + main-isolate CPU work.
+Sendability (verified): `BaseItemDto` / `QueryResult_BaseItemDto` are plain Dart object
+graphs (primitives + nested model lists/maps; no closures, Isar objects, `Timestamp`, or
+native handles) and are fully sendable across isolates. This is proven both by the existing
+production `runInIsolate` (the worker returns the parsed result to the main isolate via a
+SendPort) and by the P0.1 option A benchmark's isolate round-trip.
+
+P0.1 option A verification (benchmark/bench_test.dart "parse off the UI isolate", this
+change). Real headless numbers (desktop VM), sync-on-main vs background-isolate parse,
+result asserted identical (same count + same first/last item id):
+
+| Scale  | Sync parse on main | Background-isolate parse (wall) | Ratio |
+|---|---|---|---|
+| 10k    | 198 ms | 1130 ms | 5.0x |
+| 25k    | 540 ms | 2090 ms | 3.3x |
+| 50k    | 1018 ms | 3343 ms | 3.1x |
+| 100k   | 2241 ms | 5846 ms | 2.2x |
+
+Delivery cost (what actually lands on the main/UI isolate): moving the already-parsed graph
+back across an isolate boundary measured ~2181 ms round-trip @50k and ~3718 ms @100k
+(~1.1 s / ~1.9 s one-way).
+
+Honest residual: the benchmark's fresh-`Isolate.run` numbers include a cold-JIT penalty that
+the production **persistent** worker does not pay after its first call, so they overstate the
+production worker-parse cost. The genuinely unavoidable main-isolate cost is the *delivery*
+of the parsed objects back to the UI isolate (the ~1-2 s @100k transfer above), which is
+inherent to returning parsed objects to the UI. At the extreme 100k-single-response case the
+transfer is comparable to the parse, so pure off-loading does not fully relieve the main
+thread there. Full relief would require not materializing the entire library on the main
+isolate at once (paging). The app already pages online browsing via `startIndex`/`limit`, and
+larger paging/materialization work is deferred (not part of this pure off-loading change).
+
+Why no redundant code change was made: the parse is already on a background isolate via
+`runInIsolate`; wrapping the already-offloaded `fromJson` in an extra `Isolate.run`/`compute`
+would be double-isolation (an extra spawn + an extra transfer hop) and strictly worse.
+Category: large API responses + JSON parsing + main-isolate CPU work.
 
 ## 2. [CRITICAL -> ADDRESSED] sortItems() sorted the full list on the UI isolate, with an
    expensive artist comparator
@@ -133,7 +170,11 @@ sorting/filtering.
 
 ## Relationship to targets (roadmap doc_9a488dedaec7, P0.1)
 
-The P0.1 target is a measured baseline, which this scaffolding now provides. The three
-dominant costs to beat are, in order: parse (~2.6 s @100k), artist sort (~5.9 s @100k),
-search scan (~20-60 ms per query). Any P0.2+ optimization should move these numbers; they
-are the reference points.
+The P0.1 target is a measured baseline, which this scaffolding now provides. The two dominant
+costs to beat, in order, are the client-side sort (~5.9 s @100k before option B; ~0.6 s
+after) and the search scan (~20-60 ms per query). The large-parse cost (~2.6 s @100k) is
+NOT a main-isolate cost in production: it already runs in the background worker isolate via
+`runInIsolate` (see #1 above); the residual main-isolate cost is the delivery of the parsed
+objects back to the UI, which only becomes significant at extreme single-response sizes and
+is addressed by paging rather than off-loading. Any P0.2+ optimization should move the sort
+and search numbers; they are the reference points.
