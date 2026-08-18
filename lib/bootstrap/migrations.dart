@@ -8,21 +8,110 @@ import 'package:finamp/models/jellyfin_models.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/adapters.dart';
+import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
-/// Runs every applicable settings migration in the exact order the original
-/// `main.dart` ran them.
+final _log = Logger("Migrations");
+
+/// The current data/schema migration version.
 ///
-/// P0.4: extracted from `main.dart` (was the sequence of `_migrate*` calls).
-/// Order and behavior are unchanged.
+/// Version 1 = the batch of seven settings migrations that shipped in
+/// JellyAmp 1.0 (extracted verbatim into this file during P0.4). Each of those
+/// seven is represented as its own ordered [MigrationStep] advancing the
+/// version by one (target versions 1..7), so a mid-batch failure recovers
+/// precisely to the last fully-applied step instead of re-running the whole
+/// batch.
+///
+/// Future migrations that change persisted state APPEND a new step (or a new
+/// version's worth of steps) and bump [currentDataVersion] accordingly. Never
+/// reorder, edit, or remove an existing step — existing installs would re-run
+/// or skip steps differently.
+const int currentDataVersion = 7;
+
+/// Hive box/key that persist the highest fully-applied migration version.
+/// Written only after a step has fully succeeded, so the runner is both
+/// idempotent across launches and recoverable after a mid-batch failure.
+const String _migrationVersionBox = "MigrationVersion";
+const String _migrationVersionKey = "version";
+
+/// One ordered, versioned migration step.
+///
+/// [targetVersion] is the version the store reaches once this step has fully
+/// applied. [migrate] MUST be idempotent (safe to re-run at any point,
+/// including after an earlier partial failure) and MUST NOT be destructive to
+/// existing user data.
+class MigrationStep {
+  const MigrationStep({required this.targetVersion, required this.name, required this.migrate});
+
+  final int targetVersion;
+  final String name;
+  final Future<void> Function() migrate;
+}
+
+/// Ordered list of every migration ever shipped. APPEND ONLY.
+///
+/// The seven P0.4 settings migrations map to versions 1..7 in their original
+/// order (downloadLocations → sortOptions → gridSize → homescreen →
+/// featureChips → deviceId → themeModeLocale). Each step's body is unchanged
+/// from the pre-versioning code; only the surrounding runner is new.
+final List<MigrationStep> _migrationSteps = [
+  MigrationStep(targetVersion: 1, name: 'downloadLocations', migrate: () async => _migrateDownloadLocations()),
+  MigrationStep(targetVersion: 2, name: 'sortOptions', migrate: () async => _migrateSortOptions()),
+  MigrationStep(targetVersion: 3, name: 'gridSize', migrate: () async => _migrateGridSize()),
+  MigrationStep(targetVersion: 4, name: 'homescreen', migrate: () async => _migrateHomescreen()),
+  MigrationStep(targetVersion: 5, name: 'featureChips', migrate: () async => _migrateFeatureChips()),
+  MigrationStep(targetVersion: 6, name: 'deviceId', migrate: () async => _migrateDeviceId()),
+  MigrationStep(targetVersion: 7, name: 'themeModeLocale', migrate: _migrateThemeModeLocale),
+];
+
+/// Applies every applicable migration in order, exactly once, in a
+/// failure-safe way.
+///
+/// Versioned   — a persistent Hive box records the highest fully-applied
+///               version; steps at or below it are skipped on later launches.
+/// Ordered     — steps run in [_migrationSteps] order.
+/// Idempotent  — every step is individually guarded/safe to re-run, so a crash
+///               mid-batch cannot double-apply or lose data on the next launch.
+/// Recoverable — the version is persisted only after a step fully succeeds.
+///               If any step throws, the error is rethrown so the caller
+///               surfaces the fatal startup error (FinampErrorApp) instead of
+///               silently continuing with half-migrated state; the next launch
+///               resumes from the last fully-applied step.
 Future<void> runMigrations() async {
-  _migrateDownloadLocations();
-  _migrateSortOptions();
-  _migrateGridSize();
-  _migrateHomescreen();
-  _migrateFeatureChips();
-  _migrateDeviceId();
-  await _migrateThemeModeLocale();
+  var storedVersion = await _readStoredVersion();
+  if (storedVersion >= currentDataVersion) {
+    _log.fine("Migrations already at version $storedVersion; nothing to do");
+    return;
+  }
+
+  for (final step in _migrationSteps) {
+    if (step.targetVersion <= storedVersion) continue;
+    _log.info("Applying migration '${step.name}' (target v${step.targetVersion})");
+    try {
+      await step.migrate();
+    } catch (e, st) {
+      // Never swallow a failed migration and never continue as if it
+      // succeeded: block startup so the user is not left on half-migrated
+      // data. On the next launch, only the failed (un-checkpointed) step and
+      // later steps re-run, safely (each step is idempotent).
+      _log.severe("Migration '${step.name}' (v${step.targetVersion}) FAILED", e, st);
+      rethrow;
+    }
+    // Checkpoint only after the step fully applied.
+    storedVersion = step.targetVersion;
+    await _writeStoredVersion(storedVersion);
+    _log.info("Migration '${step.name}' complete (v$storedVersion)");
+  }
+}
+
+Future<int> _readStoredVersion() async {
+  final box = await Hive.openBox<int>(_migrationVersionBox);
+  return box.get(_migrationVersionKey, defaultValue: 0) ?? 0;
+}
+
+Future<void> _writeStoredVersion(int version) async {
+  final box = await Hive.openBox<int>(_migrationVersionBox);
+  await box.put(_migrationVersionKey, version);
 }
 
 /// Migrates the old DownloadLocations list to a map
