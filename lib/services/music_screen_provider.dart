@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:finamp/extensions/list.dart';
@@ -445,10 +446,36 @@ Future<List<BaseItemDto>?> loadHomeSectionItemsOffline({
   return items.skip(startIndex).take(limit).toList();
 }
 
+/// Builds the artist sort key for an item: the sorted, comma-joined artist
+/// list. Returns null when the item has no artist list.
+///
+/// This is a pure function of `item`; it is computed ONCE per item before the
+/// sort (see [sortItems]) instead of on every comparison.
+String? artistSortKey(BaseItemDto item) {
+  final artists = item.artists;
+  if (artists == null) return null;
+  return artists.sortedBy((e) => e).join(", ");
+}
+
 List<BaseItemDto> sortItems(List<BaseItemDto> itemsToSort, SortBy? sortBy, SortOrder? sortOrder) {
   if (sortBy == SortBy.random) {
     itemsToSort.shuffle();
   } else {
+    // P0.1 option B: the artist comparator used to call `sortedBy` + `join` on
+    // every comparison, an O(k log k) cost inside an O(n log n) sort -> overall
+    // O(n log n · k log k), ~5.5-5.9 s at 100k tracks. Precomputing each item's
+    // artist sort key once up front turns that into an O(1) identity-keyed map
+    // lookup per comparison. The same strings are compared, so the resulting
+    // order is byte-for-byte identical to the previous implementation.
+    final Map<BaseItemDto, String?> artistSortKeys;
+    if (sortBy == SortBy.artist) {
+      artistSortKeys = LinkedHashMap<BaseItemDto, String?>.identity();
+      for (final item in itemsToSort) {
+        artistSortKeys[item] = artistSortKey(item);
+      }
+    } else {
+      artistSortKeys = const <BaseItemDto, String?>{};
+    }
     itemsToSort.sort((a, b) {
       switch (sortBy ?? SortBy.sortName) {
         case SortBy.sortName:
@@ -471,10 +498,12 @@ List<BaseItemDto> sortItems(List<BaseItemDto> itemsToSort, SortBy? sortBy, SortO
             return a.albumArtist!.compareTo(b.albumArtist!);
           }
         case SortBy.artist:
-          if (a.artists == null || b.artists == null) {
+          final keyA = artistSortKeys[a];
+          final keyB = artistSortKeys[b];
+          if (keyA == null || keyB == null) {
             return 0;
           } else {
-            return a.artists!.sortedBy((e) => e).join(", ").compareTo(b.artists!.sortedBy((e) => e).join(", "));
+            return keyA.compareTo(keyB);
           }
         case SortBy.communityRating:
           if (a.communityRating == null || b.communityRating == null) {

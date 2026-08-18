@@ -113,6 +113,18 @@ void main() {
       }
     });
 
+    test('client-side sortItems() scaling (artist, all scales)', () {
+      for (final ds in datasetFiles) {
+        final map = jsonDecode(ds.text) as Map<String, dynamic>;
+        final items = QueryResult_BaseItemDto.fromJson(map).items!;
+        final copy = List<BaseItemDto>.of(items);
+        final sw = Stopwatch()..start();
+        sortItems(copy, SortBy.artist, SortOrder.ascending);
+        sw.stop();
+        results['sort_ms_${ds.name}_artist'] = _ms(sw.elapsedMicroseconds);
+      }
+    });
+
     test('SearchQuery parse + matches latency (100k tracks)', () {
       final ds = datasetFiles.firstWhere((d) => d.name == 'library_100k_tracks');
       final map = jsonDecode(ds.text) as Map<String, dynamic>;

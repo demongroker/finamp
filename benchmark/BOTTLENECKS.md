@@ -26,26 +26,33 @@ Impact: A 100k-track fetch + parse alone is ~2.6 s of blocked main thread before
 sorting, on a desktop-class CPU; on-device it will be worse. Category: large API
 responses + JSON parsing + main-isolate CPU work.
 
-## 2. [CRITICAL] sortItems() sorts the full list on the UI isolate, with an expensive
-   artist comparator
+## 2. [CRITICAL -> ADDRESSED] sortItems() sorted the full list on the UI isolate, with an
+   expensive artist comparator
 
 Where: lib/services/music_screen_provider.dart:433 (sort after load, main isolate);
 :448-548 (sortItems); :477-478 (`sortedBy` + `join` inside the artist comparator ->
 O(n log n) sorts with an O(k log k) per-comparison cost).
 
-Evidence (100k tracks):
+Evidence (before, 100k tracks):
 - SortBy.sortName: 430 ms
 - SortBy.dateCreated: 1120 ms
 - SortBy.artist: 5880 ms  <-- dominant (string building inside every comparison)
 - By contrast SortBy.runtime 86 ms / productionYear 56 ms / playCount 131 ms are cheap.
 
-Impact: At 100k, just the artist-sort is ~5.9 s on the UI thread. Combined with the ~2.6 s
-parse, the first library frame is ~8.5 s away at the largest target scale. Category:
-sorting/filtering + excessive rebuilds.
-Status: DEFERRED in P0.1 option C. The full-list client sort is unchanged by this commit;
-main.dart and music_screen_provider.dart are not refactored. Moving the sort DB-side is only
-safe on default-order paths (the provider re-sorts on JSON-derived fields), so it stays on the
-UI isolate for now. No speculative work was done here.
+Fix (2026-08-18, P0.1 option B, commit `perf(sort)` on features/jellyamp-1.1):
+- Extracted `artistSortKey(item)` (same sortedBy + join string as before) and PRE-COMPUTED it
+  once per item into an identity-keyed LinkedHashMap before the sort, so the comparator does
+  an O(1) lookup instead of an O(k log k) per-comparison sortedBy+join. Identity keying chosen
+  because BaseItemDto overrides ==/hashCode by id.
+- Semantics-preserving by construction: identical comparator strings on the same pure, stable
+  `sortedBy` (which copies the list), identical ascending + `.reversed` descending tail.
+
+Verified result (benchmark/bench_test.dart, 100k tracks, after):
+- SortBy.artist: 591 ms (from 5462-5880 ms)  ~9-10x faster
+- SortBy.sortName: 466 ms (unchanged)
+All canonical benchmark tests pass.
+
+Category: sorting/filtering + excessive rebuilds.
 
 ## 4. [HIGH -> ADDRESSED] getAllCollections fullyDownloaded path did a full findAllSync then filters client-side
 
