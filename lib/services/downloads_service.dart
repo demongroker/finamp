@@ -205,7 +205,11 @@ class DownloadsService {
           DownloadItem? listener = _isar.downloadItems.getSync(int.parse(event.task.taskId));
           if (listener != null) {
             var newState = DownloadItemState.fromTaskStatus(event.status);
-            if (!listener.state.isFinal) {
+            // Paused items were explicitly paused via pause(); ignore in-flight or
+            // stale status events (including the TaskStatus.canceled emitted by our
+            // own pause() cancel) so they cannot yank a paused item back to a running
+            // state.  resume() re-enqueues first, so genuine later events are applied.
+            if (!listener.state.isFinal && listener.state != DownloadItemState.paused) {
               // Completed images have their extension updated if possible.  Tracks
               // should already have extensions when enqueued.  Extensions only serve
               // to help the user with viewing files stored in custom download locations, so
@@ -692,6 +696,7 @@ class DownloadsService {
         case DownloadItemState.complete:
           _verifyDownload(item);
         case DownloadItemState.notDownloaded:
+        case DownloadItemState.paused: // user hold; leave alone during repair
           break;
         case DownloadItemState.enqueued: // fall through
         case DownloadItemState.downloading:
@@ -1006,7 +1011,9 @@ class DownloadsService {
     } else if (childStates.contains(DownloadItemState.failed) || childStates.contains(DownloadItemState.syncFailed)) {
       return updateItemState(item, DownloadItemState.failed);
     } else if (childStates.contains(DownloadItemState.enqueued) ||
-        childStates.contains(DownloadItemState.downloading)) {
+        childStates.contains(DownloadItemState.downloading) ||
+        // A paused child is still in-progress; keep the parent downloading too.
+        childStates.contains(DownloadItemState.paused)) {
       // DownloadItemState.enqueued should only be reachable via _initiateDownload
       return updateItemState(item, DownloadItemState.downloading);
     } else {
@@ -1055,6 +1062,7 @@ class DownloadsService {
       item.syncTranscodingProfile = bestProfile;
       if ((item.state == DownloadItemState.enqueued ||
               item.state == DownloadItemState.downloading ||
+              item.state == DownloadItemState.paused ||
               item.state == DownloadItemState.complete) &&
           item.type.hasFiles &&
           FinampSettingsHelper.finampSettings.shouldRedownloadTranscodes) {
@@ -1869,4 +1877,135 @@ class DownloadsService {
       return outdated ? DownloadItemStatus.incidentalOutdated : DownloadItemStatus.incidental;
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // P0.2 step 6 — authoritative download state machine service API.
+  // The roadmap's Download Manager surface.  The Downloads-screen UI (P0.2 step 7)
+  // will consume these; they are exposed here so state is queryable and controllable
+  // without depending on any screen.  State is persisted in Isar (DownloadItem.state)
+  // and therefore survives restart, process death and network loss.
+  // ---------------------------------------------------------------------------
+
+  DownloadItem? _getDownloadItem(DownloadStub stub) => _isar.downloadItems.getSync(stub.isarId);
+
+  /// Roadmap state → [DownloadItemState] mapping (documented in the audit):
+  ///   QUEUED→enqueued, DOWNLOADING→downloading, PAUSED→paused (new),
+  ///   VERIFYING→filesystem verification in initializeQueue/_verifyDownload,
+  ///   DOWNLOADED→complete, FAILED→failed/syncFailed, STALE→needsRedownload*,
+  ///   REMOVED→notDownloaded.
+  List<DownloadItem> _itemsInState(DownloadItemState state) => _isar.downloadItems
+      .where()
+      .stateEqualTo(state)
+      .filter()
+      .optional(
+        state != DownloadItemState.syncFailed,
+        (q) => q.typeEqualTo(DownloadItemType.track).or().typeEqualTo(DownloadItemType.image),
+      )
+      .findAllSync();
+
+  /// Counts of every [DownloadItemState] (downloading/enqueued/paused/complete/
+  /// failed/syncFailed/needsRedownload*).  Live-updated by [updateItemState].
+  Map<DownloadItemState, int> get downloadStateCounts => downloadStatuses;
+
+  List<DownloadItem> get activeDownloads => _itemsInState(DownloadItemState.downloading);
+  List<DownloadItem> get queuedDownloads => _itemsInState(DownloadItemState.enqueued);
+  List<DownloadItem> get pausedDownloads => _itemsInState(DownloadItemState.paused);
+  List<DownloadItem> get completedDownloads => _itemsInState(DownloadItemState.complete);
+  List<DownloadItem> get failedDownloads =>
+      [..._itemsInState(DownloadItemState.failed), ..._itemsInState(DownloadItemState.syncFailed)];
+  List<DownloadItem> get staleDownloads => [
+        ..._itemsInState(DownloadItemState.needsRedownload),
+        ..._itemsInState(DownloadItemState.needsRedownloadComplete),
+      ];
+
+  /// Pause a single download.  No-op if it is not currently downloading.
+  Future<void> pauseDownload(DownloadStub stub) async {
+    final item = _getDownloadItem(stub);
+    if (item != null && item.state == DownloadItemState.downloading) {
+      await downloadTaskQueue.pause(item);
+    }
+  }
+
+  /// Resume a single paused download.
+  Future<void> resumeDownload(DownloadStub stub) async {
+    final item = _getDownloadItem(stub);
+    if (item != null && item.state == DownloadItemState.paused) {
+      await downloadTaskQueue.resume(item);
+    }
+  }
+
+  /// Pause every actively downloading download.
+  Future<void> pauseAllDownloads() => downloadTaskQueue.pauseAllDownloads();
+
+  /// Resume every paused download.
+  Future<void> resumeAllDownloads() => downloadTaskQueue.resumeAllDownloads();
+
+  /// Retry all failed/syncFailed downloads that can be re-enqueued.
+  Future<void> retryFailedDownloads() => downloadTaskQueue.retryFailedDownloads();
+
+  /// Cancel an in-progress (downloading/enqueued/paused) download without removing
+  /// any already-downloaded file.  Distinct from [deleteDownload], which removes the
+  /// user's explicit download and its file.
+  Future<void> cancelDownload(DownloadStub stub) async {
+    final item = _getDownloadItem(stub);
+    if (item != null && (item.type.hasFiles && item.state != DownloadItemState.notDownloaded)) {
+      await downloadTaskQueue.remove(item);
+    }
+  }
+
+  /// Total bytes of downloaded files currently on disk (tracks + images), summed
+  /// across all states.  Async because file sizes require a stat per file.
+  Future<int> getStorageUsed() async {
+    int total = 0;
+    for (final item
+        in _isar.downloadItems
+            .where()
+            .typeEqualTo(DownloadItemType.track)
+            .or()
+            .typeEqualTo(DownloadItemType.image)
+            .findAllSync()) {
+      final file = item.file;
+      if (file != null && file.existsSync()) {
+        try {
+          total += await file.length();
+        } catch (_) {
+          // file vanished between existsSync and length; skip
+        }
+      }
+    }
+    return total;
+  }
+
+  /// Bytes downloaded on disk grouped by download location id.
+  Future<Map<String, int>> getStorageUsedByLocation() async {
+    final byLocation = <String, int>{};
+    for (final item
+        in _isar.downloadItems
+            .where()
+            .typeEqualTo(DownloadItemType.track)
+            .or()
+            .typeEqualTo(DownloadItemType.image)
+            .findAllSync()) {
+      final file = item.file;
+      final locationId = item.fileDownloadLocation?.id;
+      if (file != null && file.existsSync() && locationId != null) {
+        try {
+          byLocation[locationId] = (byLocation[locationId] ?? 0) + await file.length();
+        } catch (_) {
+          // ignore race
+        }
+      }
+    }
+    return byLocation;
+  }
+
+  /// Free/remaining space on the filesystem is NOT derivable with dart:io alone
+  /// (FileStat has no free-space field).  Requires a platform plugin (e.g.
+  /// `disk_space`) not currently a dependency.  [getStorageUsed] +
+  /// [getStorageUsedByLocation] cover the "storage used" half of the roadmap;
+  /// "remaining storage" is deferred until such a plugin is added (documented gap).
+  /// Transfer rate is likewise unavailable: tasks are enqueued with
+  /// `Updates.status` only (no progress events), so no bytes/sec is emitted.  Request
+  /// `Updates.statusAndProgress` + throttle in a future pass (P1) to populate this.
+  int? get transferRateBytesPerSecond => null;
 }

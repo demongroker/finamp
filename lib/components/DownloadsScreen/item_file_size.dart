@@ -82,6 +82,7 @@ final downloadSizeTextProvider = FutureProvider.autoDispose.family((Ref ref, Dow
       }
     case DownloadItemState.downloading:
     case DownloadItemState.enqueued:
+    case DownloadItemState.paused:
     case DownloadItemState.needsRedownload:
       return (BuildContext context) => AppLocalizations.of(context)!.activeDownloadSize;
     case null:

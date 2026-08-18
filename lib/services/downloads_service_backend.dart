@@ -420,6 +420,106 @@ class IsarTaskQueue implements TaskQueue {
     }
   }
 
+  /// Cancel any active task for [item] and reset it to [DownloadItemState.notDownloaded]
+  /// WITHOUT deleting its file on disk.  Used by [_initiateDownload] to re-queue a
+  /// node that already has content.
+  ///
+  /// This is the P0.2 step 6 R7 fix.  The previous path deleted the file (via
+  /// [DownloadsDeleteService.deleteDownload]) before re-downloading, which caused
+  /// silent permanent loss when the server was merely unreachable and the re-download
+  /// then failed.  background_downloader downloads to a temp file and only replaces
+  /// the destination on success (native DownloadTaskRunner.kt), so leaving the
+  /// existing file in place is safe: a failed re-download leaves it intact and the
+  /// item is left retryable (FAILED-with-file-preserved) instead of deleted-then-failed.
+  Future<void> resetForRedownload(DownloadItem item) async {
+    if (_activeDownloads.contains(item.isarId)) {
+      _activeDownloads.remove(item.isarId);
+      await FileDownloader().cancelTaskWithId(item.isarId.toString());
+    }
+    _isar.writeTxnSync(() {
+      var canonItem = _isar.downloadItems.getSync(item.isarId);
+      if (canonItem != null && canonItem.state != DownloadItemState.notDownloaded) {
+        _downloadsService.updateItemState(canonItem, DownloadItemState.notDownloaded);
+      }
+    });
+  }
+
+  /// Pause a single download (P0.2 step 6 service API).
+  ///
+  /// Cancels its active task so NO task remains for it — this deliberately avoids
+  /// the background_downloader `allTasks()` paused-detection pitfall (allTasks() on
+  /// Android also returns enqueued+running).  The item is recorded as
+  /// [DownloadItemState.paused], which [initializeQueue] and [_advanceQueue] both
+  /// leave alone, so pause survives process death and restart.  Resume via [resume],
+  /// which re-enqueues with a fresh Authorization header (safer than
+  /// background_downloader's stale-header resume).
+  Future<void> pause(DownloadItem item) async {
+    if (_activeDownloads.contains(item.isarId)) {
+      _activeDownloads.remove(item.isarId);
+      await FileDownloader().cancelTaskWithId(item.isarId.toString());
+    }
+    _isar.writeTxnSync(() {
+      var canonItem = _isar.downloadItems.getSync(item.isarId);
+      if (canonItem != null && canonItem.state != DownloadItemState.paused) {
+        _downloadsService.updateItemState(canonItem, DownloadItemState.paused);
+      }
+    });
+  }
+
+  /// Resume a paused download by re-enqueueing it (P0.2 step 6 service API).
+  Future<void> resume(DownloadItem item) async {
+    if (item.state == DownloadItemState.paused) {
+      _isar.writeTxnSync(() {
+        var canonItem = _isar.downloadItems.getSync(item.isarId);
+        if (canonItem != null && canonItem.state == DownloadItemState.paused) {
+          _downloadsService.updateItemState(canonItem, DownloadItemState.enqueued);
+        }
+      });
+    }
+    await executeDownloads();
+  }
+
+  /// Pause every actively downloading item (P0.2 step 6 service API).
+  ///
+  /// Note: this is the app-level "pause all", distinct from the no-op
+  /// [TaskQueue.pauseAll] override (which is a platform queue hook used for WiFi
+  /// requirement changes and must stay untouched — see requireWifiForDownloads).
+  Future<void> pauseAllDownloads() async {
+    final active = _isar.downloadItems.where().stateEqualTo(DownloadItemState.downloading).findAllSync();
+    for (final item in active) {
+      await pause(item);
+    }
+  }
+
+  /// Resume every paused download (P0.2 step 6 service API).
+  Future<void> resumeAllDownloads() async {
+    final paused = _isar.downloadItems.where().stateEqualTo(DownloadItemState.paused).findAllSync();
+    for (final item in paused) {
+      await resume(item);
+    }
+  }
+
+  /// Re-enqueue failed track/image downloads that still have a usable file path so
+  /// the queue retries them (P0.2 step 6 service API).  Items without a path (e.g.
+  /// failed during an offline sync before the path was computed) are left for the
+  /// normal re-sync, which re-runs [_initiateDownload].
+  Future<void> retryFailedDownloads() async {
+    _isar.writeTxnSync(() {
+      final failed = _isar.downloadItems
+          .where()
+          .stateEqualTo(DownloadItemState.failed)
+          .or()
+          .stateEqualTo(DownloadItemState.syncFailed)
+          .findAllSync();
+      for (final item in failed) {
+        if (item.type.hasFiles && item.path != null && item.state != DownloadItemState.enqueued) {
+          _downloadsService.updateItemState(item, DownloadItemState.enqueued);
+        }
+      }
+    });
+    await executeDownloads();
+  }
+
   /// Called by FileDownloader whenever a download completes.
   /// Remove the completed task and allow the queue to advance.
   @override
@@ -1547,6 +1647,10 @@ class DownloadsSyncService {
     switch (item.state) {
       case DownloadItemState.complete:
         return;
+      case DownloadItemState.paused:
+        // User explicitly paused this download.  Do not override that intent by
+        // re-initiating it; it will be re-queued only when the user resumes.
+        return;
       case DownloadItemState.notDownloaded:
         break;
       case DownloadItemState.enqueued: //fall through
@@ -1554,12 +1658,20 @@ class DownloadsSyncService {
         if (await _downloadsService.downloadTaskQueue.validateQueued(item)) {
           return;
         }
-        await _downloadsService.deleteBuffer.deleteDownload(item);
+        // Enqueued/downloading but not actually present in the downloader queue
+        // (e.g. killed task / process restart).  Reset for re-download without
+        // deleting any existing file (P0.2 step 6 R7 fix).
+        await _downloadsService.downloadTaskQueue.resetForRedownload(item);
       case DownloadItemState.failed:
       case DownloadItemState.syncFailed:
       case DownloadItemState.needsRedownload:
       case DownloadItemState.needsRedownloadComplete:
-        await _downloadsService.deleteBuffer.deleteDownload(item);
+        // P0.2 step 6 R7 fix: do NOT delete an existing file before re-downloading.
+        // background_downloader writes to a temp file and only replaces the
+        // destination on success, so a failed re-download (e.g. server merely
+        // unreachable) leaves the existing file intact and the item retryable,
+        // instead of the old delete-then-fail path silently losing the download.
+        await _downloadsService.downloadTaskQueue.resetForRedownload(item);
     }
 
     switch (item.type) {

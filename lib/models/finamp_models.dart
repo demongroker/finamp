@@ -1816,13 +1816,19 @@ enum DownloadItemState {
   enqueued,
   syncFailed,
   needsRedownload,
-  needsRedownloadComplete;
+  needsRedownloadComplete,
+  // P0.2 step 6: app-level pause state, distinct from a background_downloader
+  // paused task.  APPENDED AT END — never reorder/remove existing entries (Isar
+  // stores ordinals).  Only the service's explicit pause() sets this; resume()
+  // re-enqueues.  Not final: the user can resume, and it survives restart.
+  paused;
 
   bool get isFinal {
     switch (this) {
       case DownloadItemState.notDownloaded:
       case DownloadItemState.downloading:
       case DownloadItemState.enqueued:
+      case DownloadItemState.paused:
         return false;
       case DownloadItemState.failed:
       case DownloadItemState.complete:
@@ -1838,6 +1844,7 @@ enum DownloadItemState {
       case DownloadItemState.notDownloaded:
       case DownloadItemState.downloading:
       case DownloadItemState.enqueued:
+      case DownloadItemState.paused:
       case DownloadItemState.syncFailed:
       case DownloadItemState.needsRedownload:
       case DownloadItemState.failed:

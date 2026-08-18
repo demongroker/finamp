@@ -41,6 +41,7 @@ class DownloadedIndicator extends ConsumerWidget {
           return const SizedBox.shrink();
         case DownloadItemState.enqueued:
         case DownloadItemState.downloading:
+        case DownloadItemState.paused:
         case DownloadItemState.needsRedownload:
           return Icon(
             TablerIcons.cloud_download,
