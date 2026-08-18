@@ -1,0 +1,13 @@
+# P0.1 benchmark: deterministically regenerable dataset output.
+#
+# benchmark/data/*.json (~490 MB across 12 files) are synthesized from a fixed
+# seed by benchmark/dataset_generator.dart. The generator is the source of
+# truth, NOT these bytes — they are reproducible on demand and should never be
+# committed. Regenerate with:
+#
+#   dart run benchmark/dataset_generator.dart
+#
+# Keep the generator, the harnesses (bench.dart, bench_test.dart,
+# integration_test.dart), the docs, and results/ in git. Data stays local.
+# NOTE: this .gitignore lives in benchmark/, so patterns are relative to it.
+data/
