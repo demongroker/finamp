@@ -118,7 +118,7 @@ class UpdateChecker {
       final body = data['body'] as String?;
       String? sha256;
       if (body != null) {
-        final match = RegExp(r'SHA-256[:\s]+([0-9a-fA-F]{64})').firstMatch(body);
+        final match = RegExp(r'SHA-256:\s+([0-9a-fA-F]{64})').firstMatch(body);
         if (match != null) sha256 = match.group(1)!.toLowerCase();
       }
 
