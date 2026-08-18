@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:finamp/models/jellyfin_models.dart';
+import 'package:finamp/services/connectivity_state.dart';
 import 'package:finamp/services/downloads_service.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/jellyfin_api_helper.dart';
@@ -23,7 +24,13 @@ Future<BaseItemDto?> itemById(Ref ref, BaseItemId baseItemId) async {
   ref.onDispose(timer.cancel);
 
   try {
-    if (ref.watch(finampSettingsProvider.isOffline)) {
+    // Resolve downloaded items' technical metadata locally whenever the server is
+    // unreachable, composing with the authoritative connectivity state (not just
+    // the Offline Mode setting) so we never take an unnecessary network
+    // round-trip the moment the server is detected offline (P0.3 step 7/8).
+    final resolveLocally = ref.watch(finampSettingsProvider.isOffline) ||
+        ref.watch(connectivityStateProvider) == ConnectivityState.offline;
+    if (resolveLocally) {
       baseItem = (await downloadsService.getCollectionInfo(id: baseItemId))?.baseItem;
       baseItem ??= (await downloadsService.getTrackInfo(id: baseItemId))?.baseItem;
     } else {

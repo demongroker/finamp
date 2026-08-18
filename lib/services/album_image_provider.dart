@@ -17,6 +17,7 @@ import 'package:path/path.dart' as path_helper;
 import 'package:path_provider/path_provider.dart';
 
 import '../models/jellyfin_models.dart';
+import 'connectivity_state.dart';
 import 'downloads_service.dart';
 import 'finamp_settings_helper.dart';
 import 'jellyfin_api_helper.dart';
@@ -121,7 +122,13 @@ albumImageProvider = Provider.autoDispose.family<AlbumImageInfo, AlbumImageReque
   }
 
   if (downloadedImage == null) {
-    if (ref.watch(finampSettingsProvider.isOffline)) {
+    // Prefer downloaded art; never hit the network when offline. Compose with the
+    // authoritative connectivity state (not just the Offline Mode setting) so a
+    // detected-unreachable server never triggers a network art fetch, even in the
+    // brief window before the isOffline setting reconciles (P0.3 step 7/8).
+    final isOffline = ref.watch(finampSettingsProvider.isOffline) ||
+        ref.watch(connectivityStateProvider) == ConnectivityState.offline;
+    if (isOffline) {
       return AlbumImageInfo.empty(request);
     }
 
