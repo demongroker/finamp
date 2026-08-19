@@ -41,6 +41,9 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
   final void Function(String)? onUpdateSearchQuery;
   final void Function() refreshTab;
   final HomeScreenSectionConfiguration? singleTabConfig;
+  /// When the slim nav rail already shows the brand icon, omit the header chip
+  /// so Home tab no longer sits under a second Jellyamp logo.
+  final bool hideBrandChip;
 
   FinampMusicScreenHeader({
     super.key,
@@ -53,6 +56,7 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
     this.onStopSearch,
     this.onUpdateSearchQuery,
     this.singleTabConfig,
+    this.hideBrandChip = false,
   });
 
   final finampUserHelper = GetIt.instance<FinampUserHelper>();
@@ -121,8 +125,8 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
               children: [
                 if (backButtonInsteadOfTabs)
                   SizedBox(width: _upperToolbarHeight + 6, height: _upperToolbarHeight, child: FinampAppBarBackButton())
-                else
-                  // Ice glass logo chip
+                else if (!hideBrandChip)
+                  // Ice glass logo chip (omitted when FinampNavigationRail already brands the shell)
                   Material(
                     elevation: 0,
                     color: Colors.transparent,
@@ -202,7 +206,7 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
                       ),
                     ),
                   ),
-                const SizedBox(width: 9.0),
+                if (!hideBrandChip || backButtonInsteadOfTabs) const SizedBox(width: 9.0),
                 if (isSearching) ...[
                   Expanded(
                     child: TextField(

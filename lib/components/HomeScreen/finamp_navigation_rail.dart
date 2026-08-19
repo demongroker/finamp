@@ -1,3 +1,4 @@
+import 'package:finamp/components/HomeScreen/finamp_music_screen_header.dart';
 import 'package:finamp/components/AlbumScreen/download_dialog.dart';
 import 'package:finamp/components/MusicScreen/view_list_tile.dart';
 import 'package:finamp/components/PlayerScreen/player_split_screen_scaffold.dart';
@@ -12,6 +13,7 @@ import 'package:finamp/screens/logs_screen.dart';
 import 'package:finamp/screens/playback_history_screen.dart';
 import 'package:finamp/screens/queue_restore_screen.dart';
 import 'package:finamp/screens/settings_screen.dart';
+import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/finamp_user_helper.dart';
 import 'package:finamp/services/queue_service.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +69,44 @@ class FinampNavigationRail extends ConsumerWidget {
     required String routeName,
   }) {
     return IconButton(icon: Icon(icon), tooltip: tooltip, onPressed: () => _push(context, routeName));
+  }
+
+  Widget _railBrandIcon(BuildContext context, WidgetRef ref) {
+    final statusIcon = ref.watch(finampSettingsProvider.isOffline)
+        ? TablerIcons.cloud_off
+        : ref.watch(FinampUserHelper.finampCurrentUserProvider)?.isLocal ?? false
+        ? TablerIcons.wifi
+        : null;
+    final downloading = ref.watch(isDownloadingOrSyncingPollingProvider);
+    return GestureDetector(
+      onSecondaryTap: downloading ? () => _push(context, DownloadsScreen.routeName) : null,
+      onLongPress: downloading ? () => _push(context, DownloadsScreen.routeName) : null,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          FinampIcon(
+            36,
+            36,
+            overrideColor: ref.watch(finampSettingsProvider.isOffline)
+                ? TextTheme.of(context).bodyMedium?.color?.withValues(alpha: 0.6)
+                : null,
+          ),
+          if (statusIcon != null) Positioned(bottom: -4, right: -2, child: Icon(statusIcon, size: 16)),
+          if (downloading)
+            Positioned(
+              bottom: statusIcon != null ? -6 : 1,
+              right: statusIcon != null ? -4 : 3,
+              child: SizedBox.square(
+                dimension: statusIcon != null ? 20.0 : 10.0,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1,
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onSurface),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _actionColumn(BuildContext context) {
@@ -144,9 +184,9 @@ class FinampNavigationRail extends ConsumerWidget {
               views.isEmpty
                   ? Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
-                        child: Center(child: FinampIcon(36, 36)),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                        child: Center(child: _railBrandIcon(context, ref)),
                       ),
                       _actionColumn(context),
                     ],
@@ -166,9 +206,9 @@ class FinampNavigationRail extends ConsumerWidget {
                     // a huge/negative extent; Flutter's NavigationRail already
                     // handles vertical placement of the trailing segment.
                     trailingAtBottom: true,
-                    leading: const Padding(
-                      padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
-                      child: Center(child: FinampIcon(36, 36)),
+                    leading: Padding(
+                      padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                      child: Center(child: _railBrandIcon(context, ref)),
                     ),
                     trailing: Align(
                       alignment: Alignment.bottomCenter,

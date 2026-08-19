@@ -233,6 +233,7 @@ class _MusicScreenState extends ConsumerState<MusicScreen> with TickerProviderSt
         extendBody: true,
         appBar: FinampMusicScreenHeader(
           singleTabConfig: widget.singleTabConfig,
+          hideBrandChip: widget.showHeader,
           sortedTabs: sortedTabs.toList(),
           tabController: _tabController,
           onSearch: () => setState(() {
