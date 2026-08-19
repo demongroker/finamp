@@ -1447,6 +1447,22 @@
     "@activeDownloadSize": {
         "description": "Message shown for download size while item is still being downloaded"
     },
+    "downloadProgressBytes": "{percent}% · {received} / {total}",
+    "@downloadProgressBytes": {
+        "description": "Live download progress with percent and transferred bytes",
+        "placeholders": {
+            "percent": {"type": "int"},
+            "received": {"type": "String"},
+            "total": {"type": "String"}
+        }
+    },
+    "downloadProgressPercent": "{percent}%",
+    "@downloadProgressPercent": {
+        "description": "Live download progress when file size is unknown",
+        "placeholders": {
+            "percent": {"type": "int"}
+        }
+    },
     "missingDownloadSize": "Deleting…",
     "@missingDownloadSize": {
         "description": "Message shown for download size while item is being deleted but is not fully removed"

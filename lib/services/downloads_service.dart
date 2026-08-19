@@ -26,6 +26,26 @@ import 'finamp_settings_helper.dart';
 const isarDatabaseName = "finamp_db.isar";
 const repairStepTrackingName = "repairStep";
 
+/// Live transfer progress for one download task (in-memory only — no Isar field).
+class DownloadTransferProgress {
+  const DownloadTransferProgress({
+    required this.isarId,
+    required this.progress,
+    required this.expectedFileSize,
+  });
+
+  final int isarId;
+
+  /// 0.0–1.0 while transferring. Negative values are background_downloader sentinels.
+  final double progress;
+  final int expectedFileSize;
+
+  bool get hasFraction => progress >= 0 && progress <= 1;
+  int? get percent => hasFraction ? (progress * 100).clamp(0, 100).round() : null;
+  bool get hasSize => expectedFileSize > 0 && hasFraction;
+  int get receivedBytes => hasSize ? (expectedFileSize * progress).round() : 0;
+}
+
 class DownloadsService {
   final _downloadsLogger = Logger("downloadsService");
   final _isar = GetIt.instance<Isar>();
@@ -49,6 +69,12 @@ class DownloadsService {
   final Map<String, int> downloadCounts = {repairStepTrackingName: 0};
   late final Stream<Map<String, int>> downloadCountsStream;
   final StreamController<Map<String, int>> _downloadCountsStreamController = StreamController.broadcast();
+
+  // Live %/bytes from TaskProgressUpdate (not persisted).
+  final Map<int, DownloadTransferProgress> _progressById = {};
+  final StreamController<int> _progressTickController = StreamController.broadcast();
+  DateTime _lastProgressUiEmit = DateTime.fromMillisecondsSinceEpoch(0);
+  static const _progressUiThrottle = Duration(milliseconds: 250);
 
   // Private flags/counters used to calculate public sync/download flags
   bool _fileSystemFull = false;
@@ -120,6 +146,19 @@ class DownloadsService {
     assert(stub.type != DownloadItemType.image && stub.type != DownloadItemType.anchor);
     final isar = GetIt.instance<Isar>();
     return isar.downloadItems.watchObject(stub.isarId, fireImmediately: true);
+  });
+
+  /// Live transfer progress for an active download (null when none / not transferring).
+  late final progressProvider = StreamProvider.family.autoDispose<DownloadTransferProgress?, DownloadStub>((ref, stub) {
+    return Stream<DownloadTransferProgress?>.multi((controller) {
+      controller.add(_progressById[stub.isarId]);
+      final sub = _progressTickController.stream.listen((id) {
+        if (id == stub.isarId) {
+          controller.add(_progressById[stub.isarId]);
+        }
+      });
+      controller.onCancel = sub.cancel;
+    });
   });
 
   /// Provider for user-downloaded items of a specific category.
@@ -195,6 +234,10 @@ class DownloadsService {
     // in out of order and are ignored.  Failed items may be moved to enqueued instead
     // of failed depending on the exception.
     FileDownloader().updates.listen((event) {
+      if (event is TaskProgressUpdate) {
+        _recordProgress(event);
+        return;
+      }
       if (event is TaskStatusUpdate) {
         _isar.writeTxnSync(() {
           DownloadItem? listener = _isar.downloadItems.getSync(int.parse(event.task.taskId));
@@ -270,6 +313,12 @@ class DownloadsService {
               // Canceled items are expected to have their status updated by the
               // canceling code.  Cancelled items not handled and left in downloading
               // will be moved back to enqueued on next app restart or sync.
+              if (event.status == TaskStatus.complete ||
+                  event.status == TaskStatus.failed ||
+                  event.status == TaskStatus.canceled ||
+                  event.status == TaskStatus.notFound) {
+                _clearProgress(listener.isarId);
+              }
               if (event.status != TaskStatus.canceled) {
                 updateItemState(listener, newState, alwaysPut: event.status == TaskStatus.complete);
               }
@@ -875,6 +924,33 @@ class DownloadsService {
     });
     _downloadsLogger.info("${item.name} failed download verification, not located at ${item.file?.path}.");
     return false;
+  }
+
+  void _recordProgress(TaskProgressUpdate event) {
+    final id = int.tryParse(event.task.taskId);
+    if (id == null) return;
+    if (event.progress < 0) return;
+    final next = DownloadTransferProgress(
+      isarId: id,
+      progress: event.progress,
+      expectedFileSize: event.expectedFileSize,
+    );
+    final prev = _progressById[id];
+    _progressById[id] = next;
+    final now = DateTime.now();
+    final jumped = prev == null || (next.progress - prev.progress).abs() >= 0.01 || next.percent != prev.percent;
+    if (jumped && now.difference(_lastProgressUiEmit) >= _progressUiThrottle) {
+      _lastProgressUiEmit = now;
+      _progressTickController.add(id);
+    } else if (prev == null) {
+      _progressTickController.add(id);
+    }
+  }
+
+  void _clearProgress(int isarId) {
+    if (_progressById.remove(isarId) != null) {
+      _progressTickController.add(isarId);
+    }
   }
 
   /// Updates the state of a DownloadItem and inserts into Isar.  If the state changed,

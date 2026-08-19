@@ -15,6 +15,16 @@ class ItemFileSize extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final downloadsService = GetIt.instance<DownloadsService>();
+    final item = ref.watch(downloadsService.itemProvider(stub)).valueOrNull;
+    final progress = ref.watch(downloadsService.progressProvider(stub)).valueOrNull;
+
+    if (item?.state == DownloadItemState.downloading ||
+        item?.state == DownloadItemState.enqueued ||
+        item?.state == DownloadItemState.needsRedownload) {
+      return _ActiveDownloadProgress(progress: progress);
+    }
+
     final textFunction = ref.watch(downloadSizeTextProvider(stub)).valueOrNull;
     final text = textFunction == null ? "" : textFunction(context);
     if (text.startsWith("!!!")) {
@@ -22,6 +32,40 @@ class ItemFileSize extends ConsumerWidget {
     } else {
       return Text(text);
     }
+  }
+}
+
+class _ActiveDownloadProgress extends StatelessWidget {
+  const _ActiveDownloadProgress({required this.progress});
+
+  final DownloadTransferProgress? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final fraction = progress != null && progress!.hasFraction ? progress!.progress.clamp(0.0, 1.0) : null;
+    final label = () {
+      if (progress?.percent != null && progress!.hasSize) {
+        return l10n.downloadProgressBytes(
+          progress!.percent!,
+          FileSize.getSize(progress!.receivedBytes),
+          FileSize.getSize(progress!.expectedFileSize),
+        );
+      }
+      if (progress?.percent != null) {
+        return l10n.downloadProgressPercent(progress!.percent!);
+      }
+      return l10n.activeDownloadSize;
+    }();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(value: fraction),
+      ],
+    );
   }
 }
 
