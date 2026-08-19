@@ -26,6 +26,10 @@ class FinampUserHelper {
   }
 
   Future<void> setAuthHeader() async {
+    // Worker isolates open their own Isar + FinampUserHelper. Tokens live in
+    // secure storage, not Isar, so hydrate before building MediaBrowser auth
+    // (otherwise isolate /Users/{id}/Items GETs go out with no Token → 401).
+    await hydrateAccessTokens();
     authorizationHeader = await jellyfin_api.getAuthHeader(deviceId: deviceId);
   }
 
